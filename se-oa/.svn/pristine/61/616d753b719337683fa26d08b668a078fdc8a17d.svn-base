@@ -1,0 +1,256 @@
+package com.xjw.service.rake.impl;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.rake.RakeStatDao;
+import com.xjw.dao.rake.RakeVipDao;
+import com.xjw.dao.user.MemberMoneyChangeDao;
+import com.xjw.entity.Page;
+import com.xjw.entity.po.rake.RakeStat;
+import com.xjw.entity.po.rake.RakeVip;
+import com.xjw.entity.po.user.Member;
+import com.xjw.entity.po.user.MemberMoneyChange;
+import com.xjw.entity.vo.rake.PlayerStatVo;
+import com.xjw.kzenum.activity.ActivityTypeEnum;
+import com.xjw.kzenum.platform.PlatformTypeEnum;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+import com.xjw.kzenum.rake.RakeVipTypeEnum;
+import com.xjw.service.rake.RakeStatService;
+import com.xjw.service.user.MemberService;
+import com.xjw.utility.BizException;
+
+@Service
+public class RakeStatServiceImpl extends BaseServiceImpl<RakeStat> implements RakeStatService {
+	private static Logger logger = LoggerFactory.getLogger(RakeStatServiceImpl.class);
+	
+	@Autowired
+	private MemberService memberService;
+	@Autowired
+	private RakeStatDao rakeStatDao;
+	@Autowired
+	private RakeVipDao rakeVipDao;
+	@Autowired
+	private MemberMoneyChangeDao memberMoneyChangeDao;
+	
+	@Override
+	public BaseDaoImpl<RakeStat> baseDao() {
+		return rakeStatDao;
+	}
+	
+	public void saveBySum(String rakeType, String statDate) throws BizException {
+		if(RakeTypeEnum.getEnumByCode(RakeTypeEnum.class, rakeType) == null){
+			throw new BizException("返水的游戏类型不存在");
+		}else if(StringUtils.isBlank(statDate)){
+			throw new BizException("返水的统计日期不能为空");
+		}
+		
+		Calendar statTime = null;
+		try {
+			statTime = DateUtils.toCalendar(DateUtils.parseDate(statDate, "yyyyMMdd"));
+		} catch (ParseException e) {
+			throw new BizException("返水的统计日期格式错误");
+		}
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("rakeType", rakeType);
+		params.put("statDate", statDate);
+		
+		long count = super.selectAllCount(params);
+		if(count > 0){
+			throw new BizException(rakeType + "游戏平台" + statDate + "日已生成返水记录");
+		}
+		
+		Calendar beginTime = new GregorianCalendar(statTime.get(Calendar.YEAR), statTime.get(Calendar.MONTH), statTime.get(Calendar.DATE), 0, 0, 0);
+		Calendar endTime = new GregorianCalendar(statTime.get(Calendar.YEAR), statTime.get(Calendar.MONTH), statTime.get(Calendar.DATE), 23, 59, 59);
+		
+		Calendar nowTime = Calendar.getInstance();
+		List<PlayerStatVo> voList = rakeStatDao.selectPlayerStatVo(rakeType, beginTime.getTime(), endTime.getTime());
+		for(PlayerStatVo vo : voList){
+			BigDecimal betAmount = vo.getBetAmount();
+			Member member = memberService.findMemberByUserId(vo.getUserId().toString());
+			
+			// 老虎机的返水处理
+			if(RakeTypeEnum.isSlot(rakeType)){
+				Integer actType = Integer.valueOf(ActivityTypeEnum.ELEC.getCode());
+				Integer platformType = null;
+//				if(RakeTypeEnum.AG_SLOT.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.AG_GJ.getCode());
+//				}else if(RakeTypeEnum.PT_SLOT.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.PT.getCode());
+//				}else if(RakeTypeEnum.MG_SLOT.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.MG.getCode());
+//				}else if(RakeTypeEnum.TTG_SLOT.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.AG_GJ.getCode());
+//				}else if(RakeTypeEnum.PNG_SLOT.getCode().equals(rakeType)){
+//					//TODO: 游戏还未上线
+//				}else if(RakeTypeEnum.NYX_SLOT.getCode().equals(rakeType)){
+//					//TODO: 游戏还未上线
+//				}else if(RakeTypeEnum.ENDO_SLOT.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.AG_GJ.getCode());
+//				}
+				
+				if(null != platformType){
+					List<MemberMoneyChange> mmcList = memberMoneyChangeDao.selectByJoinAct(vo.getUserId(), actType, platformType, statDate);
+					if(mmcList.size() > 0){
+						List<Map<String, Date>> rangeTimeList = new ArrayList<Map<String, Date>>();
+						for(MemberMoneyChange mmc : mmcList){
+							Map<String, Date> rangeTime = new HashMap<String, Date>();
+							rangeTime.put("startTime", mmc.getStartTime());
+							rangeTime.put("endTime", mmc.getEndTime() == null ? endTime.getTime() : mmc.getEndTime());
+							rangeTimeList.add(rangeTime);
+						}
+						
+						//活动期间的投注总额 
+						PlayerStatVo voByAct = rakeStatDao.selectPlayerStatVo(vo.getUserId(), rakeType, rangeTimeList, beginTime.getTime(), endTime.getTime());
+						if(null != voByAct){
+							//参加活动的统计提款积分进行奖金会员的返水
+							BigDecimal sumIntegral = memberMoneyChangeDao.selectSumIntegralByJoinAct(vo.getUserId(), actType, platformType, statDate);
+							if(null != sumIntegral && sumIntegral.compareTo(BigDecimal.ZERO) > 0){
+								BigDecimal awardAmount = voByAct.getBetAmount();
+								
+								if(voByAct.getBetAmount().compareTo(sumIntegral) >= 0){
+									awardAmount = sumIntegral;
+								}
+								
+								RakeStat stat = new RakeStat();
+								stat.setRakeType(rakeType);
+								stat.setVipType(Integer.valueOf(RakeVipTypeEnum.AWARD.getCode()));
+								stat.setUserId(voByAct.getUserId());
+								stat.setLoginName(member.getLoginName());
+								stat.setPlayerName(voByAct.getPlayerName());
+								stat.setBetAmount(awardAmount);
+								stat.setStatus(0);
+								stat.setStatDate(statDate);
+								stat.setCreateTime(nowTime.getTime());
+								super.save(stat);
+								
+								betAmount = betAmount.subtract(awardAmount);
+							}
+						}
+					}
+				}
+			}else if(RakeTypeEnum.isLive(rakeType) || RakeTypeEnum.isSport(rakeType)){	//真人、体育的返水
+				Integer actType = Integer.valueOf(ActivityTypeEnum.PERSON.getCode());
+				Integer platformType = null;
+				
+//				if(RakeTypeEnum.AG_JS.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.AG_GJ.getCode());
+//				}else if(RakeTypeEnum.AG_GJ.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.AG_JS.getCode());
+//				}else if(RakeTypeEnum.PT_LIVE.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.PT.getCode());
+//				}else if(RakeTypeEnum.MG_LIVE.getCode().equals(rakeType)){
+//					platformType = Integer.valueOf(PlatformTypeEnum.MG.getCode());
+//				}
+				
+				if(null != platformType){
+					//查询参与不返水的活动
+					List<MemberMoneyChange> mmcList = memberMoneyChangeDao.selectByJoinAct(vo.getUserId(), actType, platformType, statDate);
+					if(mmcList.size() > 0){
+						List<Map<String, Date>> rangeTimeList = new ArrayList<Map<String, Date>>();
+						for(MemberMoneyChange mmc : mmcList){
+							Map<String, Date> rangeTime = new HashMap<String, Date>();
+							rangeTime.put("startTime", mmc.getStartTime());
+							rangeTime.put("endTime", mmc.getEndTime() == null ? endTime.getTime() : mmc.getEndTime());
+							rangeTimeList.add(rangeTime);
+						}
+						
+						//有参加活动期间的投注记录
+						PlayerStatVo voByAct = rakeStatDao.selectPlayerStatVo(vo.getUserId(), rakeType, rangeTimeList, beginTime.getTime(), endTime.getTime());
+						if(null != voByAct){
+							betAmount = betAmount.subtract(voByAct.getBetAmount()); 
+						}
+					}
+				}
+			}
+			
+			if(betAmount.compareTo(BigDecimal.ZERO) > 0){
+				RakeStat stat = new RakeStat();
+				stat.setRakeType(rakeType);
+				stat.setVipType(member.getVipType());
+				stat.setUserId(vo.getUserId());
+				stat.setLoginName(member.getLoginName());
+				stat.setPlayerName(vo.getPlayerName());
+				stat.setBetAmount(betAmount);
+				stat.setStatus(0);
+				stat.setStatDate(statDate);
+				stat.setCreateTime(nowTime.getTime());
+				super.save(stat);
+			}
+		}
+	}
+	
+	public void updateBySend(String rakeType, String statDate) throws BizException{
+		if(RakeTypeEnum.getEnumByCode(RakeTypeEnum.class, rakeType) == null){
+			throw new BizException("返水的游戏类型不存在");
+		}else if(StringUtils.isBlank(statDate)){
+			throw new BizException("返水的统计日期不能为空");
+		}
+		
+		Map<String, RakeVip> rakeVipMap = rakeVipDao.selectMap(rakeType);
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("rakeType", rakeType);
+		params.put("statDate", statDate);
+		params.put("status", 0);
+		
+		Calendar nowTime = Calendar.getInstance();
+		Integer pageNo = 0;
+		Integer pageSize = 200;
+		Page<RakeStat> page = null;
+		
+		do{
+			page = super.getPage(params, pageNo, pageSize);
+			for(RakeStat stat : page.getDataList()){
+				BigDecimal rakeAmount = BigDecimal.ZERO;
+				
+				String key = stat.getRakeType() + "|" + stat.getVipType();
+				RakeVip rakeVip = rakeVipMap.get(key);
+				if(null != rakeVip){
+					rakeAmount = stat.getBetAmount().multiply(rakeVip.getRatio());	//返水金额
+					
+					if(rakeAmount.compareTo(rakeVip.getThresholdAmount()) < 0){	//低于返水的门槛金额
+						rakeAmount = BigDecimal.ZERO;
+					}else if(rakeAmount.compareTo(rakeVip.getMaxAmount()) > 0){	//超过最高返水金额
+						rakeAmount = rakeVip.getMaxAmount();
+					}
+				}
+				
+				//更新返水记录
+				RakeStat rs = new RakeStat();
+				rs.setId(stat.getId());
+				rs.setRakeAmount(rakeAmount);
+				rs.setRakeTime(nowTime.getTime());
+				rs.setStatus(1);
+				rakeStatDao.updateBySend(rs);
+				
+				// 进行返现
+				if(rakeAmount.compareTo(BigDecimal.ZERO) > 0){
+					//TODO：返现代码
+				}
+			}
+		}while(page.isHasNext());
+	}
+	
+	@Override
+	public Class<RakeStat> getClazz() {
+		return RakeStat.class;
+	}
+}

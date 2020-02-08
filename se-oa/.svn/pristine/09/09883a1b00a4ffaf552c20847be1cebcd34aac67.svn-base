@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Activity">
+	<sql id="searchColumn">
+		ID, NAME, TITLE, MONEY_UP, MONEY_DOWN, DIVIDEND_PERCENT, DIVIDEND_UP, COUNT, MULTIPLE,
+		START_TIME, END_TIME, DISCOUNT_CODE, MEMBER_START, MEMBER_END, PICTURE_URL,
+		EXPLAINS, REMARK, TYPE, RAKE_STATUS, STATUS, CREATE_USER, CREATE_TIME, UPDATE_TIME, UPDATE_USER,COME_FROM
+	</sql>
+	
+	<resultMap type="Activity" id="activity" extends="base.baseAttr">
+	  	<result column="NAME" 				property="name" />
+	  	<result column="TITLE" 				property="title" />
+        <result column="MONEY_UP" 			property="moneyUp" />
+        <result column="MONEY_DOWN" 		property="moneyDown" />
+        <result column="DIVIDEND_PERCENT" 	property="dividendPercent" />
+        <result column="DIVIDEND_UP" 		property="dividendUp" />
+        <result column="COUNT" 				property="count" />
+        <result column="MULTIPLE" 			property="multiple" />
+        <result column="START_TIME" 		property="startTime" />
+        <result column="END_TIME" 			property="endTime" />
+        <result column="DISCOUNT_CODE" 		property="discountCode" />
+        <result column="MEMBER_START" 		property="memberStart" />
+        <result column="MEMBER_END" 		property="memberEnd" />
+        <result column="PICTURE_URL" 		property="pictureUrl" />
+        <result column="EXPLAINS" 			property="explains" />
+        <result column="REMARK" 			property="remark" />
+        <result column="TYPE" 				property="type" />
+        <result column="RAKE_STATUS" 		property="rakeStatus" />
+        <result column="COME_FROM" 			property="comeFrom" />
+	</resultMap>
+	
+	<update id="delete" parameterType="map">
+		UPDATE SYS_ACTIVITY
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser},status = #{status}
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+	
+	<update id="update" parameterType="map">
+		UPDATE SYS_ACTIVITY
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser},
+			<if test="status != null">
+				 STATUS = #{status},
+			</if>
+            <if test="name != null">
+                 NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                 TITLE = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="multiple != null">
+                 MULTIPLE = #{multiple,jdbcType=NUMERIC},
+            </if>
+            <if test="moneyUp != null">
+                 MONEY_UP = #{moneyUp,jdbcType=NUMERIC},
+            </if>
+            <if test="moneyDown != null">
+                 MONEY_DOWN = #{moneyDown,jdbcType=NUMERIC},
+            </if>
+            <if test="dividendPercent != null">
+                 DIVIDEND_PERCENT = #{dividendPercent,jdbcType=NUMERIC},
+            </if>
+            <if test="dividendUp != null">
+                 DIVIDEND_UP = #{dividendUp,jdbcType=NUMERIC},
+            </if>
+            <if test="count != null">
+                 COUNT = #{count,jdbcType=NUMERIC},
+            </if>
+            <if test="startTime != null">
+                 START_TIME = #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                 END_TIME = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="discountCode != null">
+                 DISCOUNT_CODE = #{discountCode,jdbcType=VARCHAR},
+            </if>
+            <if test="memberStart != null">
+                 MEMBER_START = #{memberStart,jdbcType=NUMERIC},
+            </if>
+            <if test="memberEnd != null">
+                 MEMBER_END = #{memberEnd,jdbcType=NUMERIC},
+            </if>
+            <if test="pictureUrl != null and pictureUrl != ''">
+                 PICTURE_URL = #{pictureUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="explains != null">
+                 EXPLAINS = #{explains,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+             <if test="type != null">
+                 TYPE = #{type,jdbcType=NUMERIC},
+            </if>
+             <if test="rakeStatus != null">
+                 RAKE_STATUS = #{rakeStatus},
+            </if>
+            <if test="comeFrom != null">
+                 COME_FROM = #{comeFrom},
+            </if>
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+    <insert id="save" parameterType="activity">
+        INSERT INTO SYS_ACTIVITY(
+	        NAME,TITLE, MONEY_UP, MONEY_DOWN, DIVIDEND_PERCENT, DIVIDEND_UP, COUNT, MULTIPLE,
+			START_TIME, END_TIME, DISCOUNT_CODE, MEMBER_START, MEMBER_END, PICTURE_URL,
+			EXPLAINS, REMARK, TYPE, RAKE_STATUS, STATUS, CREATE_USER, CREATE_TIME,COME_FROM
+        ) VALUES (
+	        #{name,jdbcType=VARCHAR},
+	        #{title,jdbcType=VARCHAR},
+	        #{moneyUp,jdbcType=NUMERIC},
+	        #{moneyDown,jdbcType=NUMERIC},
+	        #{dividendPercent,jdbcType=NUMERIC},
+	        #{dividendUp,jdbcType=NUMERIC},
+	        #{count,jdbcType=NUMERIC},
+	        #{multiple,jdbcType=NUMERIC},
+	        #{startTime,jdbcType=TIMESTAMP},
+	        #{endTime,jdbcType=TIMESTAMP},
+	        #{discountCode,jdbcType=VARCHAR},
+	        #{memberStart,jdbcType=NUMERIC},
+	        #{memberEnd,jdbcType=NUMERIC},
+	        #{pictureUrl,jdbcType=VARCHAR},
+	        #{explains,jdbcType=VARCHAR},
+	        #{remark,jdbcType=VARCHAR},
+	        #{type,jdbcType=NUMERIC},
+	        #{rakeStatus,jdbcType=NUMERIC},
+	        #{status,jdbcType=VARCHAR},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{comeFrom,jdbcType=NUMERIC}
+        )
+    </insert>
+    
+	<select id="selectById" parameterType="long" resultMap="activity">
+		SELECT <include refid="searchColumn" /> FROM SYS_ACTIVITY WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="activity">
+		SELECT <include refid="searchColumn" /> FROM SYS_ACTIVITY
+		<include refid="condition" />
+		ORDER BY STATUS ASC,UPDATE_TIME DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(id) FROM SYS_ACTIVITY
+		<include refid="condition" />
+	</select>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="discountCode != null">
+				AND DISCOUNT_CODE = #{discountCode}
+            </if>
+			<if test="type != null">
+				AND type=#{type}
+			</if>
+			<if test="comeFrom != null">
+				AND COME_FROM=#{comeFrom}
+			</if>
+			<if test="statusList != null">
+				AND status in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+			<if test="ids != null">
+				 id IN
+				<foreach collection="ids" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+</mapper>

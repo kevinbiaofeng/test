@@ -1,0 +1,155 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.math.BigDecimal;
+//import java.util.ArrayList;
+//import java.util.Arrays;
+//import java.util.Calendar;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.entity.po.platform.PlatformWallet;
+//import com.xjw.entity.po.user.Member;
+//import com.xjw.kzenum.platform.PlatformTypeEnum;
+//import com.xjw.service.api.AGGameService;
+//import com.xjw.service.api.MGGameService;
+//import com.xjw.service.api.PTGameService;
+//import com.xjw.service.api.ShaBaGameService;
+//import com.xjw.service.platform.PlatformWalletService;
+//import com.xjw.service.user.MemberService;
+//import com.xjw.utility.SpringContextHolder;
+//
+//
+//public class PlatformWalletTask extends QuartzJobBean {
+//	private static Logger logger = LoggerFactory.getLogger(PlatformWalletTask.class);
+//	
+//	private static final List<Long> PARENT_ID_LIST = Arrays.asList(5280L, 6018L);
+//
+//	private PlatformWalletService platformWalletService;
+//	private MemberService memberService;
+//	private AGGameService agGameService;
+//	private PTGameService ptGameService;
+//	private MGGameService mgGameService;
+//	private ShaBaGameService shaBaGameService;
+//	
+//	public PlatformWalletTask(){
+//		platformWalletService = (PlatformWalletService) SpringContextHolder.getBean(PlatformWalletService.class);
+//		memberService = (MemberService) SpringContextHolder.getBean(MemberService.class);
+//		agGameService = (AGGameService) SpringContextHolder.getBean(AGGameService.class);
+//		ptGameService = (PTGameService) SpringContextHolder.getBean(PTGameService.class);
+//		mgGameService = (MGGameService) SpringContextHolder.getBean(MGGameService.class);
+//		shaBaGameService = (ShaBaGameService) SpringContextHolder.getBean(ShaBaGameService.class);
+//	}
+//	
+//	@Override
+//	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+//		try {
+//			platformWalletService.deleteAll();
+//			
+//			for(Long parentId : PARENT_ID_LIST){
+//				Member agentMember = memberService.selectAgentById(parentId);
+//				
+//				Map<String, Object> params = new HashMap<String, Object>();
+//				params.put("parentId", parentId);
+//				params.put("getBalance", true);
+//				List<Member> memberList = memberService.selectAll(params);
+//				
+//				List<PlatformWallet> walletList = new ArrayList<PlatformWallet>();
+//				for(Member member : memberList){
+//					PlatformWallet wallet = new PlatformWallet();
+//					wallet.setUserId(member.getId());
+//					wallet.setLoginName(member.getLoginName());
+//					wallet.setAgentUserId(agentMember.getId());
+//					wallet.setAgentLoginName(agentMember.getLoginName());
+//					wallet.setMainAmount(BigDecimal.valueOf(member.getTotalMoney()));
+//					wallet.setAggjAmount(this.queryAggjAmount(member.getId()));
+//					wallet.setAgjsAmount(this.queryAgjsAmount(member.getId()));
+//					wallet.setPtAmount(this.queryPtAmount(member.getId()));
+//					wallet.setMgAmount(this.queryMgAmount(member.getId()));
+//					wallet.setSbAmount(this.querySbAmount(member.getId()));
+//					wallet.setCreateTime(Calendar.getInstance().getTime());
+//					walletList.add(wallet);
+//				}
+//				
+//				if(walletList.size() > 0){
+//					platformWalletService.saveRecordBatch(walletList);
+//				}
+//			}
+//			
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//		}
+//	}
+//	
+//	private BigDecimal queryAggjAmount(Long userId){
+//		try {
+//			Map<String, Object> map = agGameService.getAGBalance(String.valueOf(userId), PlatformTypeEnum.AG_GJ.getCode());
+//			if(map != null && map.get("code").equals("1")){
+//				return new BigDecimal(map.get("data").toString());
+//			}
+//		} catch (Exception e) {
+//			logger.error("查询AGGJ余额异常:" + e.getMessage(), e);
+//		}
+//		
+//		return BigDecimal.ZERO;
+//	}
+//	
+//	private BigDecimal queryAgjsAmount(Long userId){
+//		try {
+//			Map<String, Object> map = agGameService.getAGBalance(String.valueOf(userId), PlatformTypeEnum.AG_JS.getCode());
+//			if(map != null && map.get("code").equals("1")){
+//				return new BigDecimal(map.get("data").toString());
+//			}
+//		} catch (Exception e) {
+//			logger.error("查询AGJS余额异常:" + e.getMessage(), e);
+//		}
+//		
+//		return BigDecimal.ZERO;
+//	}
+//	
+//	private BigDecimal queryPtAmount(Long userId){
+//		try {
+//			Map<String, Object> map = ptGameService.getNewGameBalance(String.valueOf(userId));
+//			if(map != null && map.get("code").equals("1")){
+//				return new BigDecimal(map.get("data").toString());
+//			}
+//		} catch (Exception e) {
+//			logger.error("查询PT余额异常:" + e.getMessage(), e);
+//		}
+//		
+//		return BigDecimal.ZERO;
+//	}
+//	
+//	private BigDecimal queryMgAmount(Long userId){
+//		try {
+//			Map<String, Object> map = mgGameService.getNewGameBalance(String.valueOf(userId));;
+//			if(map != null && map.get("code").equals("1")){
+//				return new BigDecimal(map.get("data").toString());
+//			}
+//		} catch (Exception e) {
+//			logger.error("查询MG余额异常:" + e.getMessage(), e);
+//		}
+//		
+//		return BigDecimal.ZERO;
+//	}
+//	
+//	private BigDecimal querySbAmount(Long userId){
+//		try{
+//			Map<String, Object> map = shaBaGameService.getBalance(String.valueOf(userId), PlatformTypeEnum.SB.getCode());
+//			if(map != null && map.get("code").equals("1")){
+//				return new BigDecimal(map.get("data").toString());
+//			}
+//		}catch(Exception e){
+//			logger.error("查询SB余额异常:" + e.getMessage(), e);
+//		}
+//		
+//		return BigDecimal.ZERO;
+//	}
+//}

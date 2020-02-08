@@ -1,0 +1,39 @@
+package com.xjw.entity.vo.rake;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+public class PlayerStatVo implements Serializable{
+	private static final long serialVersionUID = -1206773576010597595L;
+	
+	/** 用户ID */
+	private Long userId;
+	/** 游戏账号 */
+	private String playerName;
+	/** 投注金额 */
+	private BigDecimal betAmount;
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getPlayerName() {
+		return playerName;
+	}
+
+	public void setPlayerName(String playerName) {
+		this.playerName = playerName;
+	}
+
+	public BigDecimal getBetAmount() {
+		return betAmount;
+	}
+
+	public void setBetAmount(BigDecimal betAmount) {
+		this.betAmount = betAmount;
+	}
+}

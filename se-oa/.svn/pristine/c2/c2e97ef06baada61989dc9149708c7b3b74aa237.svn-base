@@ -1,0 +1,8 @@
+package com.xjw.kzenum.platform;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class NewGameSlotTypeEnum extends AbstractEnum{
+	public static final EnumBean WAGER = new EnumBean("WAGER", "投注");
+	public static final EnumBean PAYOUT = new EnumBean("PAYOUT", "派彩");
+}

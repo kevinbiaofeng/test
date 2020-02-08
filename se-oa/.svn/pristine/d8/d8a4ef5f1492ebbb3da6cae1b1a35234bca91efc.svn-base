@@ -1,0 +1,12 @@
+package com.xjw.service.rake;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.rake.Rake;
+import com.xjw.utility.BizException;
+
+public interface RakeService extends BaseServcie<Rake> {
+	
+	public Rake queryByRakeType(String rakeType);
+	
+	public void deleteByRakeType(String rakeType) throws BizException;
+}

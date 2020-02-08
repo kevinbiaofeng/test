@@ -1,0 +1,29 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.service.sys.SequenceService;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class InitSequenceTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(InitSequenceTask.class.getName());
+//	
+//	@Override
+//    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+//        try{
+//        	init(context);
+//        }catch(Exception e){
+//        	logger.error(e.getMessage(), e);
+//        }
+//    }
+//    
+//    public void init(JobExecutionContext context) throws Exception {
+//    	SequenceService sequenceService = (SequenceService) SpringContextHolder.getBean(SequenceService.class);
+//    	sequenceService.initNumber();
+//    }
+//}

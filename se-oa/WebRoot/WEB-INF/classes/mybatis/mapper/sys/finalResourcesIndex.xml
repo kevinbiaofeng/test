@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="FinalResourcesIndex">
+	<sql id="searchColumn">
+		ID, NAME, CODE, REMARK, CREATE_USER, CREATE_TIME, UPDATE_TIME, UPDATE_USER, IS_PUBLIC
+	</sql>
+	
+	<resultMap type="FinalResourcesIndex" id="finalResourcesIndex" extends="base.baseAttr">
+	   <result property="name" column="NAME" ></result>
+	   <result property="code" column="CODE"></result>
+	   <result property="remark" column="REMARK"></result>
+	   <result property="isPublic" column="IS_PUBLIC"></result>
+	</resultMap>
+	
+	<select id="selectById" parameterType="long" resultMap="finalResourcesIndex">
+		SELECT <include refid="searchColumn" /> FROM pub_final_resources_index WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="finalResourcesIndex">
+		SELECT <include refid="searchColumn" /> FROM pub_final_resources_index
+		<include refid="condition" />
+		ORDER BY id ASC
+	</select>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="code != null">
+				AND code=#{code}
+			</if>
+		</where>
+	</sql>
+</mapper>

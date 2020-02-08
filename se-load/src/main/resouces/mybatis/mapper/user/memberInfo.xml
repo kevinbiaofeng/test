@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Member">
+	<sql id="searchColumn">
+		m.ID, m.USER_ID, m.NAME, m.EMAIL, m.SEX, m.PHONE, m.QQ, m.VIP_TYPE, m.BIRTHDAY, u.LOGIN_NAME, u.CREATE_TIME
+	</sql>
+	
+	<resultMap type="Member" id="member" extends="base.baseAttr">
+	   <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+	   <result column="NAME" jdbcType="VARCHAR" property="name" />
+	   <result column="QQ" jdbcType="VARCHAR" property="qq" />
+       <result column="EMAIL" jdbcType="VARCHAR" property="email" />
+       <result column="SEX" jdbcType="NUMERIC" property="sex" />
+       <result column="VIP_TYPE" jdbcType="NUMERIC" property="vipType" />
+       <result column="PHONE" jdbcType="VARCHAR" property="phone" />
+       <result column="LOGIN_NAME" jdbcType="TIMESTAMP" property="loginName" />
+       <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+	</resultMap>
+	
+	<update id="delete" parameterType="map">
+		UPDATE member_info
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser}
+			<if test="status != null">
+				,status = #{status}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+		</where>
+	</update>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO member_info (
+        	NAME, USER_ID, EMAIL, SEX, PHONE, QQ, VIP_TYPE, BIRTHDAY, PRIVACY_FLAG
+        ) VALUES (
+	        #{name,jdbcType=VARCHAR},
+	        #{userId,jdbcType=NUMERIC},
+	        #{email,jdbcType=VARCHAR},
+	        #{sex,jdbcType=NUMERIC},
+	        #{phone,jdbcType=VARCHAR},
+	        #{qq,jdbcType=VARCHAR},
+	        #{vipType,jdbcType=NUMERIC}, 
+	        #{birthday,jdbcType=TIMESTAMP},
+	        #{privacyFlag,jdbcType=NUMERIC}
+        )
+    </insert>
+
+	<select id="selectById" parameterType="long" resultMap="member">
+		SELECT <include refid="searchColumn" /> 
+		FROM member_info m 
+		LEFT JOIN pub_user u ON m.user_id = u.id
+		WHERE m.id=#{id}
+	</select>
+    
+	<select id="selectAll" parameterType="map" resultMap="member">
+		select <include refid="searchColumn" /> 
+		FROM member_info m 
+		LEFT JOIN pub_user u ON m.user_id = u.id
+ 			<include refid="condition" />
+ 		ORDER BY m.id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(m.id) FROM member_info m 
+		LEFT JOIN pub_user u ON m.user_id = u.id
+ 			<include refid="condition" />
+    </select>
+	
+	<sql id="condition">
+		<where>
+			<if test="userId != null">
+				AND m.user_id=#{userId}
+			</if>
+			<if test="email != null">
+				AND m.email=#{email}
+			</if>
+			<if test="phone != null">
+				AND m.phone=#{phone}
+			</if>
+			<if test="beginTime != null">
+                AND u.create_time >= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND u.create_time <![CDATA[<=]]> #{endTime}
+            </if>
+            <if test="userIdList != null">
+            	<foreach collection="userIdList" item="_uId" open="(" separator="," close=")">
+					#{_uId}
+		    	</foreach>
+		    </if>
+		</where>
+	</sql>
+</mapper>

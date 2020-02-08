@@ -1,0 +1,59 @@
+package com.xjw.service.api.impl;
+
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
+import com.xjw.service.api.MGGameService;
+import com.xjw.utility.ContextPropsLoad;
+import com.xjw.utility.DESEncrypt;
+import com.xjw.utility.HttpClientUtils;
+import com.xjw.utility.HttpClientUtils.Method;
+import com.xjw.utility.MD5Util;
+
+@SuppressWarnings("all")
+@Service
+public class MGGameServiceImpl implements MGGameService {
+	private static Logger logger = LoggerFactory.getLogger(AGGameServiceImpl.class.getName());
+	private static final String apiBaseUrl = ContextPropsLoad.getValByKey("APIS.BASE.URL");
+	private static final String desKey = ContextPropsLoad.getValByKey("EGAME.DES.KEY");
+	private static final String md5Key = ContextPropsLoad.getValByKey("EGAME.MD5.KEY");
+	
+	private static final String gameApisBaseUrl = ContextPropsLoad.getValByKey("GAMEAPI.BASE.URL");	
+	private static final String gameDesKey = ContextPropsLoad.getValByKey("GAME.DES.KEY");
+	private static final String gameMd5Key = ContextPropsLoad.getValByKey("GAME.MD5.KEY");
+	
+	public Map<String, Object> getNewGameBalance(String userId) throws Exception{
+		String jsonObj = "{\"userId\":\"" + userId + "\"}";
+		logger.debug(jsonObj.toString());
+		DESEncrypt desEncrypt = new DESEncrypt(gameDesKey);
+		String params = desEncrypt.encrypt(jsonObj);
+		StringBuffer buf = new StringBuffer();
+		buf.append(gameApisBaseUrl).append("game/mg/").append(URLEncoder.encode(URLEncoder.encode(params, "UTF-8"), "UTF-8")).append("/")
+		.append(MD5Util.md5Encode(params + gameMd5Key)).append("/").append("getBalance.json");
+		
+		String responseMsg = HttpClientUtils.send(Method.POST, buf.toString(), null, true, "UTF-8", 50000);
+		responseMsg = URLDecoder.decode(responseMsg, "UTF-8");
+		return JSON.parseObject(responseMsg, Map.class);
+	}
+	
+	public Map<String, Object> createNewGameTransferOrder(String userId, String gameType, BigDecimal credit, String type, String fromFunction) throws Exception{
+		String jsonObj = "{\"userId\":\"" + userId + "\" ,\"gameType\": " + gameType + " ,\"credit\": " + credit + ",\"type\": \"" + type + "\",\"operatingUser\": \"" + userId + "\",\"fromFunction\": \"" + fromFunction + "\"}";
+		DESEncrypt desEncrypt = new DESEncrypt(gameDesKey);
+		String params = desEncrypt.encrypt(jsonObj);
+		StringBuffer buf = new StringBuffer();
+		buf.append(gameApisBaseUrl).append("game/mg/").append(URLEncoder.encode(URLEncoder.encode(params, "UTF-8"), "UTF-8")).append("/")
+		.append(MD5Util.md5Encode(params + gameMd5Key)).append("/").append("prepareTransferCredit.json");
+		
+		String responseMsg = HttpClientUtils.send(Method.POST, buf.toString(), null, true, "UTF-8", 50000);
+		responseMsg = URLDecoder.decode(responseMsg, "UTF-8");
+		return JSON.parseObject(responseMsg, Map.class);
+	}
+	
+}

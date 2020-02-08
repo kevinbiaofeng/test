@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PlatformWallet">
+	<resultMap type="PlatformWallet" id="platformWallet" extends="base.baseAttr">
+		<result column="user_id" 			property="userId"/>
+	   	<result column="login_name" 		property="loginName"/>
+	   	<result column="agent_user_id" 		property="agentUserId"/>
+	   	<result column="agent_login_name" 	property="agentLoginName"/>
+		<result column="main_amount" 		property="mainAmount"/>
+		<result column="aggj_amount" 		property="aggjAmount"/>
+		<result column="agjs_amount" 		property="agjsAmount"/>
+		<result column="pt_amount" 			property="ptAmount"/>
+		<result column="mg_amount" 			property="mgAmount"/>
+		<result column="sb_amount" 			property="sbAmount"/>
+		<result column="create_time" 		property="createTime"/>
+	</resultMap>
+	
+	<sql id="baseColumnList">
+		id, user_id, login_name, agent_user_id, agent_login_name, 
+		main_amount, aggj_amount, agjs_amount, pt_amount, mg_amount, sb_amount, create_time
+	</sql>
+	
+	<sql id="searchCondition">
+        <where>
+        	<if test="agentUserId != null">
+        		AND agent_user_id = #{agentUserId}
+        	</if>
+        	<if test="agentLoginName != null and agentLoginName != ''">
+        		AND agent_login_name = #{agentLoginName}
+        	</if>
+        	<if test="loginName != null and loginName != ''">
+        		AND login_name = #{loginName}
+        	</if>
+        	<if test="beginTime != null and beginTime != ''">
+        		AND create_time >= #{beginTime}
+        	</if>
+        	<if test="endTime != null and endTime != ''">
+        		AND create_time <![CDATA[<=]]> #{endTime}
+        	</if>
+        </where>
+    </sql>
+	
+	 <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT COUNT(id) FROM member_platform_wallet 
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="platformWallet">
+        SELECT <include refid="baseColumnList"/>
+        FROM member_platform_wallet
+        <include refid="searchCondition"/>
+        ORDER BY id DESC
+        <include refid="base.page" />
+    </select>
+    
+    <select id="selectAllGroupByAgent" parameterType="map" resultMap="platformWallet">
+        SELECT 
+        	agent_user_id, agent_login_name, sum(main_amount) AS main_amount, sum(aggj_amount) AS aggj_amount, 
+        	sum(agjs_amount) AS agjs_amount,  sum(pt_amount) AS pt_amount,  sum(mg_amount) AS mg_amount,
+        	sum(sb_amount) AS sb_amount
+        FROM member_platform_wallet
+        <include refid="searchCondition"/>
+       	GROUP BY agent_user_id
+    </select>
+	
+	<insert id="saveRecordBatch" parameterType="map">
+        INSERT INTO member_platform_wallet(
+        	user_id, login_name, agent_user_id, agent_login_name, main_amount, 
+        	aggj_amount, agjs_amount, pt_amount, mg_amount, sb_amount, create_time
+		) VALUES
+		<foreach collection="list" item="item" index="index" separator="," > 
+	    (
+			#{item.userId}, #{item.loginName}, #{item.agentUserId}, #{item.agentLoginName}, #{item.mainAmount},
+	       	#{item.aggjAmount}, #{item.agjsAmount}, #{item.ptAmount}, #{item.mgAmount}, #{item.sbAmount}, #{item.createTime}
+	    )
+	    </foreach>
+    </insert>
+    
+    <!-- 清空数据 -->
+    <delete id="deleteAll" parameterType="map">
+		DELETE FROM member_platform_wallet
+	</delete>
+</mapper>

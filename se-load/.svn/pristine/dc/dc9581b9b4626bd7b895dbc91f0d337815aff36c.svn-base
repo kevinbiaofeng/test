@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="User">
+	<sql id="searchColumn">
+		ID, LOGIN_NAME, PWD, STATUS, CREATE_TIME, SESSION_SID_TIME, SESSION_SID, PARENT_ID
+	</sql>
+	
+	<resultMap type="User" id="user" extends="base.baseAttr">
+	   <result property="loginName" column="LOGIN_NAME"></result>
+	   <result property="pwd" column="PWD"></result>
+	   <result property="status" column="STATUS"></result>
+	   <result property="createTime" column="CREATE_TIME"></result>
+	   <result property="sessionSid" column="SESSION_SID"></result>
+	   <result property="sessionSidTime" column="SESSION_SID_TIME"></result>
+	   <result property="parentId" column="PARENT_ID"></result>
+	</resultMap>
+	
+	<update id="update" parameterType="map">
+		UPDATE pub_user
+		<set>
+			update_time = #{updateTime}
+			<if test="updateUser != null">
+				,update_user = #{updateUser}
+			</if>
+			<if test="loginTime != null">
+				,login_time = #{loginTime}
+			</if>
+			<if test="loginIp != null">
+				,login_ip = #{loginIp}
+			</if>
+			<if test="loginIpCityInfo != null">
+				,login_ip_city_info = #{loginIpCityInfo}
+			</if>
+			<if test="sessionSid != null">
+				,session_sid = #{sessionSid}
+			</if>
+			<if test="sessionSidTime != null">
+				,session_sid_time = #{sessionSidTime}
+			</if>
+			<if test="pwd != null">
+				,pwd = #{pwd}
+			</if>
+			<if test="status != null">
+				,status = #{status}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+		</where>
+	</update>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO pub_user
+         (login_name, pwd, status, create_user, create_time, type, parent_id, register_ip, register_ip_city_info, session_sid, session_sid_time) 
+         VALUES 
+         (#{loginName}, #{pwd}, #{status}, #{createUser}, #{createTime}, #{type}, #{parentId}, #{registerIp}, #{registerIpCityInfo}, #{sessionSid}, #{sessionSidTime})
+    </insert>
+    
+    <select id="selectById" parameterType="long" resultMap="user">
+		SELECT <include refid="searchColumn" /> FROM pub_user WHERE id=#{id}
+	</select>
+
+	<select id="selectAll" parameterType="map" resultMap="user">
+		select <include refid="searchColumn" /> FROM pub_user
+ 		<include refid="condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+    <select id="selectAllCount" resultType="long">
+        SELECT count(id) FROM pub_user
+ 			<include refid="condition" />
+    </select>
+    
+	
+	<sql id="condition">
+		<where>
+			<if test="status != null">
+				AND status=#{status}
+			</if>
+			<if test="loginName != null">
+				AND LOGIN_NAME=#{loginName}
+			</if>
+			<if test="sessionSid != null">
+				AND SESSION_SID=#{sessionSid}
+			</if>
+			<if test="sessionSidTime != null">
+                AND SESSION_SID_TIME > #{sessionSidTime,jdbcType=TIMESTAMP}
+            </if>
+			<if test="pwd != null">
+				AND PWD=#{pwd}
+			</if>
+			<if test="type != null">
+				AND TYPE=#{type}
+			</if>
+			<if test="typeList != null">
+				AND TYPE IN
+				<foreach collection="typeList" item="s" index="index" open="(" separator="," close=")">
+				#{s, jdbcType=NUMERIC}
+		        </foreach>
+			</if>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="beginTime != null">
+                AND u.create_time >= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND u.create_time <![CDATA[<=]]> #{endTime}
+            </if>
+		</where>
+	</sql>
+</mapper>

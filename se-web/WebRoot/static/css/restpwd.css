@@ -1,0 +1,23 @@
+.rst-main{background: linear-gradient(to bottom, #5f21a6, #271085 90%); font-size:16px;}
+.rst-content{margin: 30px auto 90px; background: url(../images/restpwd/bg.png) no-repeat; width:580px; height:320px;}
+.rst-header{height: 50px; padding-top:20px; text-align:center;}
+.rst-header .title{font-size:20px; color: #0e0206;}
+.rst-panel{margin:0 100px; }
+.rst-panel li {margin-top:20px;}
+.rst-panel li label{width:15%;}
+.rst-panel li input{
+	height: 77px; 
+	width: 85%;
+	padding-left:20px;
+	background-color: #ebebeb;
+	border: medium none;
+	border-left: solid #ebebeb 10px;
+	border-radius: 5px; 
+    font-size: 14px; 
+}
+
+.rst-panel input:focus{border-left-color: #be34f6;}
+.rst-panel input:blur{border-left-color: #ebebeb;}
+
+.rst-circle{margin-left: 231px;}
+.rst-btn{display: inline-block; width:125px; height:125px; background: url(../images/restpwd/tick.png) no-repeat; text-indent:-9999em;}

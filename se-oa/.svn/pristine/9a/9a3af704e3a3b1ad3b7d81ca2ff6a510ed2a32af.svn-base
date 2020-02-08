@@ -1,0 +1,29 @@
+package com.xjw.entity.form.notice;
+
+import com.xjw.entity.form.BaseForm;
+import com.xjw.kzenum.platform.PlatformTypeEnum;
+
+public class NoticePromptForm extends BaseForm {
+	private static final long serialVersionUID = -3543596189433436300L;
+	/** 用户名 */
+	private String name;
+
+	/** 平台类别 {@link PlatformTypeEnum} */
+	private Integer platformType;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Integer getPlatformType() {
+		return platformType;
+	}
+
+	public void setPlatformType(Integer platformType) {
+		this.platformType = platformType;
+	}
+}

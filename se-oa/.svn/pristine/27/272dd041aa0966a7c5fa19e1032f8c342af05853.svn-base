@@ -1,0 +1,88 @@
+package com.xjw.controller.file;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.xjw.controller.BaseController;
+import com.xjw.entity.Page;
+import com.xjw.entity.form.file.VideoForm;
+import com.xjw.entity.po.file.Material;
+import com.xjw.entity.po.file.Video;
+import com.xjw.service.file.MaterialService;
+import com.xjw.service.file.VideoService;
+
+/**
+ * 视频
+ */
+@Controller
+@RequestMapping("/video/")
+public class VideoController extends BaseController {
+	private static Logger logger = LoggerFactory.getLogger(VideoController.class);
+	
+	@Autowired
+	private MaterialService materialService;
+	@Autowired
+	private VideoService videoService;
+
+	@RequestMapping("list")
+	public String list(VideoForm form, Model model) {
+		Map<String, Object> params = new HashMap<>();
+
+		if(StringUtils.isNotBlank(form.getNum())) {
+			params.put("num", form.getNum());
+		}
+		if(null != form.getType()) {
+			params.put("type", form.getType());
+		}
+		
+		try {
+			Page<Material> page = materialService.getPageByVideo(params, form.getPageNo(), form.getPageSize());
+			model.addAttribute("page", page);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+
+		model.addAttribute("form", form);
+		return "xjw/file/video-list";
+	}
+	
+	@RequestMapping("edit")
+	public String edit(String num, Model model) {
+		Material material = materialService.selectByNum(num);
+		if(null != material) {
+			Video video = videoService.selectByMaterialNum(material.getNum());
+			material.setVideo(video);
+		}
+			
+		model.addAttribute("dto", material);
+		return "xjw/file/video-edit";
+	}
+	
+	@RequestMapping("save")
+	@ResponseBody
+	public String save(Video video) {
+		try{
+			if(null == video.getId()) {
+				videoService.save(video);
+			} else {
+				videoService.update(video);
+			}
+			
+			super.writerSuccessJSONDataById("编辑成功", null, "/video/edit?num=" + video.getMaterialNum(), "/video/list", null);
+		} catch(Exception e) {
+			logger.error(e.getMessage(), e);
+			writerJSONData("failure", "编辑失败", null, "/video/list");
+		}
+		
+		return null;
+	}
+}

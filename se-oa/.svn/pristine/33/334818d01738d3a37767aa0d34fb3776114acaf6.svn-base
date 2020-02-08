@@ -1,0 +1,61 @@
+package com.xjw.api.platform;
+
+import java.util.Map;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.xjw.common.exception.HttpException;
+import com.xjw.util.HttpClientUtils;
+
+public class RemoteApi {
+
+    /** API的域名 */
+    @Value("${api.domain}")
+    protected String apiDomain;
+    
+    /** 客户端KEY */
+    @Value("${api.app_key}")
+    protected String appKey;
+    /** 应用公钥 */
+    @Value("${api.app_secret}")
+    protected String appSecret;
+    
+    /**
+     * 发送http请求
+     * @param path  
+     * @param params
+     */
+    public String post(String path, Map<String, String> params) throws HttpException {
+        String url = (apiDomain + path);
+        this.buildParams(params);
+        
+        return HttpClientUtils.post(url, params);
+    }
+    
+    /**
+     * 构建请求参数
+     */
+    public void buildParams(Map<String, String> params) {
+        Long signTime = System.currentTimeMillis();
+        params.put("sign_time", signTime.toString());
+        
+        String sign = getSign(params);
+        
+        params.put("app_key", appKey);
+        params.put("sign", sign);
+    }
+    
+    /** 生成签名 */
+    private String getSign(Map<String, String> params) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("app_key").append(appKey);
+        params.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    sb.append(entry.getKey()).append(entry.getValue());
+                });
+        sb.append("app_secret").append(appSecret);
+        return DigestUtils.md5Hex(sb.toString());
+    }
+}

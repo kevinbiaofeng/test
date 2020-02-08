@@ -1,0 +1,17 @@
+package com.xjw.dao.history;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.entity.po.history.NewMgDayHistory;
+
+@Repository
+public class NewMgDayHistoryDao extends BaseDaoImpl<NewMgDayHistory>{
+	
+	public List<NewMgDayHistory> selectOneDayData(Map<String, Object> params){
+		return this.getSqlSession().selectList("NewMgDayHistory.selectOneDayData", params);
+	}
+}

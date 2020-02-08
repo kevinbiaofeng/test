@@ -1,0 +1,46 @@
+package com.xjw.kzenum.rake;
+
+import com.xjw.kzenum.AbstractEnum;
+
+/**
+ * 返水类型 
+ */
+public class RakeTypeEnum extends AbstractEnum{
+	public static final EnumBean AG_GJ 		= new EnumBean("AG_GJ", 	"真人视讯-AG国际厅");
+	public static final EnumBean AG_JS 		= new EnumBean("AG_JS", 	"真人视讯-AG急速版");
+	public static final EnumBean AG_BYW 	= new EnumBean("AG_BYW", 	"捕鱼王II");
+	public static final EnumBean AG_SLOT 	= new EnumBean("AG_SLOT", 	"电子游戏-AG老虎机XIN");
+	public static final EnumBean PT_LIVE 	= new EnumBean("PT_LIVE", 	"真人视讯-PT视讯");
+	public static final EnumBean PT_SLOT 	= new EnumBean("PT_SLOT", 	"电子游戏-PT老虎机");
+	public static final EnumBean MG_LIVE 	= new EnumBean("MG_LIVE", 	"真人视讯-MG视讯");
+	public static final EnumBean MG_SLOT 	= new EnumBean("MG_SLOT", 	"电子游戏-MG老虎机");
+	public static final EnumBean TTG_SLOT 	= new EnumBean("TTG_SLOT", 	"电子游戏-TTG老虎机");
+	public static final EnumBean PNG_SLOT 	= new EnumBean("PNG_SLOT", 	"电子游戏-PNG老虎机");
+	public static final EnumBean NYX_SLOT 	= new EnumBean("NYX_SLOT", 	"电子游戏-NYX老虎机");
+	public static final EnumBean ENDO_SLOT 	= new EnumBean("ENDO_SLOT", "电子游戏-ENDO老虎机");
+	public static final EnumBean SB 		= new EnumBean("SB",	 	"沙巴体育");
+	
+	/** 是否老虎机 */ 
+	public static boolean isSlot(String rakeType){
+		return (RakeTypeEnum.AG_SLOT.getCode().equals(rakeType) 
+				|| RakeTypeEnum.PT_SLOT.getCode().equals(rakeType)
+				|| RakeTypeEnum.MG_SLOT.getCode().equals(rakeType)
+				|| RakeTypeEnum.TTG_SLOT.getCode().equals(rakeType)
+				|| RakeTypeEnum.PNG_SLOT.getCode().equals(rakeType)
+				|| RakeTypeEnum.NYX_SLOT.getCode().equals(rakeType)
+				|| RakeTypeEnum.ENDO_SLOT.getCode().equals(rakeType));
+	}
+	
+	/** 是否真人 */ 
+	public static boolean isLive(String rakeType){
+		return (RakeTypeEnum.AG_GJ.getCode().equals(rakeType) 
+				|| RakeTypeEnum.AG_JS.getCode().equals(rakeType)
+				|| RakeTypeEnum.PT_LIVE.getCode().equals(rakeType)
+				|| RakeTypeEnum.MG_LIVE.getCode().equals(rakeType));
+	}
+	
+	/** 是否体育 */ 
+	public static boolean isSport(String rakeType){
+		return (RakeTypeEnum.SB.getCode().equals(rakeType));
+	}
+}

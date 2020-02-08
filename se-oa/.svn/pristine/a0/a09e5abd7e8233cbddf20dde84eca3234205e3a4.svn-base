@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="GameBunkoReport">
+    <resultMap id="GameBunkoReport" type="GameBunkoReport" extends="base.baseAttr">
+    	<result column="user_id"     property="userId" />
+		<result column="game_type"   property="gameType" />
+		<result column="device_type" property="deviceType" />
+		<result column="bet_amount"  property="betAmount" />
+		<result column="net_amount"  property="netAmount" />
+		<result column="login_name"  property="loginName" />
+		<result column="type"        property="type"/>
+	</resultMap>
+    <!-- 统计NewPt投注总额以及输赢度  -->
+    <select id="selectNewPtByLogiName" parameterType="map" resultMap="GameBunkoReport">	  	
+	  	SELECT p.user_id , u.login_name, 'PT' as type,
+	  			(
+				 select case 
+				  when p.device_type = '0' then (select g.zh_name from game_slot_info g where g.code= p.game_type )
+				  when p.device_type = '1' then (select g.zh_name from game_slot_info g where g.wap_code= p.game_type )
+				  else null end
+				) game_type,
+	  			p.device_type,
+	  		   SUM(p.bet_amount) AS bet_amount,
+	  		   (SUM(p.bet_amount) - SUM(p.net_amount)) AS net_amount
+		FROM new_pt_game_data p 
+		  LEFT JOIN pub_user u
+			ON p.user_id = u.id
+		WHERE p.user_id = #{userId} 
+		  <!-- AND p.bet_amount >=0.01 -->
+		  AND p.local_time >= #{beginTime} 
+		  AND p.local_time <![CDATA[<=]]> #{endTime}
+		  GROUP BY p.device_type
+    </select>
+    
+    <!-- 统计NewMg投注总额以及输赢度  -->
+    <select id="selectNewMgByLogiName" parameterType="map" resultMap="GameBunkoReport">
+    	SELECT  d.user_id , u.login_name, 'MG' as type,
+    			(
+				 select case 
+				  when d.device_type = '1001' then (select g.zh_name from game_slot_info g where g.code= d.game_type )
+				  when d.device_type = '1002' then (select g.zh_name from game_slot_info g where g.wap_code= d.game_type )
+				  else null end
+				) game_type,
+    		   d.device_type,
+    	       SUM(d.bet_amount) AS bet_amount, SUM(d.net_amount) AS net_amount
+    	FROM new_mg_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.user_id = #{userId} 
+		    <!-- AND d.bet_amount >= 0.01 -->
+		    AND d.local_time >= #{beginTime} 
+			AND d.local_time <![CDATA[<=]]> #{endTime}
+			GROUP BY d.device_type 
+    </select>
+    
+    <!-- 查询XIN的输赢额度总额 -->
+    <select id="selectXinByLogiName" parameterType="map" resultMap="GameBunkoReport">
+    	SELECT d.user_id, u.login_name, 'XIN' as type,
+    	 	   (SELECT r.zh_name FROM RAKE_GAME_SLOT r WHERE r.RAKE_TYPE='AG_SLOT' and r.GAME_TYPE = d.GAME_TYPE) game_type,
+    	 	   d.device_type,
+    		   SUM(d.valid_bet_amount) AS bet_amount, SUM(d.net_amount) AS net_amount 
+    	FROM xin_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.user_id = #{userId} 
+		 <!-- AND d.valid_bet_amount >= 0.01 -->
+		  AND d.local_time >= #{beginTime} 
+	      AND d.local_time <![CDATA[<=]]> #{endTime}
+	      GROUP BY  d.device_type
+    </select>
+    
+</mapper>

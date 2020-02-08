@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ActiveMembers">
+    <resultMap id="activeMembers" type="ActiveMembers" extends="base.baseAttr">
+        <result column="user_id" 			property="userId" />
+        <result column="login_name" 		property="loginName" />
+        <result column="deposit_Amout" 		property="depositAmout" />
+        <result column="deposit_count" 		property="depositCount" />
+        <result column="withdrawal_Amout" 	property="withdrawalAmout" />
+        <result column="withdrawal_count" 	property="withdrawalCount" />
+        <result column="hlmoney" 			property="hlmoney" />
+        <result column="create_time" 		property="createTime" />
+    </resultMap>
+    
+     <sql id="whereCondition">
+    	WHERE
+    		u.type = 8 
+		  	AND u.status = 1 
+    		<if test="parentId != null">
+  				AND u.parent_id = #{parentId}
+          	</if>
+          	<if test="loginName != null and loginName != ''">
+				AND login_name = #{loginName}
+          	</if>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER u
+        <include refid="whereCondition"/>
+    </select>
+    
+    <!-- 查询代理下的会员存款金额、存款笔数、提款金额、提款笔数、红利金额、注册时间 -->
+    <select id="selectAll" parameterType="map" resultMap="activeMembers">
+    	select u.id, u.login_name, u.create_time,
+			( SELECT IFNULL(sum(o.trade_amount), 0) FROM user_deposit_order o  
+				WHERE u.id = o.user_id 
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND  o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) deposit_Amout ,
+			( SELECT count(o.trade_amount) FROM user_deposit_order o  
+				WHERE u.id = o.user_id  
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) deposit_count ,
+			(SELECT IFNULL(sum(o.trade_amount), 0) FROM user_withdrawal_order o 
+				where o.user_id=u.id
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) withdrawal_Amout,
+			(SELECT count(o.trade_amount) FROM user_withdrawal_order o 
+				where o.user_id=u.id 
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) withdrawal_count,
+			(select IFNULL(SUM(M.MONEY),0) FROM MEMBER_MONEY_CHANGE M 
+				where m.user_id = u.id
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND m.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND m.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) hlmoney
+		from pub_user u 
+		<include refid="whereCondition"/>
+		ORDER BY id DESC 
+       <include refid="base.page" />
+    </select>
+    
+</mapper>

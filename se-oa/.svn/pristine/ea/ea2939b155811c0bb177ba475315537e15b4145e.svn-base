@@ -1,0 +1,81 @@
+package com.xjw.entity.po.file;
+
+import com.xjw.base.entity.BasePo;
+
+/**
+ * 素材
+ */
+public class Material extends BasePo {
+	private static final long serialVersionUID = 1948543892161729652L;
+
+	/** ID */
+	private Long id;
+	/** 编号 */
+	private String num;
+	/** 名称 */
+	private String name;
+	/** 原名 */
+	private String originalName;
+	/** 存放路径 */
+	private String path;
+	/** 扩展名 */
+	private String extension;
+
+	private Video video;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNum() {
+		return num;
+	}
+
+	public void setNum(String num) {
+		this.num = num;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getOriginalName() {
+		return originalName;
+	}
+
+	public void setOriginalName(String originalName) {
+		this.originalName = originalName;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+
+	public Video getVideo() {
+		return video;
+	}
+
+	public void setVideo(Video video) {
+		this.video = video;
+	}
+}

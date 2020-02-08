@@ -1,0 +1,41 @@
+.bannel{ width:100%; overflow:hidden; position:relative; }
+.bannel .hd{ height:15px; overflow:hidden; position:absolute; bottom:10px; z-index:1; width: 100%;}
+.bannel .hd ul{ 
+	overflow:hidden;
+	zoom:1;
+	float:left;
+	left: 50%;
+    margin-left: -30%;
+    padding-left: 0;
+    position: absolute;
+    text-align: center;
+    width: 60%;
+}
+.bannel .hd ul li{ 
+	background-color: rgba(0, 0, 0, 0);
+    border: 1px solid #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-block;
+    height: 10px;
+    margin: 1px;
+    text-indent: -999px;
+    width: 10px;
+}
+.bannel .hd ul li.on{ 
+	background-color: #fff;
+    height: 11px;
+    margin: 0;
+    width: 11px;
+}
+.bannel .bd{ position:relative; height:100%; z-index:0;   }
+.bannel .bd li{ zoom:1; vertical-align:middle; }
+.bannel .bd img{ width:100%; display:block;  }
+
+.bannel .prev,
+.bannel .next{ position:absolute; left:3%; top:50%; margin-top:-25px; display:block; width:32px; height:40px; background:url(../../images/bannel/slider-arrow.png) -110px 5px no-repeat; filter:alpha(opacity=50);opacity:0.5;   }
+.bannel .next{ left:auto; right:3%; background-position: 8px 5px; }
+.bannel .prev:hover,
+.bannel .next:hover{ filter:alpha(opacity=100);opacity:1;  }
+.bannel .prevStop{ display:none;  }
+.bannel .nextStop{ display:none;  }

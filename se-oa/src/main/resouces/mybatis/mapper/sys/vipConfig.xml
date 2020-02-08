@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VipConfig">
+	<resultMap type="VipConfig" id="vipConfig" extends="base.baseAttr">
+	   <result property="level" column="LEVEL"/>
+	   <result property="monthDepositAmount" column="MONTH_DEPOSIT_AMOUNT"/>
+	   <result property="weekBetAmount" column="WEEK_BET_AMOUNT"/>
+	   <result property="monthChipAmount" column="MONTH_CHIP_AMOUNT"/>
+	</resultMap>
+
+	<sql id="searchColumn">
+		id, level, month_deposit_amount, week_bet_amount, month_chip_amount
+	</sql>
+	
+	<sql id="where_condition">
+		1=1
+		<if test="level != null">
+			AND LEVEL = #{level}
+		</if>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="vipConfig">
+		SELECT <include refid="searchColumn" /> FROM SYS_VIP_CONFIG WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="vipConfig">
+		SELECT <include refid="searchColumn" /> 
+		FROM SYS_VIP_CONFIG
+		WHERE <include refid="where_condition" />
+		ORDER BY id desc
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM SYS_VIP_CONFIG
+        WHERE <include refid="where_condition" />
+    </select>
+    
+     <update id="update" parameterType="map">
+		UPDATE SYS_VIP_CONFIG
+		<set> 
+   			month_deposit_amount = #{monthDepositAmount},
+   			week_bet_amount = #{weekBetAmount},
+   			month_chip_amount = #{monthChipAmount}
+    		<if test="level != null and level != ''">
+    			, LEVEL = #{level}
+    		</if>
+    	 </set>
+    	 WHERE ID = #{id}
+    </update>
+	
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO SYS_VIP_CONFIG(LEVEL, MONTH_DEPOSIT_AMOUNT, WEEK_BET_AMOUNT, MONTH_CHIP_AMOUNT) 
+		VALUES(#{level}, #{monthDepositAmount}, #{weekBetAmount}, #{monthChipAmount})
+    </insert>
+    
+    <delete id="deleteOne" parameterType="map">
+		DELETE FROM SYS_VIP_CONFIG where id = #{id}
+	</delete>
+</mapper>

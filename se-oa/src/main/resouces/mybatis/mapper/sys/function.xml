@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Function">
+	<sql id="searchColumn">
+		f.ID, f.NAME, f.CODE, f.URL, f.SORT, f.LEVEL, f.PARENT_ID, f.CREATE_USER, f.CREATE_TIME, f.UPDATE_TIME, f.UPDATE_USER, f.STATUS, f.SHOW_FLAG, f.CSS_NAME
+	</sql>
+	
+	<resultMap type="Function" id="function" extends="base.baseAttr">
+	   <result property="name" column="NAME"></result>
+	   <result property="code" column="CODE"></result>
+	   <result property="url" column="URL"></result>
+	   <result property="sort" column="SORT"></result>
+	   <result property="level" column="LEVEL"></result>
+	   <result property="showFlag" column="show_flag"></result>
+	   <result property="parentId" column="PARENT_ID"></result>
+	   <result property="cssName" column="CSS_NAME"></result>
+	</resultMap>
+	
+	<delete id="deleteOne" parameterType="long">
+		DELETE FROM pub_function <include refid="condition" />
+	</delete>
+	
+	<delete id="delete" parameterType="long">
+		UPDATE pub_function
+		<set>
+			update_time = #{updateTime},update_user = #{updateUser}
+			<if test="status != null">
+				,status = #{status}
+				<choose>
+				    <when test="status == 1">,show_flag = 1</when>
+				    <otherwise>,show_flag = 2</otherwise>
+				</choose>
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				AND id = #{id}
+			</if>
+			<if test="ids != null">
+				 id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+					#{id}
+		        </foreach>
+			</if>
+		</where>
+	</delete>
+
+	<update id="update" parameterType="map">
+		UPDATE pub_function
+		<set>
+			update_time = #{updateTime}
+			<if test="update_user != null">
+				,update_user = #{updateUser}
+			</if>
+			<if test="name != null">
+				,name = #{name}
+			</if>
+			<if test="code != null">
+				,code = #{code}
+			</if>
+			<if test="url != null">
+				,url = #{url}
+			</if>
+			<if test="cssName != null">
+				,css_name = #{cssName}
+			</if>
+			<if test="parentId != null">
+				,parent_id = #{parentId}
+			</if>
+			<if test="sort != null">
+				,sort = #{sort}
+			</if>
+			<if test="status != null">
+				,status = #{status}
+			</if>
+			<if test="showFlag != null">
+                ,show_flag = #{showFlag}
+            </if>
+			<if test="level != null">
+				,level = #{level}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO pub_function (
+            name, code, url, sort, level, parent_id, status, show_flag
+            , create_user, create_time, update_user, update_time, css_name
+        ) 
+        VALUES (
+            #{name}, #{code}, #{url}, #{sort}, #{level}, #{parentId}, #{status}, #{showFlag}
+            , #{createUser}, #{createTime}, #{updateUser}, #{updateTime}, #{cssName}
+        )
+    </insert>
+
+	<select id="selectById" parameterType="long" resultMap="function">
+		SELECT <include refid="searchColumn" /> FROM pub_function f WHERE f.id = #{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="function">
+		SELECT <include refid="searchColumn" /> FROM pub_function f
+		<include refid="condition" />
+		ORDER BY f.level, f.sort ASC
+	</select>
+	<select id="selectAllCount" resultType="long">
+		SELECT count(f.id) FROM pub_function f
+		<include refid="condition" />
+	</select>
+	
+	<sql id="condition">
+		<where>
+			
+			<if test="id != null">
+				AND f.id=#{id}
+			</if>
+			<if test="code != null">
+				AND f.code=#{code}
+			</if>
+			<if test="parentId != null">
+				AND f.parent_id=#{parentId}
+			</if>
+			<if test="status != null">
+				AND f.status = #{status}
+			</if>
+			<if test="showFlag != null ">
+                AND f.show_flag =#{showFlag}
+            </if>
+			<if test="ids != null">
+				AND f.id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+					#{id}
+		        </foreach>
+			</if>
+			<if test="statusList != null">
+				AND f.status in
+				<foreach collection="statusList" item="status" index="index" open="(" separator="," close=")">
+					#{status}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 根据角色查询功能菜单 begin -->		
+	<select id="selectAllByRole" parameterType="map" resultMap="function">
+		SELECT <include refid="searchColumn" /> FROM pub_function f 
+		LEFT JOIN pub_role_function_rel r ON f.id = r.function_id 
+		<where>
+			<if test="roleId != null">
+				AND r.role_id = #{roleId}
+			</if>
+			<if test="status != null">
+				AND f.status = #{status}
+			</if>
+			<if test="showFlag != null ">
+                AND f.show_flag =#{showFlag}
+            </if>
+		</where>
+		ORDER BY f.level, f.sort ASC
+	</select>
+</mapper>

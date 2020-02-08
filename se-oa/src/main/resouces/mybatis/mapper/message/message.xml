@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Message">
+	<resultMap type="Message" id="message" extends="base.baseAttr">
+       	<result column="title" property="title" />
+       	<result column="content" property="content" />
+       	<result column="receive_count" property="receiveCount" />
+	</resultMap>
+	
+	<sql id="base_column">
+		id, title, content, receive_count, create_user, create_time, update_user, update_time
+	</sql>
+	<sql id="where_condition">
+		<where>
+			<if test="likeTitle != null and likeTitle != ''">
+				AND title LIKE CONCAT('%', #{likeTitle}, '%') 
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectById" parameterType="long" resultMap="message">
+		SELECT <include refid="base_column" /> FROM message WHERE id = #{id}
+	</select>
+
+	<select id="selectAll" parameterType="map" resultMap="message">
+		SELECT <include refid="base_column" /> FROM message
+		<include refid="where_condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(*) FROM message
+		<include refid="where_condition" />
+	</select>
+	
+	<update id="update" parameterType="map">
+		UPDATE message
+		<set>
+			update_time = #{updateTime}, 
+			update_user = #{updateUser},
+			<if test="title != null">
+				 title = #{title},
+			</if>
+			<if test="content != null">
+				 content = #{content},
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="updateReceiveCount" parameterType="long">
+		UPDATE message 
+		SET receive_count = (SELECT COUNT(*) FROM message_user WHERE message_id = #{id}) 
+		WHERE id = #{id}
+	</update>
+	
+    <insert id="save" parameterType="message">
+        INSERT INTO message(title, content, receive_count, create_user, create_time, update_user, update_time) 
+        	VALUES(#{title}, #{content}, #{receiveCount}, #{createUser}, #{createTime}, #{updateUser}, #{updateTime})
+    </insert>
+    
+    <delete id="deleteOne" parameterType="map">
+    	DELETE FROM message WHERE id = #{id}
+    </delete>
+    
+</mapper>

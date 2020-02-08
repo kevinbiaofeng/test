@@ -1,0 +1,12 @@
+package com.xjw.kzenum.media;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class VideoTypeEnum extends AbstractEnum {
+	 public static final EnumBean EUROPE = new EnumBean("101", "歐美");
+	 public static final EnumBean PHILIPPINES = new EnumBean("232", "菲律賓");
+	 public static final EnumBean KOREAN = new EnumBean("187", "韓國");
+	 public static final EnumBean JAPANESE = new EnumBean("299", "日本");
+	 public static final EnumBean CHINA = new EnumBean("331", "中國大陸");
+	 public static final EnumBean ANIME = new EnumBean("799", "动漫");
+}

@@ -1,0 +1,12 @@
+package com.xjw.kzenum.platform.ag;
+
+import com.xjw.kzenum.AbstractEnum;
+/**
+ * 老虎机类型 4.6
+ */
+public class SlotTypeEnum extends AbstractEnum {
+	 public static final EnumBean PT = new EnumBean("1", "普通");
+	 public static final EnumBean MF = new EnumBean("2", "免费");
+	 public static final EnumBean JACKPOT = new EnumBean("100", "Jackpot");
+	 public static final EnumBean GP = new EnumBean("11", "个人红利或派对红利");
+}

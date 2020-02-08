@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="renderer" content="webkit" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE;chrome=1" />
+		<title>电子游戏</title>
+    	<meta name="keywords" content="
+老司機,
+老司機官网" />
+		<meta name="description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		<meta property="og:title" content="
+老司機官网-在线老虎机娱乐场游戏|
+老司機" />
+		<meta property="og:description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		
+		<link href="../plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+		<link href="../plugins/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+		<link href="../plugins/hover/2.1.1/hover-min.css" rel="stylesheet"/>
+		<link href="../plugins/swiper/3.4.2/css/swiper.min.css" rel="stylesheet"/>
+    	<link href="../css/common.css" rel="stylesheet" />
+    	
+    	<script src="../plugins/jquery/1.11.1/jquery.min.js"></script>
+    	<script src="../plugins/swiper/3.4.2/js/swiper.jquery.min.js"></script>
+    	<!--[if lte IE 9]>
+		<script src="${statics}/js/respond.min.js"></script>
+		<script src="${statics}/js/html5shiv.min.js"></script>
+		<![endif]-->
+		
+		<style>
+			.hvr-radial-out:before{background: rgba(0,0,0,0.5);}
+			.hvr-bounce-to-right:before{background: rgba(0,0,0,0.5);}
+		
+			.main{background: rgba(0,0,0,0.8);}
+		
+			.side-panel{
+				background: rgba(0,0,0,0.5);
+    			display: block;
+    			position: relative;
+    			border-right: rgba(255,255,255,0.2) solid 1px;
+    		}
+    		.side-panel ul {list-style: none; margin: 0px; padding: 0px;}
+			.side-panel ul li {display: block; border-bottom: rgba(255,255,255,0.1) solid 1px;}
+			.side-panel ul li a {display: block; padding: 10px 10px;}
+			.side-panel ul li a.active {background: rgba(0,0,0,0.5);}
+			.side-panel ul li a.active strong,
+			.side-panel ul li a.active span,
+			.side-panel ul li a:hover strong,
+			.side-panel ul li a:hover span{
+			  	color: #fff!important;
+			}
+			
+			.side-panel ul li a.active img, .side-panel ul li a:hover img {
+			    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+			    filter: alpha(opacity=100);
+			    -moz-opacity: 1.0;
+			    -khtml-opacity: 1.0;
+			    opacity: 1.0;
+			}
+			
+			.side-panel ul li a strong {display: block; color: #aaa; font-size: 16px;}
+			.side-panel ul li a span {color: #aaa;}
+			.side-panel .play-icon {display: block; float: left; margin-right: 16px; margin-left: 10px; height: 40px; width: 40px; text-align: center;}			
+			.side-panel .play-icon img {height: 40px; -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; filter: alpha(opacity=50); -moz-opacity: 0.5; -khtml-opacity: 0.5; opacity: 0.5;}
+			
+			.dark-bg{background: rgba(0,0,0,0.3); display: block;}
+			
+			.promo-game {
+			    background: rgba(255,255,255,0.2);
+			    padding: 20px;
+			    color: #fff;
+			    text-align: center;
+			    border-radius: 5px;
+			    height: 265px;
+			    position: relative;
+			}
+			
+			.promo-game strong {
+			  	font-size: 16px;
+			  	margin-bottom: 10px;
+			  	display: block;
+			  	color: #F5A623;
+			}
+			
+			.game-bar {
+			    margin-top: 15px;
+			    background: rgba(0,0,0,0.2);
+			    display: block;
+			    position: relative;
+			    padding: 15px 20px;
+			}
+			
+			.game-bar li.active {
+    			background: #fff none repeat scroll 0 0 !important;
+    			color: #00a5e6 !important;
+			}
+			
+			.game-bar li {
+			    background: transparent none repeat scroll 0 0 !important;
+			    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+			    border-radius: 4px;
+			    color: #999;
+			    cursor: pointer;
+			    float: left;
+			    font-size: 13px;
+			    margin-left: 10px;
+			    margin-top: 4px;
+			    padding: 4px 5px;
+			}
+			
+			.search-box {
+    			position: relative;
+    			display: inline-block;
+			}
+			
+			.white-input {background: transparent!important; border: rgba(255,255,255,0.2) solid 1px!important;}
+			
+			.search-box .fa {
+			    position: absolute;
+			    display: block;
+			    right: 10px;
+			    top: 10px;
+			    color: #fff;
+			    z-index: 3;
+			}
+			
+			.game-grid{padding: 15px;}
+			.game-grid ul {
+			    list-style: none;
+			    margin: 0;
+			    padding: 0px;
+			    text-align: center;
+			}
+			
+			.game-grid ul li {
+			    display: inline-block;
+			    margin: 15px 5px;
+			    margin-bottom: 30px;
+			    width: 164px;
+			    height: 184px;
+			    border-radius: 5px;
+			    position: relative;
+			}
+			
+			.game-grid .game-box {
+			    background: rgba(255,255,255,0.1);
+			    color: #fff;
+			    text-align: center;
+			    border-radius: 5px;
+			    height: 180px;
+			    position: relative;
+			    display: block;
+			    overflow: hidden;
+			    margin-bottom: 20px;
+			}
+			
+			.game-grid li:hover .game-hover {display: block;}
+			/*.game-grid li:hover {box-shadow: #F8E71C 0px 0px 20px;} */
+			.game-grid li:hover {
+				border-color: #66afe9;
+  				outline: 0;
+  				-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+          		box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+          	}
+			
+			.game-hover {
+				display: none;
+			    background: rgba(0, 0, 0, 0.5);
+			    position: absolute;
+			    z-index: 4;
+			    height: 100%;
+			    width: 100%;
+			    padding: 30px 20px;
+			    top: 0;
+			    left: 0;
+			    -webkit-animation: fadeIn 300ms ease;
+			    -moz-animation: fadeIn 300ms ease;
+			    -ms-animation: fadeIn 300ms ease;
+			}
+	
+			.btn-free {
+				color: #FFFFFF;
+				background: #301A58;
+				border: 0px;
+				border-radius: 15px;
+			    text-shadow: none!important;
+			    box-shadow: none!important;
+			    font-weight: 600!important;
+			}
+			
+			.btn-play {
+				color: #FFFFFF;
+			    background: #78069D;
+			    border: 0px;
+			   	border-radius: 15px;
+			    text-shadow: none!important;
+			    box-shadow: none!important;
+			    font-weight: 600!important;
+			}
+			
+			.game-grid .game-mark{    
+				height: 22px;
+			    overflow: hidden;
+			    position: relative;
+			    text-align: right;
+			    top: 5px;
+			    z-index: 2;
+			}
+			
+			.game-grid .game-ribbon {
+			    display: inline-block;
+			    padding: 1px 4px;
+			    background: rgba(0,0,0,0.2);
+			    font-size: 9px;
+			    min-width: 22px;
+			    text-align: center;
+			    border-radius: 3px;
+			    margin-right: 6px;
+			}
+			
+			.game-grid .game-icon{display: block; margin: 0 auto; margin-top: 10px; text-align: center;}
+			
+			.game-grid .game-title {
+			    position: absolute;
+			    bottom: 0px;
+			    left: 0px;
+			    text-align: center;
+			    width: 100%;
+			    font-size: 11px;
+			    font-weight: 600;
+			    z-index: 5;
+			    background: rgba(255,255,255,0.2);
+			    padding: 8px;
+			    letter-spacing: 2px;
+			}
+			
+			.game-grid .btn-like {
+			    position: absolute;
+			    right: 12px;
+			    bottom: 8px;
+			    color: #fff;
+			    font-size: 16px;
+			    opacity: 0.6;
+			    z-index: 5;
+			}
+			
+			.pagination > li > a,  .pagination > li > span {
+  				background: rgba(0,0,0,0.2);
+  				border:rgba(255,255,255,0.2) solid 1px;
+  				color: #fff;
+			}
+			
+			.pagination li.active a:hover{
+			    color: #23527c;
+    			background-color: #eeeeee;
+    			border-color: #dddddd;
+    		}
+			
+			.pagination li.active a{
+			    color: #23527c;
+    			background-color: #eeeeee;
+    			border-color: #dddddd;
+    		}
+		</style>
+	</head>
+	<body>
+    	<div class="main">
+    		<div class="container">
+    			<div class="row">
+    				<div class="col-md-2 side-panel">
+    					<ul>
+    						<li>
+								<a href="javascript:;" class="active hvr-bounce-to-right">
+									<div class="play-icon"><img src="http://st.hat888.com/images/games/mg.png"/></div>
+									<div class="pull-left">
+										<strong>MG平台</strong>
+										<span>点击进入</span>
+									</div>
+									<div class="clearfix"></div>
+								</a>
+    						</li>
+    						<li>
+								<a href="javascript:;" class="hvr-bounce-to-right">
+									<div class="play-icon"><img src="http://st.hat888.com/images/games/pt.png"/></div>
+									<div class="pull-left">
+										<strong>PT平台</strong>
+										<span>点击进入</span>
+									</div>
+									<div class="clearfix"></div>
+								</a>
+    						</li>
+    						<li>
+								<a href="javascript:;" class="hvr-bounce-to-right">
+									<div class="play-icon"><img src="http://st.hat888.com/images/games/commingsoon.png"/></div>
+									<div class="pull-left">
+										<strong>TTG平台</strong>
+										<span>点击进入</span>
+									</div>
+									<div class="clearfix"></div>
+								</a>
+    						</li>
+    						<li>
+								<a href="javascript:;" class="hvr-bounce-to-right">
+									<div class="play-icon"><img src="http://st.hat888.com/images/games/commingsoon.png"/></div>
+									<div class="pull-left">
+										<strong>PNG平台</strong>
+										<span>点击进入</span>
+									</div>
+									<div class="clearfix"></div>
+								</a>
+    						</li>
+    						<li>
+								<a href="javascript:;" class="hvr-bounce-to-right">
+									<div class="play-icon"><img src="http://st.hat888.com/images/games/commingsoon.png"/></div>
+									<div class="pull-left">
+										<strong>BB平台</strong>
+										<span>点击进入</span>
+									</div>
+									<div class="clearfix"></div>
+								</a>
+    						</li>
+    					</ul>
+    				</div>
+    				
+    				<div class="col-md-10 dark-bg">
+    					<div class="row" style="padding-top:15px;">
+    						<div class="col-md-9">
+    							<div class="swiper-container">
+							        <div class="swiper-wrapper">
+							            <div class="swiper-slide"><img width="100%" height="265px" src="http://st.hat888.com/images/games/slot/banner/mg-banner.jpg"/></div>
+							            <div class="swiper-slide"><img width="100%" height="265px" src="http://st.hat888.com/images/games/slot/banner/mg-banner2.jpg"/></div>
+							            <div class="swiper-slide"><img width="100%" height="265px" src="http://st.hat888.com/images/games/slot/banner/mg-banner3.jpg"/></div>
+							            <div class="swiper-slide"><img width="100%" height="265px" src="http://st.hat888.com/images/games/slot/banner/mg-banner4.jpg"/></div>
+							            <div class="swiper-slide"><img width="100%" height="265px" src="http://st.hat888.com/images/games/slot/banner/mg-banner5.jpg"/></div>
+							        </div>
+							        <!-- Add Pagination -->
+							        <div class="swiper-pagination"></div>
+							        <!-- Add Arrows -->
+							        <div class="swiper-button-next"></div>
+							        <div class="swiper-button-prev"></div>
+							    </div>
+    							
+    							
+    						</div>
+    						<div class="col-md-3">
+    							<div class="promo-game">
+									<div style="position: relative;bottom:13px;">
+										<strong>今日特色游戏</strong>
+										<span style="position: relative;bottom:5px;">奖金：<span>888</span></span>
+										<div style="position: relative;">
+											<img src="http://st.hat888.com/images/games/slot/pt/zcjb.png" height="120px;" style="cursor: pointer;"/>
+										</div>
+										<div style="letter-spacing: 3px; margin: 8px 0px;">招财进宝</div>
+										<div style="letter-spacing: 3px;">
+											<a href="javascript:;" style="letter-spacing: 3px; color: #f3bc47;">点此进入</a>
+										</div>
+									</div>
+								</div>
+    						</div>
+    					</div>
+    					<!-- 分类选项卡 -->
+    					<div class="row game-bar">
+    						<div class="pull-left">
+	    						<ul >
+									<li class="active">热门游戏</li>
+									<li>最新游戏</li>
+									<li>电子游戏</li>
+									<li>桌面游戏</li>
+									<li>视频扑克</li>
+									<li>综合游戏</li>
+								</ul>
+							</div>
+							<div class="search-box pull-right">
+								<input type="text" id="zhName" class="form-control white-input" style="color:#fff;" placeholder="游戏检索"/>
+								<i class="fa fa-search" style="cursor:pointer"></i>
+							</div>
+    					</div>
+    					<!-- 游戏列表 -->
+    					<div class="row">
+    						<div class="game-grid">
+    							<ul>
+    								<li class="hvr-grow-shadow">
+    									<div class="game-box">
+    										<div class="game-hover hvr-radial-out">
+    											<a href="javascript:;" class="btn btn-default btn-block btn-free">免费试玩</a>
+    											<a href="javascript:;" class="btn btn-default btn-block btn-play">立即开始</a>	
+    										</div>	
+    									
+    										<div class="game-mark">
+    											<div class="game-ribbon">PT</div>
+    										</div>
+    										<div class="game-icon">
+												<div style="background: url(http://st.hat888.com/images/games/slot/mg/BTN_Tarzan_Button_en.png) repeat scroll; background-position: 0 0; bottom: 18px;height: 135px; width:88%; margin:auto; position: relative;"></div>
+    										</div>
+    										<div class="game-title">雷神</div>
+    										<a href="javascript:;" class="btn-like">
+    											<i class="fa fa-star"></i>
+    										</a>
+    									</div>
+    								</li>
+    							</ul>
+    						</div>
+    						<div class="text-center"> 
+    							<ul class="pagination">
+    								<li><a href="javascript:;" aria-label="Previous"><span aria-hidden="true">上一组</span></a></li>
+    								<li class="active"><a href="javascript:;">1</a></li>
+    								<li><a href="javascript:;">2</a></li>
+    								<li><a href="javascript:;">3</a></li>
+    								<li><a href="javascript:;">4</a></li>
+    								<li><a href="javascript:;">5</a></li>
+    								<li><a href="javascript:;">6</a></li>
+    								<li><a href="javascript:;" aria-label="Next"><span aria-hidden="true">下一组</span></a></li>
+    							</ul>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+		<script>
+		    var swiper = new Swiper('.swiper-container', {
+		        pagination: '.swiper-pagination',
+		        nextButton: '.swiper-button-next',
+		        prevButton: '.swiper-button-prev',
+		        paginationClickable: true,
+		        spaceBetween: 30,
+		        centeredSlides: true,
+		        autoplay: 2500,
+		        autoplayDisableOnInteraction: false
+		    });
+		</script>
+	</body>
+</html>

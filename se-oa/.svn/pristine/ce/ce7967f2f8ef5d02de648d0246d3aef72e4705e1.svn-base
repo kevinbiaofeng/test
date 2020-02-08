@@ -1,0 +1,16 @@
+package com.xjw.kzenum.platform.ag;
+
+import com.xjw.kzenum.AbstractEnum;
+/**
+ * 游戏玩法 4.8
+ */
+public class PlayTypeEnum extends AbstractEnum {
+	 public static final EnumBean ZHUANG = new EnumBean("1", "庄");
+	 public static final EnumBean XIAN = new EnumBean("2", "闲");
+	 public static final EnumBean HE = new EnumBean("3", "和");
+	 public static final EnumBean ZHUANG_DUI = new EnumBean("4", "庄对");
+	 public static final EnumBean XIAN_DUI = new EnumBean("5", "闲对");
+	 public static final EnumBean DA = new EnumBean("6", "大");
+	 public static final EnumBean XIAO = new EnumBean("7", "小");
+	 public static final EnumBean ZHUANG_MIAN_YONG = new EnumBean("11", "庄免佣");
+}

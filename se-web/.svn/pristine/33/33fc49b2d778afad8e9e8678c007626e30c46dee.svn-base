@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DepositOrder">
+    <resultMap id="DepositOrder" type="DepositOrder" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="ORDER_NO" jdbcType="VARCHAR" property="orderNo" />
+        <result column="FROM_BANK_TYPE" jdbcType="VARCHAR" property="fromBankType" />
+        <result column="FROM_BANK_ACCOUNT" jdbcType="VARCHAR" property="fromBankAccount" />
+        <result column="FROM_BANK_CARD" jdbcType="VARCHAR" property="fromBankCard" />
+        <result column="TRADE_MODE" jdbcType="NUMERIC" property="tradeMode" />
+        <result column="TRADE_AMOUNT" jdbcType="NUMERIC" property="tradeAmount" />
+        <result column="TO_BANK_ID" jdbcType="NUMERIC" property="toBankId" />
+        <result column="TO_BANK_TYPE" jdbcType="VARCHAR" property="toBankType" />
+        <result column="TO_BANK_CARD" jdbcType="VARCHAR" property="toBankCard" />
+        <result column="TO_BANK_ACCOUNT" jdbcType="VARCHAR" property="toBankAccount" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="PREFERENTIAL_CODE" jdbcType="VARCHAR" property="preferentialCode" />
+        <result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+        <result column="UPDATE_USER_NAME" jdbcType="VARCHAR" property="updateUserName" />
+        <result column="OPERATION_TYPE" jdbcType="NUMERIC" property="operationType" />
+         <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID, USER_ID,ORDER_NO,FROM_BANK_TYPE,FROM_BANK_ACCOUNT,FROM_BANK_CARD,TRADE_MODE,TRADE_AMOUNT,TO_BANK_ID,TO_BANK_TYPE,TO_BANK_CARD,
+        TO_BANK_ACCOUNT,REMARK,PREFERENTIAL_CODE, CREATE_USER, CREATE_TIME, STATUS, OPERATION_TYPE
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO USER_DEPOSIT_ORDER (
+        	USER_ID,ORDER_NO,FROM_BANK_TYPE,FROM_BANK_ACCOUNT,FROM_BANK_CARD,TRADE_MODE,TRADE_AMOUNT,TO_BANK_ID,TO_BANK_TYPE,TO_BANK_CARD,
+        	TO_BANK_ACCOUNT,REMARK,PREFERENTIAL_CODE,CREATE_USER,CREATE_TIME, STATUS, IP_ADDRESS
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{orderNo,jdbcType=VARCHAR},
+	        #{fromBankType,jdbcType=VARCHAR},
+	        #{fromBankAccount,jdbcType=VARCHAR},
+	        #{fromBankCard,jdbcType=VARCHAR},
+	        #{tradeMode,jdbcType=NUMERIC},
+	        #{tradeAmount,jdbcType=NUMERIC},
+	        #{toBankId,jdbcType=NUMERIC},
+	        #{toBankType,jdbcType=VARCHAR},
+	        #{toBankCard,jdbcType=VARCHAR},
+	        #{toBankAccount,jdbcType=VARCHAR},
+	        #{remark,jdbcType=VARCHAR},
+	        #{preferentialCode,jdbcType=VARCHAR},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{status,jdbcType=NUMERIC},
+	        #{ipAddress,jdbcType=VARCHAR}
+        )
+    </insert>
+
+	<select id="queryByOrderNo" parameterType="String" resultMap="DepositOrder">
+		 SELECT <include refid="baseColumnList"/> FROM USER_DEPOSIT_ORDER WHERE ORDER_NO = #{orderNo}
+	</select>
+
+    <select id="selectById" parameterType="long" resultMap="DepositOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_DEPOSIT_ORDER
+        where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(ID) FROM USER_DEPOSIT_ORDER
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="DepositOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_DEPOSIT_ORDER
+        <include refid="searchCondition"/>
+        ORDER BY CREATE_TIME DESC
+       	<include refid="base.page" />
+    </select>
+    
+     <select id="selectSumAmount" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(trade_amount), 0) FROM USER_DEPOSIT_ORDER
+        <include refid="searchCondition"/>
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	<if test="userId != null">
+				AND USER_ID = #{userId}
+			</if>
+			<if test="tradeMode != null">
+				AND trade_mode=#{tradeMode}
+			</if>
+			<if test="orderNo != null">
+                AND (ORDER_NO like '%' #{orderNo} '%')
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status}
+            </if>
+        	<if test="statusList != null">
+				AND STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+			<if test="beginTime != null">
+                AND CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </sql>
+    
+    <update id="update" parameterType="DepositOrder">
+        UPDATE USER_DEPOSIT_ORDER
+        <set>
+        	update_time = #{updateTime}, 
+        	<if test="status != null">
+                 OPERATION_TYPE = #{operationType},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status},
+            </if>
+            
+        </set>
+        WHERE ORDER_NO=#{orderNo}
+    </update>
+</mapper>

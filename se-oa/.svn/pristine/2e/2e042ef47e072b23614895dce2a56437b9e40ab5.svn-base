@@ -1,0 +1,115 @@
+package com.xjw.entity.po.rake;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+import com.xjw.base.entity.BasePo;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+import com.xjw.kzenum.user.MemberVIPTypeEnum;
+
+/**
+ * 每日返水统计表
+ */
+public class RakeStat extends BasePo {
+	private static final long serialVersionUID = -4590222094910068829L;
+	/** 返水类型 {@link RakeTypeEnum} */
+	private String rakeType;
+	/** vip等级 {@link MemberVIPTypeEnum} */
+	private Integer vipType;
+	/** 用户ID */
+	private Long userId;
+	/** 登录账号 */
+	private String loginName;
+	/** 游戏账号名 */
+	private String playerName;
+	/** 投注总额 */
+	private BigDecimal betAmount;
+	/** 返水总额 */
+	private BigDecimal rakeAmount;
+	/** 返水时间 */
+	private Date rakeTime;
+	/** 返水状态  0:未处理，1：已处理*/
+	private Integer status;
+	/** 统计日期 yyyyMMdd */
+	private String statDate;
+
+	public String getRakeType() {
+		return rakeType;
+	}
+
+	public void setRakeType(String rakeType) {
+		this.rakeType = rakeType;
+	}
+
+	public Integer getVipType() {
+		return vipType;
+	}
+
+	public void setVipType(Integer vipType) {
+		this.vipType = vipType;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+	
+	public String getLoginName() {
+		return loginName;
+	}
+
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+
+	public String getPlayerName() {
+		return playerName;
+	}
+
+	public void setPlayerName(String playerName) {
+		this.playerName = playerName;
+	}
+
+	public BigDecimal getBetAmount() {
+		return betAmount;
+	}
+
+	public void setBetAmount(BigDecimal betAmount) {
+		this.betAmount = betAmount;
+	}
+
+	public BigDecimal getRakeAmount() {
+		return rakeAmount;
+	}
+
+	public void setRakeAmount(BigDecimal rakeAmount) {
+		this.rakeAmount = rakeAmount;
+	}
+
+	public Date getRakeTime() {
+		return rakeTime;
+	}
+
+	public void setRakeTime(Date rakeTime) {
+		this.rakeTime = rakeTime;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public String getStatDate() {
+		return statDate;
+	}
+
+	public void setStatDate(String statDate) {
+		this.statDate = statDate;
+	}
+}

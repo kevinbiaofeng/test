@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PlatformGame">
+    <resultMap type="PlatformGame" id="PlatformGame" extends="base.baseAttr">
+           <result column="zh_name"        property="zhName" />
+           <result column="en_name"        property="enName" />
+           <result column="flash_code"     property="flashCode" />
+           <result column="flash_flag"     property="flashFlag" />
+           <result column="h5_code"        property="h5Code" />
+           <result column="h5_flag"        property="h5Flag" />
+           <result column="image_path"     property="imagePath" />
+           <result column="platform_type"  property="platformType" />
+           <result column="game_type"      property="gameType" />
+           <result column="game_label"     property="gameLabel" />
+           <result column="new_flag"       property="newFlag" />
+           <result column="hot_flag"       property="hotFlag" />
+           <result column="remark"         property="remark" />
+    </resultMap>
+    
+    <sql id="base_column">
+        id, zh_name, en_name,flash_code, flash_flag, h5_code, h5_flag, image_path, platform_type, game_type, game_label, 
+        new_flag, hot_flag, remark, status, create_time, create_user, update_time, update_user
+    </sql>
+    
+    <sql id="where_condition">
+        <where>
+            <if test="flashCode != null and flashCode != ''">
+                AND flash_code = #{flashCode}
+            </if>
+            <if test="flashFlag != null and flashFlag != ''">
+                AND flash_flag = #{flashFlag}
+            </if>
+            <if test="h5Code != null and h5Code != ''">
+                AND h5_code = #{h5Code}
+            </if>
+            <if test="h5Flag != null and h5Flag != ''">
+                AND h5_flag = #{h5Flag}
+            </if>
+            <if test="platformType != null">
+                AND platform_type = #{platformType}
+            </if>
+            <if test="gameType != null">
+                AND game_type = #{gameType}
+            </if>
+            <if test="gameLabel != null and gameLabel != ''">
+                AND game_label = #{gameLabel}
+            </if>
+            <if test="newFlag != null and newFlag != ''">
+                AND new_flag = #{newFlag}
+            </if>
+            <if test="hotFlag != null and hotFlag != ''">
+                AND hot_flag = #{hotFlag}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </sql>
+    
+    <select id="selectById" parameterType="long" resultMap="PlatformGame">
+        SELECT <include refid="base_column" /> FROM platform_game
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" parameterType="map" resultMap="PlatformGame">
+        SELECT <include refid="base_column" /> FROM platform_game
+        <include refid="where_condition" />
+        ORDER BY id DESC
+        <include refid="base.page" />
+    </select>
+    
+    <select id="selectAllCount" resultType="long">
+        SELECT count(id) FROM platform_game
+        <include refid="where_condition" />
+    </select>
+
+    <insert id="save" parameterType="map">
+        INSERT INTO platform_game (
+            zh_name, en_name, flash_code, flash_flag, h5_code, h5_flag, 
+            image_path, platform_type, game_type, game_label, new_flag, 
+            hot_flag, remark, status, create_time, create_user
+        ) VALUES (
+            #{zhName}, #{enName}, #{flashCode}, #{flashFlag}, #{h5Code}, #{h5Flag}, 
+            #{imagePath}, #{platformType}, #{gameType}, #{gameLabel}, #{newFlag}, 
+            #{hotFlag}, #{remark}, #{status}, #{createTime}, #{createUser}
+        )
+    </insert>
+    
+    <insert id="saveRecordBatch" parameterType="map">
+        INSERT INTO platform_game (
+            zh_name, en_name, flash_code, flash_flag, h5_code, h5_flag, 
+            image_path, platform_type, game_type, game_label, new_flag, 
+            hot_flag, remark, status, create_time, create_user
+        ) VALUES
+        <foreach collection="list" item="item" index="index" separator=","> 
+            (
+                #{item.zhName}, #{item.enName}, #{item.flashCode}, #{item.flashFlag}, #{item.h5Code}, #{item.h5Flag}, 
+                #{item.imagePath}, #{item.platformType}, #{item.gameType}, #{item.gameLabel}, #{item.newFlag}, 
+                #{item.hotFlag}, #{item.remark}, #{item.status}, #{item.createTime}, #{item.createUser}}
+            }
+        </foreach>
+    </insert>
+    
+    <update id="update" parameterType="map">
+        UPDATE platform_game
+        <set> 
+        update_user = #{updateUser},
+            update_time = #{updateTIme},
+            <if test="zhName != null and zhName != ''">
+                zh_name = #{zhName},
+            </if>
+            <if test="enName != null and enName != ''">
+                 en_name = #{enName},
+            </if>
+            <if test="flashCode != null and flashCode != ''">
+                 flash_code = #{flashCode},
+            </if>
+            <if test="flashFlag != null and flashFlag != ''">
+                flash_flag = #{flashFlag},
+            </if>
+            <if test="h5Code != null and h5Code != ''">
+                h5_code = #{h5Code},
+            </if>
+            <if test="h5Flag != null and h5Flag != ''">
+                h5_flag = #{h5Flag},
+            </if>
+            <if test="imagePath != null and imagePath != ''">
+                image_path = #{imagePath},
+            </if>
+            <if test="platformType != null">
+                platform_type = #{platformType},
+            </if>
+            <if test="gameType != null">
+                game_type = #{gameType},
+            </if>
+            <if test="gameLabel != null">
+                game_label = #{gameLabel},
+            </if>
+            <if test="newFlag != null">
+                new_flag = #{newFlag},
+            </if>
+            <if test="hotFlag != null">
+                hot_flag = #{hotFlag},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

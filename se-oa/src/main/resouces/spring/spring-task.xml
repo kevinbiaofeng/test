@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/task   http://www.springframework.org/schema/task/spring-task-4.3.xsd">
+            
+   <task:scheduled-tasks>
+        <!-- 每天凌晨12点  生成每日Ag游戏统计表数据 -->
+<!--         <task:scheduled ref="agDayHistoryTask" method="run" cron="0 5 1 * * ?"/>  -->
+        
+        <!-- 存款拒绝定时任务 每50分钟查询一次  -->
+<!--         <task:scheduled ref="depositRejectTask" method="run" cron="0 */50 * * * ?"/>  -->
+        
+<!--         <task:scheduled ref="endoDayHistoryTask" method="run" cron="0 10 1 * * ?"/>  -->
+        
+<!--         <task:scheduled ref="fishDayHistoryTask" method="run" cron="0 15 1 * * ?"/>  -->
+   </task:scheduled-tasks>
+</beans>

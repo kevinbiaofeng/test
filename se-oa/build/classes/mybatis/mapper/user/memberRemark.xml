@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberRemark">
+    <resultMap id="MemberRemark" type="MemberRemark" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="TITLE_TYPE" jdbcType="NUMERIC" property="titleType" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID,USER_ID,TITLE_TYPE,REMARK,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME,STATUS
+    </sql>
+
+    <insert id="save" parameterType="MemberRemark">
+        INSERT INTO MEMBER_REMARK(
+        USER_ID,TITLE_TYPE,REMARK,CREATE_USER,CREATE_TIME,STATUS
+        ) VALUES (
+        #{userId,jdbcType=NUMERIC},
+        #{titleType,jdbcType=NUMERIC},
+        #{remark,jdbcType=VARCHAR},
+        #{createUser,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP},
+        #{status,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <update id="delete" parameterType="map">
+        UPDATE MEMBER_REMARK SET STATUS=#{status,jdbcType=VARCHAR},UPDATE_USER=#{updateUser,jdbcType=NUMERIC},UPDATE_TIME=#{updateTime,jdbcType=TIMESTAMP} WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <update id="update" parameterType="MemberRemark">
+        UPDATE MEMBER_REMARK
+        <set>
+            <if test="titleType != null">
+                 TITLE_TYPE = #{titleType,jdbcType=NUMERIC},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="updateUser != null">
+                 UPDATE_USER = #{updateUser,jdbcType=NUMERIC},
+            </if>
+            <if test="updateTime != null">
+                 UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status,jdbcType=NUMERIC},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="MemberRemark">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_REMARK where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(ID) FROM MEMBER_REMARK
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="MemberRemark">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_REMARK
+        <include refid="searchCondition"/>
+        ORDER BY STATUS DESC, UPDATE_TIME DESC, ID DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="userId != null">
+                AND USER_ID = #{userId}
+            </if>
+            <if test="titleType != null">
+                AND TITLE_TYPE = #{titleType}
+            </if>
+            <if test="createUser != null">
+                AND CREATE_USER = #{createUser,jdbcType=NUMERIC}
+            </if>
+            <if test="createTime != null">
+                AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updateUser != null">
+                AND UPDATE_USER = #{updateUser,jdbcType=NUMERIC}
+            </if>
+            <if test="updateTime != null">
+                AND UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="beginTime != null">
+                AND CREATE_TIME >= #{beginTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND CREATE_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status,jdbcType=NUMERIC}
+            </if>
+            <if test="remark != null">
+				AND (remark like '%' #{remark} '%')
+			</if>
+            <if test="statusList != null">
+				AND STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+        </where>
+    </sql>
+</mapper>

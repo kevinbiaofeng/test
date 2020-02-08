@@ -1,0 +1,90 @@
+package com.xjw.dao.rake;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.entity.po.rake.RakeStat;
+import com.xjw.entity.vo.rake.PlayerStatVo;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+
+@Repository
+public class RakeStatDao extends BaseDaoImpl<RakeStat>{
+	
+	public void updateBySend(RakeStat rakeStat){
+		super.getSqlSession().update("RakeStat.updateBySend", rakeStat);
+	}
+
+	/**
+	 * 统计游戏平台的消费金额
+	 * @param beginTime	
+	 * @param endTime
+	 * @return
+	 */
+	public List<PlayerStatVo> selectPlayerStatVo(String rakeType, Date beginTime, Date endTime){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("beginTime", beginTime);
+		params.put("endTime", endTime);
+		
+		if(RakeTypeEnum.PT_LIVE.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statPtLive", params);
+		}else if(RakeTypeEnum.PT_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statPtSlot", params);
+		}else if(RakeTypeEnum.MG_LIVE.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statMgLive", params);
+		}else if(RakeTypeEnum.MG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statMgSlot", params);
+		}else if(RakeTypeEnum.AG_GJ.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statAgGj", params);
+		}else if(RakeTypeEnum.AG_JS.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statAgJs", params);
+		}else if(RakeTypeEnum.AG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statAgSlot", params);
+		}else if(RakeTypeEnum.AG_BYW.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statAgByw", params);
+		}else if(RakeTypeEnum.SB.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statSb", params);
+		}else if(RakeTypeEnum.TTG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statTtgSlot", params);
+		}else if(RakeTypeEnum.PNG_SLOT.getCode().equals(rakeType)){
+//			return this.getSqlSession().selectList("RakeStat.statPngSlot", params);
+		}else if(RakeTypeEnum.NYX_SLOT.getCode().equals(rakeType)){
+//			return this.getSqlSession().selectList("RakeStat.statNyxSlot", params);
+		}else if(RakeTypeEnum.ENDO_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectList("RakeStat.statEndoSlot", params);
+		}
+		
+		return new ArrayList<PlayerStatVo>();
+	}
+	
+	public PlayerStatVo selectPlayerStatVo(Long userId, String rakeType, List<Map<String, Date>> rangeTimeList, Date beginTime, Date endTime){
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("userId", userId);
+		params.put("rakeType", rakeType);
+		params.put("rangeTimeList", rangeTimeList);
+		params.put("beginTime", beginTime);
+		params.put("endTime", endTime);
+		
+		if(RakeTypeEnum.PT_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectOne("RakeStat.statPtSlotByActUser", params);
+		}else if(RakeTypeEnum.MG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectOne("RakeStat.statMgSlotByActUser", params);
+		}else if(RakeTypeEnum.AG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectOne("RakeStat.statAgSlotByActUser", params);
+		}else if(RakeTypeEnum.TTG_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectOne("RakeStat.statTtgSlotByActUser", params);
+		}else if(RakeTypeEnum.PNG_SLOT.getCode().equals(rakeType)){
+//			return this.getSqlSession().selectOne("RakeStat.statPngSlotByActUser", params);
+		}else if(RakeTypeEnum.NYX_SLOT.getCode().equals(rakeType)){
+//			return this.getSqlSession().selectOne("RakeStat.statNyxSlotByActUser", params);
+		}else if(RakeTypeEnum.ENDO_SLOT.getCode().equals(rakeType)){
+			return this.getSqlSession().selectOne("RakeStat.statEndoSlotByActUser", params);
+		}
+		return null;
+	}
+}

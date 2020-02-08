@@ -1,0 +1,24 @@
+package com.xjw.task;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.xjw.service.order.DepositOrderService;
+
+@Component
+public class DepositRejectTask {
+	private static Logger logger = LoggerFactory.getLogger(DepositRejectTask.class);
+	
+	@Autowired
+	private DepositOrderService depositOrderService;
+	
+	public void run()  {
+	    try {
+	        depositOrderService.updateDepositStatus();
+	    } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+	}
+}

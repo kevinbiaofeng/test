@@ -1,0 +1,41 @@
+package com.xjw.service.file.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.file.VideoDao;
+import com.xjw.entity.po.file.Video;
+import com.xjw.service.file.VideoService;
+
+@Service
+public class VideoServiceImpl extends BaseServiceImpl<Video> implements VideoService {
+
+	@Autowired
+	private VideoDao videoDao;
+	
+	@Override
+	public Video selectByMaterialNum(String materialNum) {
+		if(StringUtils.isNotBlank(materialNum)) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("materialNum", materialNum);
+			return super.selectOne(params);
+		}
+		
+		return null;
+	}
+	@Override
+	public BaseDaoImpl<Video> baseDao() {
+		return videoDao;
+	}
+
+	@Override
+	public Class<Video> getClazz() {
+		return Video.class;
+	}
+}

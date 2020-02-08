@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Video">
+	<resultMap type="Video" id="video" extends="base.baseAttr">
+		<result property="code" 			column="code"/>
+	 	<result property="originalName" 	column="original_name"/>
+		<result property="imagePath" 		column="image_path"/>
+		<result property="path" 			column="path"/>
+		<result property="extension" 		column="extension"/>
+		<result property="size" 			column="size"/>
+		<result property="length" 			column="length"/>
+		<result property="title" 			column="title"/>
+		<result property="type" 			column="type"/>
+		<result property="star" 			column="star"/>
+		<result property="keyword" 			column="keyword"/>
+		<result property="favoriteCount" 	column="favorite_count"/>
+		<result property="clickCount" 		column="click_count"/>
+		<result property="vipFlag" 			column="vip_flag"/>
+		<result property="status" 			column="status"/>
+	
+	</resultMap>
+
+	<sql id="searchColumn">
+		id, code, original_name, image_path, path, extension, size, length, title, type, 
+		star, keyword, favorite_count, click_count, vip_flag, status, create_time
+	</sql>
+	
+	<sql id="where_condition">
+		<where>
+		    
+			<if test="code != null and code != ''">
+				AND `code` = #{code}
+			</if>
+			<if test="type != null ">
+				AND `type` = #{type}
+			</if>
+			<if test="star != null and star != ''">
+				AND `star` = #{star}
+			</if>
+			<choose>  
+             <when test="status != null and status != ''">
+             	AND `status` = #{status}
+             </when> 
+             <otherwise>and `status` = 1</otherwise> 
+            </choose>
+			<if test="vipFlag != null">
+				AND vip_flag = #{vipFlag}
+			</if>
+			<if test="title != null and title != ''">
+				AND title LIKE CONCAT('%' #{title} '%') 
+			</if>
+			<if test="videoCodes != null">
+				AND code in
+				<foreach collection="videoCodes" item="code" index="index" open="(" separator="," close=")">
+				#{code}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="order_by_condition">
+		ORDER BY
+		<choose>
+			<when test="hotVideo != null">
+				click_count DESC
+			</when>
+			<when test="goodVideo != null">
+				favorite_count DESC
+			</when>
+			<otherwise>
+				create_time DESC
+			</otherwise>
+		</choose>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="video">
+		SELECT <include refid="searchColumn" /> FROM video WHERE id = #{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="video">
+		SELECT <include refid="searchColumn" /> 
+		FROM video
+		<include refid="where_condition" />
+		<include refid="order_by_condition" />
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM video
+        <include refid="where_condition" />
+    </select>
+    
+    <update id="updateStatus" parameterType="Video">
+    	UPDATE video SET status = 1 WHERE code = #{code}
+    </update>
+    
+    <update id="updateClickCount" parameterType="Video">
+    	UPDATE video SET click_count = IF(click_count +#{clickCount} >= 0, click_count + #{clickCount}, 0)
+    	WHERE code = #{code}
+    </update>
+    
+     <update id="updateFavoriteCount" parameterType="Video">
+    	UPDATE video SET favorite_count = IF(favorite_count + #{favoriteCount} >= 0, favorite_count +#{favoriteCount}, 0) 
+    	WHERE code = #{code}
+    </update>
+</mapper>

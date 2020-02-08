@@ -1,0 +1,180 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsps/commons/taglibs.jsp" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />	
+		<meta name="renderer" content="webkit" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE;chrome=1" />
+		<meta http-equiv="Pragma" contect="no-cache" />
+		<meta http-equiv="windows-Target" contect="_top" />
+		<meta name="keywords" content="老司機,老司機官网,老司機510,老司機官网510,老司機我要你,老司機我要你官网,老司机吧,老司机在线视频,老司机,老司机510,老司机我要你,老司机精品视频在线" />
+		<meta name="description" content="${video.title }" />
+		<meta name="Robots" contect= "all" />
+		<title>老司機-${video.title }</title>
+    	<link href="${statics }/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    	<link href="${statics }/css/common.css" rel="stylesheet" />
+    	<link href="${statics }/css/main.css" rel="stylesheet" />
+    	<script src="${statics }/plugins/jquery/1.11.1/jquery.min.js"></script>
+
+    	<!--[if lte IE 9]>
+		<script src="${statics}/js/respond.min.js"></script>
+		<script src="${statics}/js/html5shiv.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+    	<%@ include file="/WEB-INF/jsps/commons/header.jsp"%>
+    	
+    	<div class="play-panel">
+    		<div class="container" style="width: 90%;">
+				<div class="play-header">
+					<div class="play-header-left">
+						<div style="height: 100%;">
+							<video id="play-video" width="100%" height="100%" controls="controls" x5-playsinline="" playsinline="" webkit-playsinline="">
+							    <source src="${ctx }/media/loading/${video.code}/" type="video/mp4"></source>
+							    請下載谷歌或火狐瀏覽器
+							</video>
+						</div>
+<!-- 						<div style="position: absolute;"> -->
+<!-- 						<a id="play">播放</a> -->
+<!-- 						<a id="pause">暫停</a> -->
+<!-- 						<a id="go10">快進10秒</a> -->
+<!-- 						<a id="back10">快退10秒</a> -->
+<!-- 						<a id="rate1">播放速度+</a> -->
+<!-- 						<a id="rate0">播放速度-</a> -->
+<!-- 						<a id="volume1">聲音+</a> -->
+<!-- 						<a id="volume0">聲音-</a> -->
+<!-- 						<a id="muted1">靜音</a> -->
+<!-- 						<a id="muted0">解除靜音</a> -->
+<!-- 						<a id="full">全屏</a> -->
+<!-- 						</div> -->
+					</div>
+					<div class="play-header-right">
+						<div style="width: 100%;">
+							<img src="${statics }/images/11.png" alt="广告位"/>
+						</div>
+						<div style="margin-top: 5px;">
+							<img src="${statics }/images/11.png" alt="广告位"/>
+						</div>
+						<div style="margin-top: 5px;">
+							<img src="${statics }/images/11.png" alt="广告位"/>
+						</div>
+					</div>
+				</div>
+    		</div>
+    		
+    		<div class="container" style="width: 90%;">
+    			<div class="play-media-params">
+					<ul>
+	    				<li class="media-name">
+	    					${video.title}
+	    				</li>
+	    				<li>
+	    					<a href="javascript:;" title="播放次數">
+	    						<i class="fa fa-eye"></i>
+	    						<span>${video.clickCount}</span>
+	    					</a>
+	    				</li>
+	    				<li>
+	    					
+	    					<a href="javascript:;" class="favorite <c:if test="${not empty favorite}">active</c:if>" title="收藏次數" data-code="${video.code}">
+	    						<i class="fa fa-heart"></i>
+	    						<span>${video.favoriteCount}</span>
+	    					</a>
+	    				</li>
+	    				<li>
+	    					<a href="javascript:;" title="收藏次數">
+		    					<i class="fa fa-clock-o"></i> 
+		    					<span><fmt:formatNumber value="${video.length / 60}" type="number"/>min</span>
+		    				</a>
+	    				</li>
+	    			</ul>
+				</div>
+			</div>
+			
+			<div class="container" style="width: 90%;">
+				<div class="media-keywords">
+					<div class="keywords-title">
+					<i class="fa fa fa-flag"></i> <strong>推薦關鍵字：</strong>
+					</div>
+					<ul>
+						<c:if test="${not empty media.keyword}">
+							<c:set value="${ fn:split(video.keyword, ',') }" var="kws" />
+	                        <c:forEach items="${kws}" var="kw">
+		                         <li>
+			    					<a href="javascript:;" title="">
+		                        		${kw}
+		                        	</a>
+			    				</li>
+	                        </c:forEach>
+                        </c:if>
+	    			</ul>
+    			</div>
+			</div>
+			
+			
+			<div class="container" style="width: 90%;">
+    			<div class="link-title">
+    				<i class="fa fa-unlink"></i><span class="list-icon-title">相關視頻</span>
+    			</div>
+    			
+    			<div class="link-content">
+    				<ul>
+    					<c:forEach var="media" items="${list}">
+	    					<li>
+		    					<div class="list-media-box">
+				                    <a href="${ctx }/media/play/${media.code }/">
+				                    	<img class="lazy" src="${statics}/images/default-video.jpg" data-original="${videoStatics}${media.imagePath}" width="204px" height="153px" alt="${media.title}"/>
+				                    </a>
+				                    <div class="cover-info" style="padding: 1px 5px 11px;">
+				                        <a href="${ctx }/media/play/${media.code }/"><h4><se:subStringTag input="${media.title}" replace="***" size="25" /></h4></a>
+				                    </div>  
+				                    <div class="cover-stat">
+				                        <i class="fa fa-eye"></i><span class="f10"> &nbsp;${media.clickCount}</span>
+				                        <i class="fa fa-heart"></i><span class="f10"> &nbsp;${media.favoriteCount}</span>
+				                    </div>
+				                </div>
+	    					</li>
+    					</c:forEach>
+    				</ul>
+					
+    			</div>
+    			
+    		</div>
+			
+    	</div>
+    	
+		<%@ include file="/WEB-INF/jsps/commons/footer.jsp"%>
+		<script src="${statics }/js/html5media.min.js"></script>
+		<script src="${statics }/plugins/bootstrap/js/bootstrap.min.js"></script>
+		<script src="${statics }/plugins/jquery.lazyload/1.9.7/jquery.lazyload.min.js"></script>
+    	<script>
+	    	$(function(){   
+	    		$("img.lazy").lazyload();
+	    		
+	    		$(".favorite").click(function(){
+	    			var $this = $(this);
+	    			
+	    			if($this.hasClass("active")) {
+						var url = "${ctx}/media/favorite";
+						var data = {"code": $(this).data("code"), "flag": 2};
+						$.getJSON(url, data, function(json){
+							var count = parseInt($this.find("span").text()) - 1;
+							$this.find("span").text(count);
+							$this.removeClass("active");
+						});
+	    			} else {
+	    				var url = "${ctx}/media/favorite";
+						var data = {"code": $(this).data("code"), "flag": 1};
+						$.getJSON(url, data, function(json){
+							var count = parseInt($this.find("span").text()) + 1;
+							$this.find("span").text(count);
+							$this.addClass("active");
+						});
+	    			}
+	    		});
+	    	});
+	    </script>
+	</body>
+</html>

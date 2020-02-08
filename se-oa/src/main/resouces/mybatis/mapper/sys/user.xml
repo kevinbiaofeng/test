@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="User">
+	<sql id="searchColumn">
+		u.ID, u.USER_NAME, u.LOGIN_NAME, u.PWD, u.STATUS, u.CREATE_USER, u.CREATE_TIME, u.UPDATE_TIME, 
+		u.UPDATE_USER, u.LOGIN_TIME, u.TYPE, r.DEPT_ID, u.PARENT_ID,u.AGENT_ID
+	</sql>
+	
+	<resultMap type="User" id="user" extends="base.baseAttr">
+	   <result property="userName" column="USER_NAME"></result>
+	   <result property="loginName" column="LOGIN_NAME"></result>
+	   <result property="pwd" column="PWD"></result>
+	   <result property="deptId" column="DEPT_ID"></result>
+	   <result property="loginTime" column="LOGIN_TIME"></result>
+	   <result property="type" column="TYPE"></result>
+	   <result property="parentId" column="PARENT_ID"></result>
+	   <result property="agentId" column="AGENT_ID"></result>
+	</resultMap>
+	
+	<update id="delete" parameterType="map">
+		UPDATE pub_user
+		<set>
+			update_time = #{updateTime}, 
+			update_user = #{updateUser},
+			<if test="status != null">
+				status = #{status},
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+
+	<update id="update" parameterType="map">
+		UPDATE pub_user
+		<set>
+			update_time = #{updateTime}
+			<if test="updateUser != null">
+				,update_user = #{updateUser}
+			</if>
+			<if test="loginTime != null">
+				,login_time = #{loginTime}
+			</if>
+			<if test="userName != null and userName != ''">
+				,user_name = #{userName}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				,parent_id = #{parentId}
+			</if>
+			<if test="status != null">
+				,status = #{status}
+			</if>
+			<if test="pwd != null and pwd != ''">
+				,pwd = #{pwd}
+			</if>
+			<if test="agentId != null">
+				,agent_id = #{agentId}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO pub_user
+         (user_name, login_name, pwd, status, create_user, create_time, update_user, update_time, type, parent_id, agent_id) 
+         VALUES 
+         (#{userName}, #{loginName}, #{pwd}, #{status}, #{createUser}, #{createTime}, #{updateUser}, #{updateTime}, #{type},  #{parentId}, #{agentId})
+    </insert>
+
+	<select id="selectById" parameterType="long" resultMap="user">
+		SELECT <include refid="searchColumn" /> FROM pub_user u LEFT JOIN pub_user_dept_rel r on u.id = r.user_id WHERE u.id=#{id}
+	</select>
+	
+    
+	<select id="selectAll" parameterType="map" resultMap="user">
+		select <include refid="searchColumn" /> FROM pub_user u 
+ 			LEFT JOIN pub_user_dept_rel r on u.id = r.user_id
+ 			<include refid="condition" />
+ 			ORDER BY u.create_time DESC
+ 			<include refid="base.page" />
+	</select>
+	
+    <select id="selectAllCount" resultType="long">
+        SELECT count(u.id) FROM pub_user u 
+ 			LEFT JOIN pub_user_dept_rel r on u.id = r.user_id
+ 			<include refid="condition" />
+ 			<include refid="base.page" />
+    </select>
+    
+	
+	<sql id="condition">
+		<where>
+			AND type != 8
+			<if test="searchStatus != null">
+				AND u.status=#{searchStatus}
+			</if>
+			<if test="statusList != null">
+				AND u.status in
+				<foreach collection="statusList" item="status" index="index" open="(" separator="," close=")">
+				#{status}
+		        </foreach>
+			</if>
+			<if test="id != null and id != ''">
+				AND u.id=#{id, jdbcType=INTEGER}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				AND u.parent_id=#{parentId}
+			</if>
+			<if test="loginName != null">
+				AND u.login_name=#{loginName}
+			</if>
+			<if test="createUser != null and createUser != ''">
+				AND u.create_user=#{createUser}
+			</if>
+			<if test="type != null and type != ''">
+				AND u.type=#{type}
+			</if>
+			<if test="typeList != null">
+				AND u.type IN
+				<foreach collection="typeList" item="s" index="index" open="(" separator="," close=")">
+				#{s, jdbcType=NUMERIC}
+		        </foreach>
+			</if>
+			<if test="pwd != null">
+				AND u.pwd=#{pwd}
+			</if>
+			<if test="deptId != null and deptId != ''">
+				AND r.dept_id=${deptId}
+			</if>
+			<if test="ids != null">
+				AND u.id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id, jdbcType=VARCHAR}
+		        </foreach>
+			</if>
+			<if test="keywords != null">
+				AND (
+				u.user_name like '%' #{keywords} '%'
+				or u.login_name like '%'  #{keywords} '%'
+				)
+			</if>
+		</where>
+	</sql>
+	
+	<select id="getUserListByUserId" parameterType="map" resultMap="user">
+		select <include refid="searchColumn" /> FROM pub_user u 
+		   LEFT JOIN pub_user_dept_rel r on u.id = r.user_id
+ 		<where>
+			u.type = 8 and u.status = 1
+			<if test="ids != null">
+				AND u.id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id, jdbcType=VARCHAR}
+		        </foreach>
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectByLoginName" parameterType="String" resultMap="user">
+		SELECT <include refid="searchColumn" /> FROM pub_user u 
+		LEFT JOIN pub_user_dept_rel r on u.id = r.user_id 
+		WHERE u.type = 8 and u.status = 1 and u.login_name=#{loginName}
+	</select>
+	
+</mapper>

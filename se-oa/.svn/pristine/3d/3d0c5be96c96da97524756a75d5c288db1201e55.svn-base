@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Video">
+	<resultMap type="Video" id="video" extends="base.baseAttr">
+		<result property="code" 			column="code"/>
+	 	<result property="originalName" 	column="original_name"/>
+		<result property="imagePath" 		column="image_path"/>
+		<result property="path" 			column="path"/>
+		<result property="extension" 		column="extension"/>
+		<result property="size" 			column="size"/>
+		<result property="length" 			column="length"/>
+		
+		<result property="title" 			column="title"/>
+		<result property="type" 			column="type"/>
+		<result property="star" 			column="star"/>
+		<result property="keyword" 			column="keyword"/>
+		<result property="favoriteCount" 	column="favorite_count"/>
+		<result property="clickCount" 		column="click_count"/>
+		<result property="vipFlag" 			column="vip_flag"/>
+		<result property="status" 			column="status"/>
+	
+	</resultMap>
+
+	<sql id="searchColumn">
+		id, code, original_name, image_path, path, extension, size, length, title, type, 
+		star, keyword, favorite_count, click_count, vip_flag, status, create_time
+	</sql>
+	
+	<sql id="where_condition">
+		<where>
+			<if test="code != null and code != ''">
+				AND `code` = #{code}
+			</if>
+			<if test="type != null ">
+				AND `type` = #{type}
+			</if>
+			<if test="star != null and star != ''">
+				AND `star` = #{star}
+			</if>
+			<if test="vipFlag != null ">
+				AND vip_flag = #{vipFlag}
+			</if>
+			<if test="status != null ">
+				AND `status` = #{status}
+			</if>
+		</where>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="video">
+		SELECT <include refid="searchColumn" /> FROM video WHERE id = #{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="video">
+		SELECT <include refid="searchColumn" /> 
+		FROM video
+		<include refid="where_condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM video
+        <include refid="where_condition" />
+    </select>
+	
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO video(
+			code, original_name, image_path, path, extension, size, length, title, type, star, 
+			keyword, favorite_count, click_count, vip_flag, status, create_user, create_time
+		) VALUES(
+			#{code}, #{originalName}, #{imagePath}, #{path}, #{extension}, #{size}, #{length}, #{title}, #{type}, 
+			#{star}, #{keyword}, #{favoriteCount}, #{clickCount}, #{vipFlag}, #{status}, #{createUser}, #{createTime}
+		)
+    </insert>
+    <update id="update" parameterType="Video">
+    	UPDATE video
+	    	<set>
+	    		update_time = #{updateTime}, 
+				update_user = #{updateUser},
+	    		<if test="title != null and title != ''">
+	    			title = #{title},
+	    		</if>
+	    		<if test="type != null ">
+	    			type = #{type},
+	    		</if>
+	    		<if test="star != null and star != ''">
+	    			star = #{star},
+	    		</if>
+	    		<if test="keyword != null and keyword != ''">
+	    			keyword = #{keyword},
+	    		</if>
+	    		<if test="favoriteCount != null">
+	    			favorite_count = #{favoriteCount},
+	    		</if>
+	    		<if test="clickCount != null">
+	    			click_count = #{clickCount},
+	    		</if>
+	    		<if test="vipFlag != null">
+	    			vip_flag = #{vipFlag},
+	    		</if>
+	    		<if test="status != null">
+	    			status = #{status},
+	    		</if>
+	    	</set>
+    	WHERE id = #{id}
+    </update>
+</mapper>

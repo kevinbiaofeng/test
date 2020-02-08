@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PayConfig">
+	<resultMap type="PayConfig" id="payConfig" extends="base.baseAttr">
+	   <result property="tradeMode" column="trade_mode"/>
+	</resultMap>
+
+	<sql id="searchColumn">
+		id, trade_mode, status, create_user, create_time, update_user, update_time
+	</sql>
+	
+	<sql id="where_condition">
+		1=1
+		<if test="tradeMode != null">
+			AND `trade_mode` = #{tradeMode}
+		</if>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="payConfig">
+		SELECT <include refid="searchColumn" /> FROM sys_pay_config WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="payConfig">
+		SELECT <include refid="searchColumn" /> 
+		FROM sys_pay_config
+		WHERE <include refid="where_condition" />
+		ORDER BY id desc
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM sys_pay_config
+        WHERE <include refid="where_condition" />
+    </select>
+    
+     <update id="update" parameterType="map">
+		UPDATE sys_pay_config
+		<set>
+			update_user = #{updateUser},
+			update_time = #{updateTime},
+			
+			<if test="tradeMode != null and tradeMode != ''">
+    			trade_mode = #{tradeMode},
+    		</if>
+    	 	<if test="status != null and status != ''">
+    			status = #{status},
+    		</if>
+    	 </set>
+    	 WHERE ID = #{id}
+    </update>
+	
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO sys_pay_config(trade_mode, status, create_user, create_time) 
+		VALUES(#{tradeMode}, #{status}, #{createUser}, #{createTime})
+    </insert>
+    
+    <delete id="deleteOne" parameterType="map">
+		DELETE FROM sys_pay_config where id = #{id}
+	</delete>
+</mapper>

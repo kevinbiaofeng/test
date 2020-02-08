@@ -1,0 +1,62 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.math.BigDecimal;
+//import java.text.DecimalFormat;
+//import java.util.Calendar;
+//import java.util.GregorianCalendar;
+//
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.entity.po.sys.YestdayAmountLog;
+//import com.xjw.service.sys.YestdayAmountLogService;
+//import com.xjw.utility.BizException;
+//import com.xjw.utility.SpringContextHolder;
+//
+//
+//public class YestdayAmountTask extends QuartzJobBean {
+//	private static Logger logger = LoggerFactory.getLogger(YestdayAmountTask.class);
+//
+//	private static DecimalFormat FORMAT = new DecimalFormat("#.00");   
+//	
+//
+//	@Override
+//	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
+//		YestdayAmountLogService yestdayAmountLogService = (YestdayAmountLogService) SpringContextHolder.getBean(YestdayAmountLogService.class);
+//		YestdayAmountLog log = yestdayAmountLogService.selectFirst();
+//
+//		if (null != log) {
+//			Calendar nowTime = Calendar.getInstance();
+//			Calendar statTime = new GregorianCalendar(nowTime.get(Calendar.YEAR), nowTime.get(Calendar.MONTH),
+//					nowTime.get(Calendar.DATE) - 1);
+//			
+//			Integer minAmount = log.getMinAmount();
+//			Integer maxAmount = log.getMaxAmount();
+//			BigDecimal dayAmount = new BigDecimal(FORMAT.format(Math.random() * (maxAmount - minAmount) + minAmount));
+//			
+//			YestdayAmountLog newLog = new YestdayAmountLog();
+//			newLog.setStatTime(statTime.getTime());
+//			newLog.setMinAmount(minAmount);
+//			newLog.setMaxAmount(maxAmount);
+//			newLog.setDayAmount(dayAmount);
+//			try {
+//				yestdayAmountLogService.save(newLog);
+//			} catch (BizException e) {
+//				logger.error(e.getMessage(), e);
+//			}
+//		}
+//	}
+//	
+//	public static void main(String[] args) {
+//		int max = 200;
+//		int min = 100;
+//		
+//		for(int i=0; i<10; i++){
+//			System.out.println(FORMAT.format(Math.random() * (max - min) + min));
+//		}
+//	}
+//}

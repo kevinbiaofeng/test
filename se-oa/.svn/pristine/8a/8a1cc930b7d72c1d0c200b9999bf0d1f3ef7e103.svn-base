@@ -1,0 +1,62 @@
+package com.xjw.service.file.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.file.MaterialDao;
+import com.xjw.entity.Page;
+import com.xjw.entity.po.file.Material;
+import com.xjw.service.file.MaterialService;
+import com.xjw.utility.BizException;
+
+@Service
+public class MaterialServiceImpl extends BaseServiceImpl<Material> implements MaterialService {
+
+	@Resource
+	private MaterialDao materialDao;
+
+	@Override
+	public BaseDaoImpl<Material> baseDao() {
+		return materialDao;
+	}
+
+	@Override
+	public Class<Material> getClazz() {
+		return Material.class;
+	}
+
+	public Material selectByNum(String num) {
+		if(StringUtils.isNotBlank(num)){
+			Map<String, Object> params = new HashMap<>();
+			params.put("num", num);
+			return super.selectOne(params);
+		}
+		
+		return null;
+	}
+	
+	public Page<Material> getPageByVideo(Map<String, Object> params, Integer pageNo, Integer pageSize) throws BizException {
+		Page<Material> page = new Page<Material>();
+		
+		long totalCount = materialDao.selectAllCountByVideo(params);
+		page.setTotalCount(totalCount);
+		
+		if (pageNo != null) {
+			page.setPageNo(pageNo);
+		}
+		if (pageSize != null) {
+			page.setPageSize(pageSize);
+		}
+		params.put("begin", page.getBegin());
+		params.put("pageSize", page.getPageSize());
+		page.setDataList(materialDao.selectAllByVideo(params));
+		return page;
+	}
+}

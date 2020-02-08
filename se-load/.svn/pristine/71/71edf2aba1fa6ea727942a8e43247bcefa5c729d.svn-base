@@ -1,0 +1,187 @@
+package com.xjw.controller.user;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
+import com.xjw.common.util.Constant;
+import com.xjw.common.util.FreeMarkerConstant;
+import com.xjw.controller.BaseController;
+import com.xjw.entity.po.Email;
+import com.xjw.entity.po.sys.EmailSms;
+import com.xjw.entity.po.user.Member;
+import com.xjw.entity.po.user.MemberCheck;
+import com.xjw.entity.po.user.User;
+import com.xjw.entity.vo.user.UserVo;
+import com.xjw.kzenum.sys.EmailSmsType;
+import com.xjw.kzenum.sys.SmsUseStatus;
+import com.xjw.kzenum.sys.YesORNoEnum;
+import com.xjw.service.mail.MailService;
+import com.xjw.service.sys.EmailSmsService;
+import com.xjw.service.user.MemberCheckService;
+import com.xjw.service.user.MemberService;
+import com.xjw.service.user.UserService;
+import com.xjw.util.SessionManager;
+import com.xjw.utility.BizException;
+import com.xjw.utility.EncryptUtil;
+
+@Controller
+@RequestMapping("/member/")
+public class MemberController extends BaseController{
+  private static Logger logger = LoggerFactory.getLogger(MemberController.class);
+  
+  @Autowired
+  private UserService userService;
+  @Autowired
+  private MemberService memberService;
+  @Autowired
+  private MemberCheckService memberCheckService;
+  @Autowired
+  private EmailSmsService emailSmsService;
+  
+  @Autowired
+  private MailService mailService;
+  
+  /**
+   * 获取用户信息
+   */
+  @RequestMapping("/skipAccountInfo")
+  public String skipAccountInfo(Model model){
+	  User user = SessionManager.getUserSession(super.getRequest());
+	  model.addAttribute("sn", "left-ai");
+	  try {
+		  if(user != null){
+			  model.addAttribute("user", user);
+			  
+			  Map<String, Object> condition = new HashMap<String, Object>();
+			  condition.put("userId", user.getId());
+			  Member member = memberService.selectOne(condition);
+			  member = memberService.decodeMember(member);
+			  model.addAttribute("member", member);
+			  
+			  MemberCheck memberCheck = memberCheckService.createAndReturn(user.getId());
+			  model.addAttribute("memberCheck", memberCheck);
+		  }
+	  } catch (Exception e) {
+		  logger.error(e.getMessage(), e);
+	  }
+	  return "/xjw/user/account";
+  }
+  
+  @RequestMapping("/skipUpdatePwd")
+  public String skipUpdatePwd(HttpServletRequest request){
+	  request.setAttribute("safe", "left-up");
+	  return "/xjw/user/update-pwd";
+  }
+  
+  /**
+   * 修改密码
+   */
+  @RequestMapping("/updatePwd")
+  @ResponseBody
+  public String updatePwd(UserVo userVo, HttpServletRequest request, HttpServletResponse response){
+	  User user = SessionManager.getUserSession(request);
+	  try {
+		  String code = userService.updatePwd(user, StringUtils.trim(userVo.getOldPwd()), StringUtils.trim(userVo.getNewPwd()));
+		  if(code.equals("1")){
+			  this.exit(request, response);
+			  return "1";	//修改成功， 不需要明确的错误
+		  }else{
+			  return "0";	//修改失败， 不需要明确的错误
+		  }
+		  
+	  } catch (Exception e) {
+		  logger.error(e.getMessage(), e);
+		  return "0";
+	  }
+  }
+  
+  	
+  	/**
+  	 * 进入校验 邮箱页面
+  	 */
+  	@RequestMapping("/skipCheckEmail")
+	public String skipCheckEmail(Model model){
+  		User user = SessionManager.getUserSession(super.getRequest());
+  		Member member = memberService.decodeMember(memberService.getMemberByUserId(user.getId()));
+  		
+  		model.addAttribute("member", member);
+  		return "xjw/user/checkemail";
+  	}
+
+  	/**
+  	 * 校验邮箱验
+  	 * @param sendCode	验证码
+  	 */
+	@RequestMapping("/checkEmail")
+	@ResponseBody
+	public String checkEmail(@RequestParam("sendCode") String sendCode){
+		User user = SessionManager.getUserSession(super.getRequest());
+		
+		EmailSms emailSms = emailSmsService.queryLatest(user.getId(), Integer.valueOf(EmailSmsType.CHECK_EMAIL.getCode()));
+		
+		Date nowTime = Calendar.getInstance().getTime();
+		
+		if(emailSms == null || nowTime.compareTo(emailSms.getExpireTime()) >= 0){//验证码已过期
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("isSuccess", false);
+			jsonObject.put("code", 200);
+			jsonObject.put("msg", "您输入的验证码有误，请重新输入!");
+			return jsonObject.toString();
+		}else if(!emailSms.getSendCode().equals(sendCode)){	//验证码错误
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("isSuccess", false);
+			jsonObject.put("code", 202);
+			jsonObject.put("msg", "您输入的验证码有误，请重新输入!");
+			return jsonObject.toString();
+		}
+		
+		try {
+			//将验证码标记为已使用
+			EmailSms _es = new EmailSms();
+			_es.setId(emailSms.getId());
+			_es.setUseStatus(Integer.valueOf(YesORNoEnum.YES.getCode()));
+			_es.setUseTime(nowTime);
+			emailSmsService.update(_es);
+			
+			//邮箱验证通过
+			MemberCheck memberCheck = new MemberCheck();
+			memberCheck.setUserId(user.getId());
+			memberCheck.setEmailFlag(Integer.valueOf(YesORNoEnum.YES.getCode()));
+			memberCheck.setEmailTime(nowTime);
+			memberCheck.setUpdateTime(nowTime);
+			memberCheckService.update(memberCheck);
+		} catch (BizException e) {
+			logger.error(e.getMessage(), e);
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("isSuccess", false);
+			jsonObject.put("code", -1);
+			jsonObject.put("msg", "系统繁忙，请您稍后再试!");
+			return jsonObject.toString();
+		}
+		
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("isSuccess", true);
+		jsonObject.put("code", 1);
+		jsonObject.put("msg", "您的邮箱验证成功!");
+		return jsonObject.toString();
+	}
+}

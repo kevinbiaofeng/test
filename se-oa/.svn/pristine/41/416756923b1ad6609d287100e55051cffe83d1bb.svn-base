@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Bunko">
+    <resultMap id="Bunko" type="Bunko" extends="base.baseAttr">
+        <result column="login_name" 	property="loginName" />
+        <result column="new_pt_amount" 	property="newPtAmount" />
+        <result column="new_mg_amount" 	property="newMgAmount" />
+    </resultMap>
+    
+     <sql id="whereCondition">
+    	WHERE
+    		type = 8 
+		  	AND status = 1 
+    		<if test="parentId != null">
+  				AND parent_id = #{parentId}
+          	</if>
+          	<if test="loginName != null and loginName != ''">
+				AND login_name = #{loginName}
+          	</if>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER u
+        <include refid="whereCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="Bunko">
+		SELECT u.id, u.login_name,
+			(
+				SELECT IFNULL(SUM(bet_amount) - SUM(net_amount),0) 
+				FROM new_pt_game_data d
+				WHERE d.user_id = u.id 
+					<if test="beginLocalTime != null and beginLocalTime != ''">
+	               	 	AND d.LOCAL_TIME >= #{beginLocalTime}
+	            	</if>
+	            	<if test="endLocalTime != null and endLocalTime != ''">
+	               	 	AND d.LOCAL_TIME <![CDATA[<=]]> #{endLocalTime}
+	            	</if>
+			) new_pt_amount,
+			(
+				SELECT (IFNULL(SUM(net_amount),0)-IFNULL(SUM(bet_amount),0)) 
+				FROM new_mg_game_data d
+				WHERE d.user_id = u.id and d.slot_type = 'WAGER'
+					<if test="beginLocalTime != null and beginLocalTime != ''">
+	               	 	AND d.LOCAL_TIME >= #{beginLocalTime}
+	            	</if>
+	            	<if test="endLocalTime != null and endLocalTime != ''">
+	               	 	AND d.LOCAL_TIME <![CDATA[<=]]> #{endLocalTime}
+	            	</if>
+			) new_mg_amount
+			FROM 
+			( 
+				SELECT id, login_name 
+			   	FROM pub_user 
+			  	<include refid="whereCondition"/>
+				ORDER BY id DESC 
+				<include refid="base.page" />
+			) u
+    </select>
+    
+    
+    <!-- 查询输赢额度 -->
+    <sql id="sum_where_condition">
+    	1 = 1
+    	AND d.flag = 1 
+    	<if test="parentId != null">
+    		AND u.parent_id = #{parentId}
+    	</if>
+    	<if test="beginLocalTime != null">
+			AND d.LOCAL_TIME >= #{beginLocalTime}
+		</if>
+		<if test="endLocalTime != null">
+			AND d.LOCAL_TIME <![CDATA[<=]]> #{endLocalTime}
+		</if>
+    </sql>
+    
+     <!-- 查询AG国际的输赢额度总额 -->
+    <select id="selectSumNetAmountByAggj" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.platform_type='AGIN'
+			AND <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询AG急速的输赢额度总额 -->
+    <select id="selectSumNetAmountByAgjs" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.platform_type='AG'
+			AND <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询PT的输赢额度总额 -->
+    <select id="selectSumNetAmountByPt" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM pt_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询MG的输赢额度总额 -->
+    <select id="selectSumNetAmountByMg" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM mg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询XIN的输赢额度总额 -->
+    <select id="selectSumNetAmountByXin" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM xin_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询Fish的输赢额度总额 -->
+    <select id="selectSumNetAmountByFish" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.earn), 0) 
+    	FROM fish_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询sb的输赢额度总额 -->
+    <select id="selectSumNetAmountBySb" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM sb_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询qp的输赢额度总额 -->
+    <select id="selectSumNetAmountByQp" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM qp_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询ttg的输赢额度总额 -->
+    <select id="selectSumNetAmountByTtg" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM ttg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询endo的输赢额度总额 -->
+    <select id="selectSumNetAmountByEndo" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.net_amount), 0) 
+    	FROM endo_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+</mapper>

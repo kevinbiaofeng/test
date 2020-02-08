@@ -1,0 +1,47 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+
+<!-- footer start -->
+<div class="footer">
+<div class="bd">
+	<ul>
+		<li>
+			<a href="javascript:;">
+				官網首頁
+			</a>
+		</li>
+		<li>
+			<a href="javascript:;">
+				廣告投放
+			</a> 
+		</li>
+	</ul>
+	
+</div>
+<div class="item">
+	<div class="inf col">
+		聯繫郵箱： laoshiji510@gmail.com
+	</div>
+	<div class="inf col">
+		未經授權禁止複製或建立鏡像
+	</div>
+	<div class="inf col">
+		請保證您已年滿18周歲
+	</div>
+	<div class="inf col">
+		版權所有-老司機 Copyright©2013-2020 All Rights Reserved 
+	</div>
+</div>
+</div>
+<!-- footer end -->
+
+<script type="text/javascript">
+$(function(){
+});
+</script>
+
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1273058595'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s13.cnzz.com/z_stat.php%3Fid%3D1273058595' type='text/javascript'%3E%3C/script%3E"));</script>
+<style>
+#cnzz_stat_icon_1273058595{
+display: none;
+}
+</style>

@@ -1,0 +1,23 @@
+package com.xjw.service.rake;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.rake.RakeStat;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+import com.xjw.utility.BizException;
+
+public interface RakeStatService extends BaseServcie<RakeStat> {
+
+	/**
+	 * 返水统计
+	 * @param rakeType	返水类型 {@link RakeTypeEnum}
+	 * @param statDate	统计日期  yyyyMMdd
+	 */
+	public void saveBySum(String rakeType, String statDate) throws BizException;
+	
+	/**
+	 * 返水发放
+	 * @param rakeType	返水类型 {@link RakeTypeEnum}
+	 * @param statDate	统计日期  yyyyMMdd
+	 */
+	public void updateBySend(String rakeType, String statDate) throws BizException;
+}

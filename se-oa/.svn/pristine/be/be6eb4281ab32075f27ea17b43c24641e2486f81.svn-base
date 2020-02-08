@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Material">
+	<resultMap type="Material" id="material" extends="base.baseAttr">
+		<result property="num" 				column="num"/>
+	 	<result property="originalName" 	column="original_name"/>
+		<result property="name" 			column="name"/>
+		<result property="path" 			column="path"/>
+		<result property="extension" 		column="extension"/>
+		
+		<association property="video" javaType="Video">
+			<id 	property="id" 			column="v_id"/>
+			<result property="materialNum"  column="v_material_num"/>
+	 		<result property="title" 		column="v_title"/>
+			<result property="type" 		column="v_type"/>
+			<result property="keyword" 		column="v_keyword"/>
+		</association>
+	</resultMap>
+	
+	<sql id="searchColumn">
+		id, num, original_name, name, path, extension, create_user, create_time
+	</sql>
+	
+	<sql id="where_condition">
+		<where>
+			<if test="num != null and num != ''">
+				AND num = #{num}
+			</if>
+		</where>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="material">
+		SELECT <include refid="searchColumn" /> FROM material WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="material">
+		SELECT <include refid="searchColumn" /> 
+		FROM material
+		<include refid="where_condition" />
+		ORDER BY id desc
+		<include refid="base.page" />
+	</select>
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM material
+        <include refid="where_condition" />
+    </select>
+	
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO material(num, original_name, name, path, extension, create_user, create_time) 
+		VALUES(#{num}, #{originalName}, #{name}, #{path}, #{extension}, #{createUser}, #{createTime})
+    </insert>
+
+<!-- 素材-视频联查 --> 
+	<sql id="material_video_Column">
+		m.id, m.num, m.original_name, m.name, m.path, m.extension, m.create_user, m.create_time,
+		v.material_num AS v_material_num, v.title AS v_title, v.type AS v_type, v.keyword AS v_keyword
+	</sql>
+	<sql id="material_video_where_condition">
+		<where>
+			<if test="num != null and num != ''">
+				AND m.num = #{num}
+			</if>
+			<if test="type != null and type != ''">
+				AND v.type = #{type}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectAllByVideo" parameterType="map" resultMap="material">
+		SELECT <include refid="material_video_Column" /> 
+		FROM material m
+		LEFT JOIN video v
+			ON m.num = v.material_num
+		<include refid="material_video_where_condition" />
+		ORDER BY m.id desc
+		<include refid="base.page" />
+	</select>
+	<select id="selectAllCountByVideo" parameterType="map" resultType="long">
+		SELECT count(1)
+		FROM material m
+		LEFT JOIN video v
+			ON m.num = v.material_num
+		<include refid="material_video_where_condition" />
+	</select>
+ 	
+</mapper>

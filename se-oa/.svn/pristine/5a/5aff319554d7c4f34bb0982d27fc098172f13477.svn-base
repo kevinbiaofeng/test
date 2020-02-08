@@ -1,0 +1,50 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.util.Calendar;
+//import java.util.GregorianCalendar;
+//
+//import org.apache.commons.lang3.time.DateFormatUtils;
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.service.data.ProxySummaryDayService;
+//import com.xjw.utility.BizException;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class ProxySummaryDayTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(ProxySummaryDayTask.class);
+//	
+//	private ProxySummaryDayService proxySummaryDayService;
+//	
+//	public ProxySummaryDayTask(){
+//		proxySummaryDayService = (ProxySummaryDayService) SpringContextHolder.getBean(ProxySummaryDayService.class);
+//	}
+//	
+//	@Override
+//	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
+//		Calendar dayTime = Calendar.getInstance();
+//		dayTime.add(Calendar.DATE, -1);
+//
+//		try {
+//			proxySummaryDayService.save(dayTime.getTime());
+//			
+////			Calendar startTime = new GregorianCalendar(2017, 0, 1);
+////			while(startTime.compareTo(dayTime) <= 0){
+////				proxySummaryDayService.save(startTime.getTime());
+////				startTime.add(Calendar.DATE, 1);
+////			}
+//		} catch (BizException e) {
+//			logger.error(e.getMessage(), e);
+//		}
+//	}
+//	
+//	public static void main(String[] args) {
+//		Calendar time = new GregorianCalendar(2017, 0, 1);
+//		
+//		System.out.println(DateFormatUtils.format(time, "yyyy-MM-dd HH:mm:ss"));
+//	}
+//}

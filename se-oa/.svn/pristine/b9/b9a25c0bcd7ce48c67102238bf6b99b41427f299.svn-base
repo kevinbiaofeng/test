@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RakeStat">
+	<resultMap type="RakeStat" id="rakeStat" extends="base.baseAttr">
+       	<id column="id" 				property="id" />
+       	<result column="rake_type" 		property="rakeType" />
+       	<result column="vip_type" 		property="vipType" />
+       	<result column="user_id" 		property="userId" />
+       	<result column="login_Name" 	property="loginName" />
+       	<result column="player_name" 	property="playerName" />
+       	<result column="bet_amount" 	property="betAmount" />
+       	<result column="rake_amount" 	property="rakeAmount" />
+       	<result column="rake_time" 		property="rakeTime" />
+       	<result column="status" 		property="status" />
+       	<result column="stat_date" 		property="statDate" />
+       	<result column="create_time" 	property="createTime" />
+	</resultMap>
+	
+	<resultMap type="com.xjw.entity.vo.rake.PlayerStatVo" id="playerStatVo">
+		<result column="user_id" property="userId" />
+		<result column="player_name" property="playerName" />
+		<result column="bet_amount" property="betAmount" />
+	</resultMap>
+	
+	<sql id="searchColumn">
+		id, rake_type, vip_type, user_id, login_name, player_name, bet_amount, rake_amount, rake_time, status, stat_date, create_time
+	</sql>
+	<sql id="searchCondition">
+		<where>
+			<if test="rakeType != null">
+				AND rake_type = #{rakeType}
+			</if>
+			<if test="vipType != null">
+				AND vip_type = #{vipType}
+			</if>
+			<if test="userId != null">
+				AND user_id = #{userId}
+			</if>
+			<if test="loginName != null and loginName != ''">
+				AND login_name = #{loginName}
+			</if>
+			<if test="statDate != null and statDate != ''">
+				AND stat_date = #{statDate}
+			</if>
+			<if test="status != null">
+				AND status = #{status}
+			</if>
+		</where>
+	</sql>
+	
+	 <select id="selectById" parameterType="long" resultMap="rakeStat">
+        SELECT <include refid="searchColumn"/> FROM rake_stat WHERE id = #{id}
+    </select>
+	
+	<select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT COUNT(*) FROM rake_stat <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="rakeStat">
+        SELECT <include refid="searchColumn"/> FROM rake_stat
+        <include refid="searchCondition"/>
+        ORDER BY id DESC
+       	<include refid="base.page" />
+    </select>
+
+	<insert id="save" parameterType="map">
+        INSERT INTO rake_stat(rake_type, vip_type, user_id, login_name, player_name, bet_amount, rake_amount, rake_time, status, stat_date, create_time) 
+        VALUES (#{rakeType}, #{vipType}, #{userId}, #{loginName}, #{playerName}, #{betAmount}, #{rakeAmount}, #{rakeTime}, #{status}, #{statDate}, #{createTime})
+	</insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE rake_stat 
+		<set>
+			update_user = #{updateUser}, update_time = #{updateTime},
+			<if test="vipType != null">
+				vip_type = #{vipType},
+			</if>
+			<if test="betAmount != null">
+				bet_amount = #{betAmount},
+			</if>
+		</set>
+        WHERE id = #{id}
+	</update>
+	
+	<update id="updateBySend" parameterType="map">
+		UPDATE rake_stat 
+		SET rake_time = #{rakeTime}, rake_amount = #{rakeAmount}, status = #{status}
+        WHERE id = #{id}
+	</update>
+	
+	<!-- 统计PT真人消费金额 -->
+	<select id="statPtLive" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM pt_play_game_data 
+		WHERE game_category = 1
+			AND <![CDATA[ net_amount <> 0 ]]>
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+	  	GROUP BY player_name
+	</select>
+	
+	<!-- 统计PT老虎机消费金额 -->
+	<select id="statPtSlot" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM pt_play_game_data 
+		WHERE game_category = 2
+			AND rake_status = 1 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+	  	GROUP BY player_name	
+	</select>
+	
+	<!-- 统计MG真人消费金额 -->
+	<select id="statMgLive" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM mg_play_game_data 
+		WHERE game_category = 1
+			AND <![CDATA[ net_amount <> 0 ]]>
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+	  	GROUP BY player_name
+	</select>
+	
+	<!-- 统计MG老虎机消费金额 -->
+	<select id="statMgSlot" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM mg_play_game_data 
+		WHERE game_category = 2
+			AND rake_status = 1 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+	  	GROUP BY player_name
+	</select>
+	
+	<!-- 统计AG国际厅消费金额 -->
+	<select id="statAgGj" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM ag_play_game_data 
+		WHERE platform_type = 'AGIN' 
+			AND flag = 1 
+			AND valid_bet_amount > 0 
+			AND bet_time >= #{beginTime} 
+			AND <![CDATA[bet_time <= #{endTime}]]>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计AG急速厅消费金额 -->
+	<select id="statAgJs" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM ag_play_game_data 
+		WHERE platform_type = 'AG' 
+			AND flag = 1 
+			AND valid_bet_amount > 0 
+			AND bet_time >= #{beginTime} 
+			AND <![CDATA[bet_time <= #{endTime}]]>
+		GROUP BY player_name	
+	</select>
+	
+	<!-- 统计AG老虎机消费金额 -->
+	<select id="statAgSlot" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM xin_play_game_data 
+		WHERE rake_status = 1 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计AG捕鱼王II消费金额 -->
+	<select id="statAgByw" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(cost) AS bet_amount
+		FROM fish_play_game_data  
+		WHERE flag = 0 
+			AND type = 1
+			AND cost > 0 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[local_time <= #{endTime}]]>
+		GROUP BY player_name	
+	</select>
+	
+	<!-- 统计沙巴体育消费金额 -->
+	<select id="statSb" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(bet_amount) AS bet_amount
+		FROM sb_play_game_data 
+		WHERE rake_status = 1  
+			AND FLAG = 1 
+			AND recalcu_time >= #{beginTime} 
+			AND <![CDATA[recalcu_time <= #{endTime}]]>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计TTG老虎机消费金额 -->
+	<select id="statTtgSlot" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM ttg_play_game_data 
+		WHERE rake_status = 1 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计ENDO老虎机消费金额 -->
+	<select id="statEndoSlot" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM endo_play_game_data 
+		WHERE rake_status = 1 
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+		GROUP BY player_name
+	</select>
+	
+	
+	<!-- 统计PT老虎机消费金额 - 用户在活动时间段内 -->
+	<select id="statPtSlotByActUser" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM pt_play_game_data 
+		WHERE game_category = 2
+			AND rake_status = 1 
+			AND user_id = #{userId}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND <foreach collection="rangeTimeList" item="rangeTime" open="(" separator="or" close=")">
+				local_time BETWEEN #{rangeTime.startTime} AND #{rangeTime.endTime}
+	        </foreach>
+	  	GROUP BY player_name 
+	</select>
+	
+	<!-- 统计MG老虎机消费金额 - 用户在活动时间段内 -->
+	<select id="statMgSlotByActUser" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM mg_play_game_data 
+		WHERE game_category = 2
+			AND rake_status = 1 
+			AND user_id = #{userId}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND <foreach collection="rangeTimeList" item="rangeTime" open="(" separator="or" close=")">
+				local_time BETWEEN #{rangeTime.startTime} AND #{rangeTime.endTime}
+	        </foreach>
+		 GROUP BY player_name
+	</select>
+	
+	<!-- 统计AG老虎机消费金额 - 用户在活动时间段内 -->
+	<select id="statAgSlotByActUser" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM xin_play_game_data 
+		WHERE rake_status = 1 
+			AND user_id = #{userId}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND <foreach collection="rangeTimeList" item="rangeTime" open="(" separator="or" close=")">
+			local_time BETWEEN #{rangeTime.startTime} AND #{rangeTime.endTime}
+        </foreach>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计TTG老虎机消费金额 - 用户在活动时间段内 -->
+	<select id="statTtgSlotByActUser" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM ttg_play_game_data 
+		WHERE rake_status = 1 
+			AND user_id = #{userId}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND <foreach collection="rangeTimeList" item="rangeTime" open="(" separator="or" close=")">
+			local_time BETWEEN #{rangeTime.startTime} AND #{rangeTime.endTime}
+        </foreach>
+		GROUP BY player_name
+	</select>
+	
+	<!-- 统计ENDO老虎机消费金额 - 用户在活动时间段内 -->
+	<select id="statEndoSlotByActUser" parameterType="map" resultMap="playerStatVo">
+		SELECT user_id, player_name, SUM(valid_bet_amount) AS bet_amount
+		FROM endo_play_game_data 
+		WHERE rake_status = 1 
+			AND user_id = #{userId}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND <foreach collection="rangeTimeList" item="rangeTime" open="(" separator="or" close=")">
+			local_time BETWEEN #{rangeTime.startTime} AND #{rangeTime.endTime}
+        </foreach>
+		GROUP BY player_name
+	</select>
+</mapper>

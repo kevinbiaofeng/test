@@ -1,0 +1,10 @@
+package com.xjw.kzenum.file;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class VideoTypeEnum extends AbstractEnum {
+	 public static final EnumBean A = new EnumBean("1", "A");
+	 public static final EnumBean B = new EnumBean("2", "B");
+	 public static final EnumBean C = new EnumBean("3", "C");
+	 public static final EnumBean D = new EnumBean("4", "D");
+}

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PlayerCount">
+	<resultMap id="PlayerCount" type="PlayerCount" extends="base.baseAttr">
+		<result column="user_id" property="userId" />
+		<result column="login_name" property="loginName" />
+		<result column="deposit_amount" property="depositAmount" />
+		<result column="withdraw_amount" property="withdrawAmount" />
+		<result column="member_money" property="memberMoney"/>
+	</resultMap>
+    
+    <sql id="search_condition">
+    	<where>
+			AND u.type=8 and u.status = 1
+			<if test="loginName != null">
+				AND u.login_name = #{loginName}
+			</if>
+			<if test=" userIds != null ">
+				AND u.id IN 
+				<foreach collection="userIds" item="_userId" open="(" separator="," close=")">
+					#{_userId}
+			    </foreach>
+			</if>
+		</where>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER u
+        <include refid="search_condition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="PlayerCount">
+		SELECT 
+			u.id AS user_id, 
+			u.login_name, 
+			(
+				SELECT COALESCE(SUM(trade_amount), 0) 
+				FROM user_deposit_order 
+				WHERE status = 2 AND user_id = u.id
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS deposit_amount, 
+			(
+				SELECT COALESCE(SUM(trade_amount), 0) 
+				FROM user_withdrawal_order 
+				WHERE status = 2 AND user_id = u.id
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS withdraw_amount,
+			(
+				SELECT sum(t.money) FROM MEMBER_MONEY_CHANGE t 
+ 				WHERE u.id = t.user_id 
+ 				<if test="beginTime != null and beginTime != ''">
+					AND create_time >= #{beginTime}
+				</if>
+				<if test="endTime != null and endTime != ''">
+					AND create_time <![CDATA[<=]]> #{endTime}
+				</if>
+			) AS member_money
+		FROM pub_user u 
+ 		<include refid="search_condition" />
+ 		ORDER BY u.id DESC
+ 		<include refid="base.page" />
+    </select>
+    
+
+    <sql id="sum_where_condition">
+    	1 = 1
+    	AND u.type=8 
+    	<if test="beginTime != null and beginTime != ''">
+			AND d.local_time >= #{beginTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND d.local_time <![CDATA[<=]]> #{endTime}
+		</if>
+    </sql> 
+    
+    <!-- 查询AG国际的投注额 -->
+    <select id="selectUserIdByAggj" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.platform_type='AGIN'
+		  AND d.valid_bet_amount > 0.01
+		  AND <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询AG急速的投注额 -->
+    <select id="selectUserIdByAgjs" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.platform_type='AG'
+		  AND d.valid_bet_amount > 0.01
+		  AND <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询PT的投注额 -->
+    <select id="selectUserIdByPt" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id 
+    	FROM pt_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询MG的投注额 -->
+    <select id="selectUserIdByMg" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id 
+    	FROM mg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询XIN的投注额 -->
+    <select id="selectUserIdByXin" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id
+    	FROM xin_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询Fish的投注额 -->
+    <select id="selectUserIdByFish" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id
+    	FROM fish_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.cost > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询sb的投注额 -->
+    <select id="selectUserIdBySb" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id
+    	FROM sb_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询qp的投注额 -->
+    <select id="selectUserIdByQp" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id
+    	FROM qp_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询ttg的投注额 -->
+    <select id="selectUserIdByTtg" parameterType="map" resultType="long">
+    	SELECT  DISTINCT d.user_id
+    	FROM ttg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询endo的投注额 -->
+    <select id="selectUserIdByEndo" parameterType="map" resultType="long">
+    	SELECT DISTINCT d.user_id
+    	FROM endo_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.valid_bet_amount > 0.01
+		  and <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询NewPt -->
+     <select id="selectUserIdByNewPt" parameterType="map" resultType="long">
+     	SELECT DISTINCT d.user_id
+		  FROM new_pt_game_data d
+		 WHERE d.bet_amount >= 0.01 
+		  <if test="beginTime != null">
+               AND d.bet_time >= #{beginTime}
+           </if>
+           <if test="endTime != null">
+               AND d.bet_time <![CDATA[<=]]> #{endTime}
+           </if>
+    </select>
+    
+     <!-- 查询NewMg -->
+     <select id="selectUserIdByNewMg" parameterType="map" resultType="long">
+     	SELECT DISTINCT d.user_id
+		  FROM new_mg_game_data d
+		 WHERE d.bet_amount >=0.01
+		 	<if test="beginTime != null">
+               AND d.bet_time >= #{beginTime}
+           </if>
+           <if test="endTime != null">
+               AND d.bet_time <![CDATA[<=]]> #{endTime}
+           </if>
+    </select>
+    
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Favorite">
+	<resultMap type="Favorite" id="favorite" extends="base.baseAttr">
+		<result property="userId" 			column="user_id"/>
+		<result property="videoCode" 		column="video_code"/>
+	</resultMap>
+
+	<sql id="searchColumn">
+		id, user_id, video_code
+	</sql>
+	
+	<sql id="where_condition">
+		<where>
+			<if test="userId != null">
+				AND user_id = #{userId}
+			</if>
+			<if test="videoCode != null and videoCode != ''">
+				AND video_code = #{videoCode}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectAll" parameterType="map" resultMap="favorite">
+		SELECT <include refid="searchColumn" /> 
+		FROM favorite
+		<include refid="where_condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(1) FROM favorite
+        <include refid="where_condition" />
+    </select>
+    
+    <insert id="save" parameterType="favorite">
+    	INSERT INTO favorite(user_id, video_code, create_time) 
+    	VALUES(#{userId}, #{videoCode}, #{createTime})
+    </insert>
+    
+    <delete id="deleteOne" parameterType="map">
+    	DELETE FROM favorite WHERE user_id = #{userId} AND video_code = #{videoCode}
+    </delete>
+</mapper>

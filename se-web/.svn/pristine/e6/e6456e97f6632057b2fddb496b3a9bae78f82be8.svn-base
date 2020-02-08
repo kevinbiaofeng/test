@@ -1,0 +1,206 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsps/commons/taglibs.jsp" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />	
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<meta http-equiv="windows-Target" contect="_top" />
+		<title>老司机510-${video.title }</title>
+    	<meta name="keywords" content="老司机,老司机510,老司机2018,老司机小电影,老司机精品,老司机网,老司机福利,老司机电影网,老司机什么意思" />
+    	<meta name="description" content="老司机510是汇集全球视频，及时收录各国视频内容的一家永久免费在线看片平台。看片，从老司机510平台开始。" />
+    	<link href="${statics }/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    	<link href="${statics }/css/common.css" rel="stylesheet" />
+    	<link href="${statics }/css/main.css" rel="stylesheet" />
+    	<link rel="shortcut icon" href="${statics }/images/favicon.ico" type="image/x-icon" />
+    	<script src="${statics }/plugins/jquery/1.11.1/jquery.min.js"></script>
+
+    	<!--[if lte IE 9]>
+		<script src="${statics}/js/respond.min.js"></script>
+		<script src="${statics}/js/html5shiv.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+    	<%@ include file="/WEB-INF/jsps/commons/header.jsp"%>
+    	
+    	<div class="play-panel">
+    		<div class="container" style="width: 90%;">
+				<div class="play-header">
+					<div class="play-header-left">
+						<c:if test="${not empty memberUser }">
+							<c:if test="${IntegralCode eq '100'}">
+								<div style="height: 100%;">
+									<video id="se-video" width="100%" height="100%" controls="controls" x5-playsinline="" playsinline="" webkit-playsinline="">
+									    <source src="${videoUrl}" type="video/mp4"></source>
+									    請下載谷歌或火狐瀏覽器
+									</video>
+								</div>
+							</c:if>
+							<c:if test="${IntegralCode eq '303'}">
+								<div class="msg">
+									积分不足，观看VIP视频需要扣除1点积分，积分可通过会员<a href="${ctx }/member/skipSign" class="msg-a">签到获得</a>！
+								</div>
+							</c:if>
+						</c:if>
+						<c:if test="${empty memberUser }">
+							<div class="msg">
+								本站视频全部免费，播放视频请登陆!
+							</div>
+						</c:if>
+<!-- 						<div style="position: absolute;"> -->
+<!-- 						<a id="play">播放</a> -->
+<!-- 						<a id="pause">暫停</a> -->
+<!-- 						<a id="go10">快進10秒</a> -->
+<!-- 						<a id="back10">快退10秒</a> -->
+<!-- 						<a id="rate1">播放速度+</a> -->
+<!-- 						<a id="rate0">播放速度-</a> -->
+<!-- 						<a id="volume1">聲音+</a> -->
+<!-- 						<a id="volume0">聲音-</a> -->
+<!-- 						<a id="muted1">靜音</a> -->
+<!-- 						<a id="muted0">解除靜音</a> -->
+<!-- 						<a id="full">全屏</a> -->
+<!-- 						</div> -->
+					</div>
+					<div class="play-header-right">
+						<div style="width: 100%;">
+							<img src="${statics}/images/default-video.jpg" alt="广告位"/>
+						</div>
+						<div style="margin-top: 5px;">
+							<img src="${statics}/images/default-video.jpg" alt="广告位"/>
+						</div>
+						<div style="margin-top: 5px;">
+							<img src="${statics}/images/default-video.jpg" alt="广告位"/>
+						</div>
+					</div>
+				</div>
+    		</div>
+    		
+    		<div class="container" style="width: 90%;">
+    			<div class="play-media-params">
+					<ul>
+	    				<li class="media-name">
+	    					${video.title}
+	    				</li>
+	    				<li>
+	    					<a href="javascript:;" title="播放次數">
+	    						<i class="fa fa-eye"></i>
+	    						<span>${video.clickCount}</span>
+	    					</a>
+	    				</li>
+	    				<li>
+	    					
+	    					<a href="javascript:;" class="favorite <c:if test="${not empty favorite}">active</c:if>" title="收藏次數" data-code="${video.code}">
+	    						<i class="fa fa-heart"></i>
+	    						<span>${video.favoriteCount}</span>
+	    					</a>
+	    				</li>
+	    				<li>
+	    					<a href="javascript:;" title="收藏次數">
+		    					<i class="fa fa-clock-o"></i> 
+		    					<span><fmt:formatNumber type="number" value="${video.length / 60}" pattern="0.#"/>min</span>
+		    				</a>
+	    				</li>
+	    			</ul>
+				</div>
+			</div>
+			
+			<div class="container" style="width: 90%;">
+				<div class="media-keywords">
+					<div class="keywords-title">
+					<i class="fa fa fa-flag"></i> <strong>推薦關鍵字：</strong>
+					</div>
+					<ul>
+						<c:if test="${not empty media.keyword}">
+							<c:set value="${ fn:split(video.keyword, ',') }" var="kws" />
+	                        <c:forEach items="${kws}" var="kw">
+		                         <li>
+			    					<a href="javascript:;" title="">
+		                        		${kw}
+		                        	</a>
+			    				</li>
+	                        </c:forEach>
+                        </c:if>
+	    			</ul>
+    			</div>
+			</div>
+			
+			
+			<div class="container" style="width: 90%;">
+    			<div class="link-title">
+    				<i class="fa fa-unlink"></i><span class="list-icon-title">相關視頻</span>
+    			</div>
+    			
+    			<div class="link-content">
+    				<ul>
+    					<c:forEach var="media" items="${list}">
+	    					<li>
+		    					<div class="list-media-box">
+				                    <a href="${ctx }/media/play/${media.code }/">
+				                    	<img class="lazy" src="${statics}/images/default-video.jpg" data-original="<spring:message code="video.image.url" />${media.imagePath}" width="204px" height="153px" alt="${media.title}"/>
+				                    </a>
+				                    <c:if test="${media.vipFlag eq '1'}">
+										<div class="media-vip">
+											VIP
+										</div>
+									</c:if>
+				                    <div class="cover-info" style="padding: 1px 5px 11px;">
+				                        <a href="${ctx }/media/play/${media.code }/"><h4><se:subStringTag input="${media.title}" replace="***" size="25" /></h4></a>
+				                    </div>  
+				                    <div class="cover-stat">
+				                        <i class="fa fa-eye"></i><span class="f10"> &nbsp;${media.clickCount}</span>
+				                        <i class="fa fa-heart"></i><span class="f10"> &nbsp;${media.favoriteCount}</span>
+				                    </div>
+				                </div>
+	    					</li>
+    					</c:forEach>
+    				</ul>
+					
+    			</div>
+    			
+    		</div>
+			
+    	</div>
+    	
+		<%@ include file="/WEB-INF/jsps/commons/footer.jsp"%>
+		<script src="${statics }/js/html5media.min.js"></script>
+		<script src="${statics }/plugins/bootstrap/js/bootstrap.min.js"></script>
+		<script src="${statics }/plugins/jquery.lazyload/1.9.7/jquery.lazyload.min.js"></script>
+    	<script>
+	    	$(function(){
+	    		$("img.lazy").lazyload();
+	    		
+	    		$(".favorite").click(function(){
+	    			var $this = $(this);
+	    			
+	    			if($this.data("lock")) {return;}
+	    			$this.data("lock", "1");
+	    			
+	    			if($this.hasClass("active")) {
+						var url = "${ctx}/media/favorite";
+						var data = {"code": $(this).data("code"), "flag": 2};
+						$.getJSON(url, data, function(json){
+							$this.removeData("lock");
+							
+							var count = parseInt($this.find("span").text()) - 1;
+							$this.find("span").text(count);
+							$this.removeClass("active");
+						});
+	    			} else {
+	    				var url = "${ctx}/media/favorite";
+						var data = {"code": $(this).data("code"), "flag": 1};
+						$.getJSON(url, data, function(json){
+							$this.removeData("lock");
+							
+							var count = parseInt($this.find("span").text()) + 1;
+							$this.find("span").text(count);
+							$this.addClass("active");
+						});
+	    			}
+	    		});
+	    	});
+	    </script>
+	</body>
+</html>

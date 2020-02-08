@@ -1,0 +1,13 @@
+package com.xjw.kzenum.platform.ag;
+
+import com.xjw.kzenum.AbstractEnum;
+/**
+ * 平台内的大厅类型 4.3
+ */
+public class RoundEnum extends AbstractEnum {
+	 public static final EnumBean DSP = new EnumBean("DSP", "国际厅");
+	 public static final EnumBean AGQ = new EnumBean("AGQ", "旗舰厅");
+	 public static final EnumBean VIP = new EnumBean("VIP", "包桌厅");
+	 public static final EnumBean SLOT = new EnumBean("SLOT", "电子游戏");
+	 public static final EnumBean LED = new EnumBean("LED", "竞咪厅");
+}

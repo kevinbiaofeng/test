@@ -1,0 +1,207 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.entity.po.user.MemberMoneyChange;
+//import com.xjw.entity.vo.rake.PlayerStatVo;
+//import com.xjw.kzenum.activity.ActivityTypeEnum;
+//import com.xjw.kzenum.platform.GameCategoryEnum;
+//import com.xjw.kzenum.platform.PlatformTypeEnum;
+//import com.xjw.service.platform.AGGameDataService;
+//import com.xjw.service.platform.MGGameDataService;
+//import com.xjw.service.platform.PTGameDataService;
+//import com.xjw.service.platform.SBGameDataService;
+//import com.xjw.service.platform.XinGameDataService;
+//import com.xjw.service.user.MemberMoneyChangeService;
+//import com.xjw.utility.BizException;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class StopMoneyChangeTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(StopMoneyChangeTask.class.getName());
+//	
+//	private MemberMoneyChangeService memberMoneyChangeService = (MemberMoneyChangeService)SpringContextHolder.getBean(MemberMoneyChangeService.class);
+//	private AGGameDataService agGameDataService = (AGGameDataService)SpringContextHolder.getBean(AGGameDataService.class);
+//	private XinGameDataService xinGameDataService = (XinGameDataService)SpringContextHolder.getBean(XinGameDataService.class);
+//	private MGGameDataService mgGameDataService = (MGGameDataService)SpringContextHolder.getBean(MGGameDataService.class);
+//	private PTGameDataService ptGameDataService = (PTGameDataService)SpringContextHolder.getBean(PTGameDataService.class);
+//	private SBGameDataService sbGameDataService = (SBGameDataService)SpringContextHolder.getBean(SBGameDataService.class);
+//	
+//	@Override
+//    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+//		//查询没有结束的资金调整列表电子游戏
+//    	Map<String, Object> params = new HashMap<String, Object>();
+//    	params.put("actIdIsNotNull", "true");
+//    	params.put("startTimeIsNotNull", "true");
+//    	params.put("endTimeIsNull", "true");
+//    	
+//    	List <MemberMoneyChange> memberMoneyChangeList = memberMoneyChangeService.selectAll(params);
+//    	for (MemberMoneyChange memberMoneyChange : memberMoneyChangeList) {
+////    		if(null == memberMoneyChange.getStartTime()){
+////    			continue;
+////    		}
+//    		
+//    		try{
+//	    		if(Integer.parseInt(ActivityTypeEnum.ELEC.getCode()) == memberMoneyChange.getActType()){
+//	    			this.bySlot(memberMoneyChange);
+//	    		}else if(Integer.parseInt(ActivityTypeEnum.PERSON.getCode()) == memberMoneyChange.getActType()){
+//	    			this.byLive(memberMoneyChange);
+//	    		}else if(Integer.parseInt(ActivityTypeEnum.SPORT.getCode()) == memberMoneyChange.getActType()){
+//	    			this.bySport(memberMoneyChange);
+//	    		}
+//    		}catch(Exception e){
+//    			logger.error(e.getMessage(), e);
+//    		}
+//		}
+//    }
+//    
+//    /** 电子游戏  */
+//    private void bySlot(MemberMoneyChange memberMoneyChange) throws BizException{
+//		if(memberMoneyChange.getPlatformType() == Integer.valueOf(PlatformTypeEnum.AG_GJ.getCode())){
+//			Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = xinGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//		}else if(memberMoneyChange.getPlatformType() == Integer.valueOf(PlatformTypeEnum.PT.getCode())){
+//			Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("gameCategory", GameCategoryEnum.SOLT.getCode());
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = ptGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//		}else if(memberMoneyChange.getPlatformType() == Integer.valueOf(PlatformTypeEnum.MG.getCode())){
+//			Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("gameCategory", GameCategoryEnum.SOLT.getCode());
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = mgGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//		}
+//    }
+//    
+//    /** 真人视讯 */
+//    private void byLive(MemberMoneyChange memberMoneyChange) throws BizException {
+//    	if(Integer.parseInt(PlatformTypeEnum.PT.getCode()) == memberMoneyChange.getPlatformType()){    //真人视讯-PT视讯
+//    		Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("gameCategory", GameCategoryEnum.LIVE.getCode());
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = ptGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//    	}else if(Integer.parseInt(PlatformTypeEnum.MG.getCode()) == memberMoneyChange.getPlatformType()){	//真人视讯-MG视讯
+//    		Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("gameCategory", GameCategoryEnum.LIVE.getCode());
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = mgGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//    	}else if(Integer.parseInt(PlatformTypeEnum.AG_GJ.getCode()) == memberMoneyChange.getPlatformType()){	//真人视讯-AG国际
+//    		Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("platformType", "AGIN");
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = agGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//    	}else if(Integer.parseInt(PlatformTypeEnum.AG_JS.getCode()) == memberMoneyChange.getPlatformType()){	//真人视讯-AG急速
+//    		Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("platformType", "AG");
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = agGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//    	}
+//    }
+//    
+//    /** 体育 */
+//    private void bySport(MemberMoneyChange memberMoneyChange) throws BizException {
+//    	if(Integer.parseInt(PlatformTypeEnum.SB.getCode()) == memberMoneyChange.getPlatformType()){    //体育-沙巴体育
+//    		Map<String, Object> params = new HashMap<String, Object>();
+//			params.put("beginTime", memberMoneyChange.getStartTime());
+//			params.put("endTime", new Date());
+//			params.put("userId", memberMoneyChange.getUserId());
+//			List<PlayerStatVo> list = sbGameDataService.selectSumAll(params);
+//			if(list != null && list.size() > 0){
+//				PlayerStatVo vo = list.get(0);
+//				if(vo.getBetAmount().compareTo(memberMoneyChange.getIntegral()) != -1){
+//					params.clear();
+//					params.put("endTime", new Date());
+//					params.put("id", memberMoneyChange.getId());
+//					memberMoneyChangeService.update(params);
+//				}
+//			}
+//    	}
+//    }
+//}

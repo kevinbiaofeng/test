@@ -1,0 +1,47 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.util.Calendar;
+//import java.util.GregorianCalendar;
+//import java.util.List;
+//
+//import org.apache.commons.lang3.time.DateFormatUtils;
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.kzenum.AbstractEnum.EnumBean;
+//import com.xjw.kzenum.rake.RakeTypeEnum;
+//import com.xjw.service.rake.RakeStatService;
+//import com.xjw.utility.BizException;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class RakeStatBySumTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(RakeStatBySumTask.class);
+//	
+//	@Autowired
+//	private RakeStatService rakeStatService;
+//		
+//	public RakeStatBySumTask(){
+//		rakeStatService = (RakeStatService) SpringContextHolder.getBean(RakeStatService.class);
+//	}
+//	
+//	@Override
+//	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
+//		Calendar nowTime = Calendar.getInstance();
+//		Calendar statTime = new GregorianCalendar(nowTime.get(Calendar.YEAR), nowTime.get(Calendar.MONTH), nowTime.get(Calendar.DATE)-1);
+//		String statDate = DateFormatUtils.format(statTime, "yyyyMMdd");
+//
+//		List<EnumBean> enumList = RakeTypeEnum.getEnumBeans(RakeTypeEnum.class);
+//		for(EnumBean rakeTypeEnum : enumList){
+//			try {
+//				rakeStatService.saveBySum(rakeTypeEnum.getCode(), statDate);
+//			} catch (BizException e) {
+//				logger.error(e.getMessage(), e);
+//			}
+//		}
+//	}
+//}

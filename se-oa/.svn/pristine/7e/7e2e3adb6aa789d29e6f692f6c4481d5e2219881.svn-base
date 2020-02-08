@@ -1,0 +1,55 @@
+package com.xjw.service.rake.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.rake.RakeGameSlotDao;
+import com.xjw.entity.po.rake.RakeGameSlot;
+import com.xjw.service.rake.RakeGameSlotService;
+import com.xjw.utility.BizException;
+
+@Service
+public class RakeGameSlotServiceImpl extends BaseServiceImpl<RakeGameSlot> implements RakeGameSlotService {
+
+	@Autowired
+	private RakeGameSlotDao rakeGameSlotDao;
+	
+	public RakeGameSlot queryOne(String rakeType, String gameType) {
+		if(StringUtils.isBlank(rakeType) || StringUtils.isBlank(gameType)){
+			return null;
+		}
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("rakeType", rakeType);
+		params.put("gameType", gameType);
+		return super.selectOne(params);
+	}
+	
+
+	public void save(List<RakeGameSlot> slotList) throws BizException {
+		for(RakeGameSlot slot : slotList){
+			try {
+				super.save(slot);
+			} catch (Exception e) {
+				throw new BizException("游戏 " + slot.getZhName() + " 保存失败，可能是game_type重复、为空等原因引起", e);
+			}
+		}
+	}
+	
+	@Override
+	public BaseDaoImpl<RakeGameSlot> baseDao() {
+		return rakeGameSlotDao;
+	}
+
+	@Override
+	public Class<RakeGameSlot> getClazz() {
+		return RakeGameSlot.class;
+	}
+}

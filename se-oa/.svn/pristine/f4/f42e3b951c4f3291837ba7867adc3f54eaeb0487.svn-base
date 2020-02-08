@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="NewMgDayHistory">
+	<resultMap id="NewMgDayHistory" type="NewMgDayHistory" extends="base.baseAttr">
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+		<result column="login_name" property="loginName" jdbcType="VARCHAR" />
+		<result column="player_name" property="playerName" jdbcType="VARCHAR" />
+		<result column="game_type" property="gameType" jdbcType="VARCHAR" />
+		<result column="game_code" property="gameCode" jdbcType="VARCHAR" />
+		<result column="game_zh_name" property="gameZhName" jdbcType="VARCHAR" />
+		<result column="bet_count" property="betCount" jdbcType="INTEGER" />
+		<result column="bet_amount" property="betAmount" jdbcType="DECIMAL" />
+		<result column="net_amount" property="netAmount" jdbcType="DECIMAL" />
+		<result column="stat_date" property="statDate" jdbcType="DATE" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id, user_id, login_name, player_name, game_type,game_code, game_zh_name,
+		bet_count, bet_amount, net_amount, stat_date, create_time
+	</sql>
+
+	<select id="selectAllCount" resultType="long">
+		SELECT count(*) FROM newmg_day_history 
+		<include refid="whereCondition" /> 
+	</select>
+
+	<select id="selectAll" parameterType="Map" resultMap="NewMgDayHistory">
+		select
+		<include refid="Base_Column_List" />
+		from newmg_day_history
+		<include refid="whereCondition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+
+	<sql id="whereCondition">
+		<where>
+			<if test="userId != null">
+				AND user_id = #{userId}
+			</if>
+			<if test="loginName != null">
+				AND login_name = #{loginName}
+			</if>
+			<if test="playerName != null">
+				AND player_name = #{playerName}
+			</if>
+			<if test="beginTime != null">
+				AND stat_date >= #{beginTime}
+			</if>
+			<if test="endTime != null">
+				AND stat_date <![CDATA[<=]]> #{endTime}
+			</if>
+			<if test="localBeginTime != null">
+				AND create_time >= #{localBeginTime}
+			</if>
+			<if test="localEndTime != null">
+				AND create_time <![CDATA[<=]]> #{localEndTime}
+			</if>
+		</where>
+	</sql>
+
+	<insert id="save" parameterType="NewMgDayHistory">
+		INSERT INTO newmg_day_history (user_id, login_name,
+		player_name, game_type,game_code, game_zh_name, bet_count,
+		bet_amount, net_amount, stat_date, create_time)
+		VALUES (#{userId,jdbcType=INTEGER}, #{loginName,jdbcType=VARCHAR},
+		#{playerName,jdbcType=VARCHAR}, #{gameType,jdbcType=VARCHAR},
+		#{gameCode,jdbcType=VARCHAR}, #{gameZhName,jdbcType=VARCHAR},
+		#{betCount,jdbcType=INTEGER}, #{betAmount,jdbcType=DECIMAL}, 
+		#{netAmount,jdbcType=DECIMAL}, #{statDate,jdbcType=DATE},
+		#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<insert id="saveRecordBatch" parameterType="map">
+		INSERT INTO newmg_day_history (user_id, login_name,player_name, game_type,
+		game_code, game_zh_name, bet_count,	bet_amount, net_amount, stat_date,create_time)
+		VALUES 
+		 <foreach collection="list" item="item" index="index" separator="," >
+			(#{item.userId,jdbcType=INTEGER},#{item.loginName,jdbcType=VARCHAR},#{item.playerName,jdbcType=VARCHAR}, 
+			 #{item.gameType,jdbcType=VARCHAR},#{item.gameCode,jdbcType=VARCHAR},#{item.gameZhName,jdbcType=VARCHAR},
+			 #{item.betCount,jdbcType=INTEGER},#{item.betAmount,jdbcType=DECIMAL}, #{item.netAmount,jdbcType=DECIMAL}, 
+			 #{item.statDate,jdbcType=DATE},#{item.createTime,jdbcType=TIMESTAMP})
+		</foreach>
+	</insert>
+	
+	<select id="selectOneDayData" parameterType="map" resultMap="NewMgDayHistory">
+		SELECT  u.id, h.user_id, u.login_name, h.player_name, h.slot_type as game_type,
+				(
+				  select case 
+					when h.device_type = '1001' then (select g.zh_name from game_slot_info g where g.code= h.game_type )
+					when h.device_type = '1002' then (select g.zh_name from game_slot_info g where g.wap_code= h.game_type )
+					else null end
+				) game_zh_name,  
+			    h.bet_count, h.bet_amount, h.net_amount
+		FROM 
+		(
+		  SELECT
+		   user_id, player_name, game_type,slot_type,device_type,
+		   COUNT(*) AS bet_count,
+		   SUM(bet_amount) AS bet_amount,
+		   SUM(net_amount) AS net_amount
+		  FROM
+		   new_mg_game_data
+		  WHERE
+		  	1 = 1
+		   <if test="beginLocalTime != null and beginLocalTime != '' ">
+				AND local_time >= #{beginLocalTime}
+			</if>
+			<if test="endLocalTime != null and endLocalTime != ''">
+				AND local_time <![CDATA[<=]]> #{endLocalTime}
+			</if>
+		  GROUP BY user_id, game_type
+		 ) h 
+		LEFT JOIN PUB_USER u
+		on h.user_id = u.id
+	</select>
+ 
+</mapper>

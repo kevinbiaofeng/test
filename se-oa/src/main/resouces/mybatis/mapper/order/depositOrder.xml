@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DepositOrder">
+    <resultMap id="DepositOrder" type="DepositOrder" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="ORDER_NO" jdbcType="VARCHAR" property="orderNo" />
+        <result column="FROM_BANK_TYPE" jdbcType="VARCHAR" property="fromBankType" />
+        <result column="FROM_BANK_ACCOUNT" jdbcType="VARCHAR" property="fromBankAccount" />
+        <result column="FROM_BANK_CARD" jdbcType="VARCHAR" property="fromBankCard" />
+        <result column="TRADE_MODE" jdbcType="NUMERIC" property="tradeMode" />
+        <result column="TRADE_AMOUNT" jdbcType="NUMERIC" property="tradeAmount" />
+        <result column="TO_BANK_ID" jdbcType="NUMERIC" property="toBankId" />
+        <result column="TO_BANK_TYPE" jdbcType="VARCHAR" property="toBankType" />
+        <result column="TO_BANK_CARD" jdbcType="VARCHAR" property="toBankCard" />
+        <result column="TO_BANK_ACCOUNT" jdbcType="VARCHAR" property="toBankAccount" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="PREFERENTIAL_CODE" jdbcType="VARCHAR" property="preferentialCode" />
+        <result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+        <result column="UPDATE_USER_NAME" jdbcType="VARCHAR" property="updateUserName" />
+        <result column="OPERATION_TYPE" jdbcType="NUMERIC" property="operationType" />
+    </resultMap>
+    
+    <resultMap type="com.xjw.entity.vo.data.SummaryDepositVo" id="SummaryDepositVo">
+		<result column="trade_mode" property="tradeMode" />
+		<result column="trade_amount" property="tradeAmount" />
+	</resultMap>
+
+    <sql id="baseColumnList">
+        t.ID, t.USER_ID,t.ORDER_NO,t.FROM_BANK_TYPE,t.FROM_BANK_ACCOUNT,t.FROM_BANK_CARD,t.TRADE_MODE,t.TRADE_AMOUNT,t.TO_BANK_ID,t.TO_BANK_TYPE,t.TO_BANK_CARD,
+        t.TO_BANK_ACCOUNT,t.REMARK,t.PREFERENTIAL_CODE,t.CREATE_USER,t.CREATE_TIME, u.LOGIN_NAME, t.STATUS, uu.LOGIN_NAME UPDATE_USER_NAME, t.UPDATE_TIME, t.OPERATION_TYPE
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO USER_DEPOSIT_ORDER (
+        	USER_ID,ORDER_NO,FROM_BANK_TYPE,FROM_BANK_ACCOUNT,FROM_BANK_CARD,TRADE_MODE,TRADE_AMOUNT,TO_BANK_ID,TO_BANK_TYPE,TO_BANK_CARD,
+        	TO_BANK_ACCOUNT,REMARK,PREFERENTIAL_CODE,CREATE_USER,CREATE_TIME, STATUS, IP_ADDRESS
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{orderNo,jdbcType=VARCHAR},
+	        #{fromBankType,jdbcType=VARCHAR},
+	        #{fromBankAccount,jdbcType=VARCHAR},
+	        #{fromBankCard,jdbcType=VARCHAR},
+	        #{tradeMode,jdbcType=NUMERIC},
+	        #{tradeAmount,jdbcType=NUMERIC},
+	        #{toBankId,jdbcType=NUMERIC},
+	        #{toBankType,jdbcType=VARCHAR},
+	        #{toBankCard,jdbcType=VARCHAR},
+	        #{toBankAccount,jdbcType=VARCHAR},
+	        #{remark,jdbcType=VARCHAR},
+	        #{preferentialCode,jdbcType=VARCHAR},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{status,jdbcType=NUMERIC},
+	        #{ipAddress,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="update" parameterType="map">
+        UPDATE USER_DEPOSIT_ORDER
+        <set>
+        	update_time = #{updateTime}, update_user = #{updateUser},
+            <if test="userId != null">
+                 USER_ID = #{userId,jdbcType=NUMERIC},
+            </if>
+            <if test="operationType != null">
+                 OPERATION_TYPE = #{operationType,jdbcType=NUMERIC},
+            </if>
+            <if test="orderNo != null">
+                 ORDER_NO = #{orderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="fromBankType != null">
+                 FROM_BANK_TYPE = #{fromBankType,jdbcType=VARCHAR},
+            </if>
+            <if test="fromBankAccount != null">
+                 FROM_BANK_ACCOUNT = #{fromBankAccount,jdbcType=VARCHAR},
+            </if>
+            <if test="fromBankCard != null">
+                 FROM_BANK_CARD = #{fromBankCard,jdbcType=VARCHAR},
+            </if>
+            <if test="tradeMode != null">
+                 TRADE_MODE = #{tradeMode,jdbcType=NUMERIC},
+            </if>
+            <if test="tradeAmount != null">
+                 TRADE_AMOUNT = #{tradeAmount,jdbcType=NUMERIC},
+            </if>
+            <if test="toBankId != null">
+                 TO_BANK_ID = #{toBankId,jdbcType=NUMERIC},
+            </if>
+            <if test="toBankType != null">
+                 TO_BANK_TYPE = #{toBankType,jdbcType=VARCHAR},
+            </if>
+            <if test="toBankCard != null">
+                 TO_BANK_CARD = #{toBankCard,jdbcType=VARCHAR},
+            </if>
+            <if test="toBankAccount != null">
+                 TO_BANK_ACCOUNT = #{toBankAccount,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status, jdbcType=VARCHAR},
+            </if>
+            <if test="createUser != null">
+                 CREATE_USER = #{createUser,jdbcType=NUMERIC},
+            </if>
+            <if test="createTime != null">
+                 CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="preferentialCode != null">
+                 PREFERENTIAL_CODE = #{preferentialCode,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="DepositOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_DEPOSIT_ORDER t 
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user uu on uu.id = t.update_user
+        where t.ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.ID) FROM USER_DEPOSIT_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        <include refid="searchCondition"/>
+    </select>
+    
+    <!-- ORDER BY t.CREATE_TIME DESC  -->
+    <select id="selectAll" parameterType="map" resultMap="DepositOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_DEPOSIT_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user uu on uu.id = t.update_user
+        <include refid="searchCondition"/>
+        ORDER BY t.id DESC
+       	<include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	<if test="id != null">
+        		AND t.id = #{id}
+        	</if>
+        	<if test="statusList != null">
+				AND t.STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+            <if test="keywords != null">
+				AND (u.LOGIN_NAME like '%' #{keywords} '%' or t.ORDER_NO like '%' #{keywords} '%')
+			</if>
+			<if test="loginName != null">
+				AND u.login_name=#{loginName}
+			</if>
+			<if test="parentIds != null">
+				AND u.parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+		    	</foreach>
+		    </if>
+		     <if test="notInParentIds != null">
+				AND (
+					u.parent_id IS NULL OR u.parent_id NOT IN 
+					<foreach collection="notInParentIds" item="_pId" open="(" separator="," close=")">
+						#{_pId}
+		    		</foreach>
+		    	)
+		    </if>
+			<if test="tradeMode != null">
+				AND t.trade_mode=#{tradeMode}
+			</if>
+			<if test="userId != null">
+				AND t.user_id=#{userId}
+			</if>
+			<if test="beginTime != null">
+                AND t.CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="orderNo != null">
+                AND (t.ORDER_NO like '%' #{orderNo} '%')
+            </if>
+            <if test="operationType != null">
+                AND t.OPERATION_TYPE=#{operationType}
+            </if>
+            <if test="updateUserName != null">
+                AND t.update_user=#{updateUserName}
+            </if>
+            <if test="tradeModeList != null">
+				 AND t.trade_mode in
+				<foreach collection="tradeModeList" item="tm" index="index" open="(" separator="," close=")">
+					#{tm}
+		        </foreach>
+			</if>
+        </where>
+    </sql>
+    
+    <select id="selectSumAmount" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(o.trade_amount), 0) 
+        FROM USER_DEPOSIT_ORDER o
+        	LEFT JOIN pub_user u
+        		ON o.user_id = u.id
+        WHERE o.status = 2
+        	<if test="parentId != null">
+				AND u.parent_id = #{parentId}
+		    </if>
+        	<if test="beginTime != null">
+        		AND o.create_time >= #{beginTime}
+        	</if>
+        	<if test="endTime != null">
+        		AND o.create_time <![CDATA[<=]]> #{endTime}
+        	</if>
+    </select>
+    
+    <!-- 按存款方式统计存款金额 -->
+    <select id="selectSumAmountGroupByTradeMode" parameterType="map" resultMap="SummaryDepositVo">
+        SELECT trade_mode, SUM(trade_amount) AS trade_amount
+        FROM USER_DEPOSIT_ORDER
+        WHERE status = 2
+        	<if test="beginTime != null">
+        		AND create_time >= #{beginTime}
+        	</if>
+        	<if test="endTime != null">
+        		AND create_time <![CDATA[<=]]> #{endTime}
+        	</if>
+        GROUP BY trade_mode	
+    </select>
+    
+    <!-- 查询代理的下属会员存款总额 -->
+    <select id="selectAmountByAgent" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(sum(o.trade_amount), 0) FROM user_deposit_order o
+		LEFT JOIN pub_user u 
+			ON u.id = o.user_id
+		WHERE o.status = 2
+			AND u.parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+			    </foreach>
+			<if test="beginTime != null">
+	    		AND o.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND o.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+    
+    <!-- 查询代理的下属会员有存款的人员，也叫活跃会员 -->
+     <select id="selectAllCountByUser" parameterType="map" resultType="long">
+        select count(*) from PUB_USER u
+         where u.id in (
+			select  t.USER_ID from USER_DEPOSIT_ORDER t 
+			where 
+				t.TRADE_AMOUNT > 0
+				<if test="beginTime != null">
+		    		AND t.CREATE_TIME >= #{beginTime}
+		    	</if>
+				<if test="endTime != null">
+					AND t.CREATE_TIME <![CDATA[<=]]> #{endTime}
+				</if>
+				group by t.user_id )
+			<if test="parentIds != null">
+				AND u.parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+	    		</foreach>
+	 		</if>
+    </select>
+    
+    <!-- 存款订单拒绝功能, 会员存款5个小时转账未到系统账户的订单,修改状态  -->
+     <update id="updateStatus">
+        UPDATE USER_DEPOSIT_ORDER 
+        set STATUS=3, OPERATION_TYPE=1 , REMARK='未收到您的款项，系统自动回收您的提交订单.'
+        where STATUS =1 and  TIMESTAMPDIFF(HOUR, create_time, now()) > 5 
+     </update>
+    
+</mapper>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WithdrawalOrder">
+    <resultMap id="WithdrawalOrder" type="WithdrawalOrder" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="ORDER_NO" jdbcType="VARCHAR" property="orderNo" />
+        <result column="FROM_BANK_ID" jdbcType="NUMERIC" property="fromBankId" />
+        <result column="FROM_BANK_TYPE" jdbcType="NUMERIC" property="fromBankType" />
+        <result column="FROM_BANK_ACCOUNT" jdbcType="VARCHAR" property="fromBankAccount" />
+        <result column="FROM_BANK_CARD" jdbcType="VARCHAR" property="fromBankCard" />
+        <result column="TRADE_AMOUNT" jdbcType="NUMERIC" property="tradeAmount" />
+        <result column="TO_BANK_TYPE" jdbcType="NUMERIC" property="toBankType" />
+        <result column="TO_BANK_CARD" jdbcType="VARCHAR" property="toBankCard" />
+        <result column="TO_BANK_ACCOUNT" jdbcType="VARCHAR" property="toBankAccount" />
+        <result column="TO_BANK_ADDRESS" jdbcType="VARCHAR" property="toBankAddress" />
+        <result column="STATUS" jdbcType="NUMERIC" property="status" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+        <result column="FINANCE_USER" jdbcType="VARCHAR" property="financeUser" />
+        <result column="RISK_USER" jdbcType="NUMERIC" property="riskUser" />
+        <result column="POUNDAGE" jdbcType="NUMERIC" property="poundage" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID,t.USER_ID,t.ORDER_NO,t.FROM_BANK_ID,t.FROM_BANK_TYPE,t.FROM_BANK_ACCOUNT,t.FROM_BANK_CARD,t.TRADE_AMOUNT,t.TO_BANK_TYPE,t.TO_BANK_CARD,
+        t.TO_BANK_ACCOUNT,t.TO_BANK_ADDRESS,t.STATUS,t.CREATE_USER,t.CREATE_TIME,t.REMARK,u.LOGIN_NAME, cw.LOGIN_NAME FINANCE_USER_NAME, fk.LOGIN_NAME RISK_USER_NAME,
+        t.FINANCE_TIME,t.RISK_TIME,t.FINANCE_USER, t.RISK_USER, t.POUNDAGE
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO USER_WITHDRAWAL_ORDER (
+        	USER_ID,ORDER_NO,FROM_BANK_ID,FROM_BANK_TYPE,FROM_BANK_ACCOUNT,FROM_BANK_CARD,TRADE_AMOUNT,TO_BANK_TYPE,TO_BANK_CARD,
+        	TO_BANK_ACCOUNT,TO_BANK_ADDRESS,STATUS,CREATE_TIME, IP_ADDRESS
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{orderNo,jdbcType=VARCHAR},
+	        #{fromBankId,jdbcType=NUMERIC},
+	        #{fromBankType,jdbcType=VARCHAR},
+	        #{fromBankAccount,jdbcType=VARCHAR},
+	        #{fromBankCard,jdbcType=VARCHAR},
+	        #{tradeAmount,jdbcType=NUMERIC},
+	        #{toBankType,jdbcType=VARCHAR},
+	        #{toBankCard,jdbcType=VARCHAR},
+	        #{toBankAccount,jdbcType=VARCHAR},
+	        #{toBankAddress,jdbcType=VARCHAR},
+	        #{status,jdbcType=VARCHAR},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{ipAddress,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="update" parameterType="map">
+        UPDATE USER_WITHDRAWAL_ORDER
+        <set>
+        	update_time = #{updateTime}, update_user = #{updateUser},
+        	<if test="financeUser != null">
+                 FINANCE_USER = #{financeUser, jdbcType=NUMERIC},
+            </if>
+            <if test="financeTime != null">
+                 FINANCE_TIME = #{financeTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark, jdbcType=TIMESTAMP},
+            </if>
+            <if test="riskUser != null">
+                 RISK_USER = #{riskUser, jdbcType=NUMERIC},
+            </if>
+            <if test="riskTime != null">
+                 RISK_TIME = #{riskTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status,jdbcType=NUMERIC},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="poundage != null">
+                 POUNDAGE = #{poundage,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankId != null">
+                 FROM_BANK_ID = #{fromBankId,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankType != null">
+                 FROM_BANK_TYPE = #{fromBankType,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankAccount != null">
+                 FROM_BANK_ACCOUNT = #{fromBankAccount,jdbcType=VARCHAR},
+            </if>
+            <if test="fromBankCard != null">
+                 FROM_BANK_CARD = #{fromBankCard,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="WithdrawalOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_WITHDRAWAL_ORDER t 
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user cw on cw.id = t.finance_user
+        LEFT JOIN pub_user fk on fk.id = t.risk_user
+        where t.ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.ID) FROM USER_WITHDRAWAL_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="WithdrawalOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_WITHDRAWAL_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user cw on cw.id = t.finance_user
+        LEFT JOIN pub_user fk on fk.id = t.risk_user
+        <include refid="searchCondition"/>
+        ORDER BY t.CREATE_TIME DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	<if test="userId != null">
+                AND t.user_id = #{userId}
+            </if>
+        	<if test="status != null">
+                AND t.STATUS = #{status}
+            </if>
+        	<if test="statusList != null">
+				AND t.STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+			<if test="keywords != null">
+				AND (u.LOGIN_NAME like '%' #{keywords} '%')
+			</if>
+			<if test="beginTime != null">
+                AND t.CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="orderNo != null">
+                AND (t.ORDER_NO like '%' #{orderNo} '%')
+            </if>
+        </where>
+    </sql>
+</mapper>

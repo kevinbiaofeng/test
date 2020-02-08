@@ -1,0 +1,243 @@
+package com.xjw.controller.media;
+
+import static java.nio.file.StandardOpenOption.READ;
+
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.spreada.utils.chinese.ZHConverter;
+import com.xjw.cache.VideoClickCache;
+import com.xjw.common.result.ModelResult;
+import com.xjw.controller.BaseController;
+import com.xjw.entity.Page;
+import com.xjw.entity.po.media.Favorite;
+import com.xjw.entity.po.media.Video;
+import com.xjw.entity.po.user.User;
+import com.xjw.kzenum.AbstractEnum.EnumBean;
+import com.xjw.kzenum.media.VideoTypeEnum;
+import com.xjw.kzenum.sys.YesORNoEnum;
+import com.xjw.service.media.FavoriteService;
+import com.xjw.service.media.VideoService;
+import com.xjw.util.SessionManager;
+
+@Controller
+@RequestMapping("/media/")
+public class MediaController extends BaseController {
+	private static Logger logger = LoggerFactory.getLogger(MediaController.class);
+
+	private static final int BUFFER_LENGTH = 1024 * 16; // 一次读取的字节长度
+	private static final long EXPIRE_TIME = 1000 * 60 * 60 * 24 * 100;
+	private static final Pattern RANGE_PATTERN = Pattern.compile("bytes=(?<start>\\d*)-(?<end>\\d*)");
+	
+	@Value("${upload.video.directory}")
+	private String videoDirectory;
+	@Autowired
+	private VideoService videoService;
+	@Autowired
+	private FavoriteService favoriteService;
+	@Autowired
+	private VideoClickCache clickCache;
+	
+	
+	/**
+	 * 根据导航跳转到列表页
+	 */
+	@RequestMapping(value = "/list/{typeName}/{orderBy}/{pageNo}/", method = RequestMethod.GET)
+	public String list(@PathVariable String typeName, 
+				@PathVariable String orderBy,
+				@PathVariable Integer pageNo,
+				@RequestParam(defaultValue = "16") Integer pageSize,
+				Model model) {
+		List<EnumBean> listEnum = VideoTypeEnum.getEnumBeans(VideoTypeEnum.class);
+		String type = null;
+		for (EnumBean enumBean : listEnum) {
+			if(enumBean.getName().equals(typeName)){
+				type = enumBean.getCode();
+				break;
+			}
+		}
+		
+		Map<String, Object> params = new HashMap<>();
+		//判断是否按照视频类型搜索
+		if(StringUtils.isNotEmpty(type)){
+			params.put("type", type);
+		}else{
+			params.put("type", type);
+		}
+		
+		if(StringUtils.isNotEmpty(typeName) && typeName.equals("VIP區")){
+			params.put("vipFlag", 1);
+		}
+		//按照热度等排序功能
+		if(StringUtils.isNotEmpty(orderBy)){
+			params.put(orderBy, orderBy);
+		}
+		
+		try {
+			Page<Video> page = videoService.getPage(params, pageNo, pageSize);
+			model.addAttribute("page", page);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		return "/xjw/media/list";
+	}
+
+	/**
+	 * 跳转到播放页面
+	 * @param code 素材编号
+	 */
+	@RequestMapping(value = "/play/{code}/", method = RequestMethod.GET)
+	public String play(@PathVariable String code, HttpServletRequest request, Model model) {
+		Video video = videoService.selectByCode(code);
+		model.addAttribute("video", video);
+		
+		User user = SessionManager.getUserSession(request);
+		if(null != user) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("userId", user.getId());
+			params.put("videoCode", code);
+			Favorite fav = favoriteService.selectOne(params);
+			model.addAttribute("favorite", fav);
+		}
+		
+		/*热门*/
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("hotVideo", "1");
+		params.put("begin", "1");
+		params.put("pageSize", "6");
+		params.put("type", video.getType());
+		List<Video> hotList = videoService.selectAll(params);
+		model.addAttribute("list", hotList);
+		return "/xjw/media/play";
+	}
+
+	/**
+	 * 跳转到播放页面
+	 * @param code  素材编号
+	 */
+	@RequestMapping(value = "/loading/{code}/", method = RequestMethod.GET)
+	public String loading(@PathVariable String code, HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Video video = videoService.selectByCode(code);
+		
+		//增加视频点击总数
+		clickCache.increment(code);
+		
+		Path videoFile = Paths.get(videoDirectory, video.getPath());
+
+		int length = (int) Files.size(videoFile);
+		int start = 0;
+		int end = length - 1;
+
+		String range = request.getHeader("Range");
+		range = range == null ? "" : range;
+		Matcher matcher = RANGE_PATTERN.matcher(range);
+
+		if (matcher.matches()) {
+			String startGroup = matcher.group("start");
+			start = startGroup.isEmpty() ? start : Integer.valueOf(startGroup);
+			start = start < 0 ? 0 : start;
+
+			String endGroup = matcher.group("end");
+			end = endGroup.isEmpty() ? end : Integer.valueOf(endGroup);
+			end = end > length - 1 ? length - 1 : end;
+		}
+
+		int contentLength = end - start + 1;
+		response.reset();
+		response.setContentType("application/octet-stream");
+		response.setBufferSize(BUFFER_LENGTH);
+		// response.setHeader("Content-Disposition",
+		// String.format("inline;filename=\"%s\"", "test3.mp4"));
+		response.setHeader("Accept-Ranges", "bytes");
+		response.setDateHeader("Last-Modified", Files.getLastModifiedTime(videoFile).toMillis());
+		response.setDateHeader("Expires", System.currentTimeMillis() + EXPIRE_TIME);
+		response.setContentType(Files.probeContentType(videoFile));
+		response.setHeader("Content-Range", String.format("bytes %s-%s/%s", start, end, length));
+		response.setHeader("Content-Length", String.format("%s", contentLength));
+		response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+		int bytesRead;
+		int bytesLeft = contentLength;
+		ByteBuffer buffer = ByteBuffer.allocate(BUFFER_LENGTH);
+
+		try (SeekableByteChannel input = Files.newByteChannel(videoFile, READ); OutputStream output = response.getOutputStream()) {
+			input.position(start);
+			while ((bytesRead = input.read(buffer)) != -1 && bytesLeft > 0) {
+				buffer.clear();
+				output.write(buffer.array(), 0, bytesLeft < bytesRead ? bytesLeft : bytesRead);
+				bytesLeft -= bytesRead;
+			}
+			input.close();
+			output.close();
+		}
+		return "/xjw/media/play";
+	}
+	
+	@RequestMapping(value = "/favorite", method = RequestMethod.GET)
+	@ResponseBody
+	public ModelResult<String> favorite(@RequestParam String code, @RequestParam Integer flag, HttpServletRequest request) throws Exception {
+		User user = SessionManager.getUserSession(request);
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", user.getId());
+		params.put("videoCode", code);
+		int count = (int)favoriteService.selectAllCount(params);
+		
+		if(Integer.valueOf(YesORNoEnum.YES.getCode()) == flag) {
+			if(count == 0){
+				Favorite f = new Favorite();
+				f.setUserId(user.getId());
+				f.setVideoCode(code);
+				favoriteService.save(f);
+				
+				videoService.updateFavoriteCount(code, 1);
+			}
+			return new ModelResult<>().withSuccess();
+		} else {
+			if(count > 0) {
+				params = new HashMap<>();
+				params.put("userId", user.getId());
+				params.put("videoCode", code);
+				favoriteService.deleteOne(params);
+				
+				videoService.updateFavoriteCount(code, -1);
+			}
+			
+			return new ModelResult<>().withSuccess();
+		}
+	}
+	
+	public static void main(String[] args) {
+		String str1="繁體轉簡體"; 
+		String simpleStr=ZHConverter.convert(str1, ZHConverter.SIMPLIFIED); 
+		System.out.println(simpleStr); 
+		String traditionStr=ZHConverter.convert(str1, ZHConverter.TRADITIONAL); 
+		System.out.println(traditionStr);
+	}
+}

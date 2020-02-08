@@ -1,0 +1,139 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/jsps/layout/base-header.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>AG游戏统计数据</title>
+	<%@ include file="/WEB-INF/jsps/layout/base-js.jsp"%>
+	<script type="text/javascript" src="${statics }/js/datePicker/WdatePicker.js"></script>
+</head>
+
+<body>
+	<div class="pageContent">
+		<form id="objForm" action="${ctx}/game/day/agList" method="post">
+			<input type="hidden" name="platformType" value="${form.platformType }"/>
+			<table class="searchTable">
+				<tr>
+					<td class="tableleft">
+						会员ID：
+					</td>
+					<td><input type="text" name="userId" value="${form.userId }" maxlength="15"/></td>
+					<td class="tableleft">北京时间：</td>
+					<td>
+						<input type="text" name="localBeginTime" value="${form.localBeginTime }" id="localBeginTime" class="datepicker" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'localEndTime\')||\'2020-10-01\'}'})"/>
+						一
+						<input type="text" name="localEndTime" value="${form.localEndTime }" id="localEndTime" class="datepicker" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'localBeginTime\')}',maxDate:'2020-10-01'})"/>
+					</td>
+					<td class="tableleft">
+						显示条数：
+					</td>
+					<td>
+						<select name="pageSize" id="pageSize">
+							<option value="15" >15条</option>
+							<option value="100" >100条</option>
+							<option value="500" >500条</option>
+							<option value="1000" >1000条</option>
+							<option value="2000" >2000条</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="tableleft">账户名称：</td>
+					<td><input type="text" name="loginName" value="${form.loginName }" maxlength="15"/></td>
+					<td class="tableleft">统计日期：</td>
+					<td>
+						<input type="text" name="beginTime" value="${form.beginTime }" id="beginTime" class="datepicker" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')||\'2020-10-01\'}'})"/>
+						一
+						<input type="text" name="endTime" value="${form.endTime }" id="endTime" class="datepicker" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'beginTime\')}',maxDate:'2020-10-01'})"/>
+					</td>
+					<td class="tableleft">游戏账号：</td>
+					<td><input type="text" name="playerName" value="${form.playerName }" maxlength="20"/></td>
+				</tr>
+			</table>
+			<div class="well">
+				<button type="submit" class="btn btn-primary"><i class="icon-white icon-search"></i>搜索</button>
+			</div>
+	
+		  	<div class="doc-content">
+		    	<div class="panel">
+		    	  <div class="panel-header">
+			        	<strong><font color="red"><c:if test="${form.platformType eq 'AG'}">AG极速版</c:if><c:if test="${form.platformType eq 'AGIN'}">AG国际厅</c:if></font>统计记录</strong>
+			      </div>
+		          <table class="table list table-bordered table-hover definewidth">
+					    <thead>
+						    <tr>
+						    	<th>账户名称</th>
+						        <th>游戏账号</th>
+						        <th>游戏平台</th>
+						        <th>游戏类别</th>
+						        <th>游戏编号</th>
+						        <th>游戏名称</th>
+						        <th>当天投注次数</th>
+						        <th>当日投注总额</th>
+						        <th>当日输赢总额</th>
+						        <th>统计日期</th>
+						        <th>创建时间</th>
+						    </tr>
+					    </thead>
+					    <c:choose>
+						    <c:when test="${not empty page.dataList }">
+						    	<tbody>
+				    				<c:forEach var="dto" items="${page.dataList }">
+								    	<tr>
+								    		<td>${dto.loginName }</td>
+								    		<td>${dto.playerName }</td>
+								    		<td>
+								    			<c:if test="${dto.platformType eq 'AG'}">AG极速版</c:if><c:if test="${dto.platformType eq 'AGIN'}">AG国际厅</c:if>
+								    		</td>
+								    		<td>
+								    			<xjw:enumBar clazz="com.xjw.kzenum.platform.ag.AGGameTypeEnum" code="${dto.gameType }" />
+								    		</td>
+								    		<td>${dto.gameCode }</td> <!-- 游戏编号  -->
+								    		<td>${dto.gameZhName }</td> <!-- 游戏名称  -->
+								    		<td>${dto.betCount }</td> <!-- 当天投注次数  -->
+								    		<td>
+								    			<fmt:formatNumber value="${dto.betAmount }" type="currency" pattern="#.##"/><!-- 当日投注总额  -->
+								    		</td> 
+								    		<td>
+								    			<fmt:formatNumber value="${dto.netAmount }" type="currency" pattern="#.##"/><!-- 当日输赢总额  -->
+								    		</td>
+								    		<td>
+								    			<fmt:formatDate value="${dto.statDate}" type="both" pattern="yyyy-MM-dd"/><!-- 统计时间 -->
+								    		</td> 
+								    		<td>
+								    			<fmt:formatDate value="${dto.createTime}" type="both" pattern="yyyy-MM-dd HH:mm:ss"/><!-- 创建时间 -->
+								    		</td> 
+								    	</tr>
+							    	</c:forEach>
+						    	</tbody>
+					    	</c:when>
+					    	<c:otherwise>
+				    			<tr><td colspan="16" class="notdata"><spring:message code="page.text.notData" /></td></tr>
+				    		</c:otherwise>
+				    	</c:choose>
+				  </table>
+			 	</div>
+			 	
+			 	<div class='bui-grid'>
+				  	<div class='bui-grid-bbar'>
+		    		  <c:if test="${not empty page.dataList }">
+		   				<xjw:pageTag page="${page}" formId="objForm"></xjw:pageTag>
+					  </c:if>
+				  	</div>
+				  </div>
+			 </div>
+		 </form>
+		 
+	  </div>
+      
+      <script>
+	    $(function () {
+			BUI.use('bui/overlay');
+			$("#pageSize option[value='${form.pageSize }']").attr("selected",true);
+	    });
+		
+	  </script>
+</body>
+</html>

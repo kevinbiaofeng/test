@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WithdrawalOrder">
+    <resultMap id="WithdrawalOrder" type="WithdrawalOrder" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="ORDER_NO" jdbcType="VARCHAR" property="orderNo" />
+        <result column="FROM_BANK_ID" jdbcType="NUMERIC" property="fromBankId" />
+        <result column="FROM_BANK_TYPE" jdbcType="NUMERIC" property="fromBankType" />
+        <result column="FROM_BANK_ACCOUNT" jdbcType="VARCHAR" property="fromBankAccount" />
+        <result column="FROM_BANK_CARD" jdbcType="VARCHAR" property="fromBankCard" />
+        <result column="TRADE_AMOUNT" jdbcType="NUMERIC" property="tradeAmount" />
+        <result column="TO_BANK_TYPE" jdbcType="NUMERIC" property="toBankType" />
+        <result column="TO_BANK_CARD" jdbcType="VARCHAR" property="toBankCard" />
+        <result column="TO_BANK_ACCOUNT" jdbcType="VARCHAR" property="toBankAccount" />
+        <result column="TO_BANK_ADDRESS" jdbcType="VARCHAR" property="toBankAddress" />
+        <result column="STATUS" jdbcType="NUMERIC" property="status" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+        <result column="FINANCE_USER_NAME" jdbcType="VARCHAR" property="financeUserName" />
+        <result column="RISK_USER_NAME" jdbcType="VARCHAR" property="riskUserName" />
+        <result column="FINANCE_TIME" jdbcType="VARCHAR" property="financeTime" />
+        <result column="RISK_TIME" jdbcType="NUMERIC" property="riskTime" />
+        <result column="FINANCE_USER" jdbcType="VARCHAR" property="financeUser" />
+        <result column="RISK_USER" jdbcType="NUMERIC" property="riskUser" />
+        <result column="POUNDAGE" jdbcType="NUMERIC" property="poundage" />
+        <result column="riskUserTime" jdbcType="NUMERIC" property="riskUserTime" />
+        <result column="financeUserTime" jdbcType="NUMERIC" property="financeUserTime" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID,t.USER_ID,t.ORDER_NO,t.FROM_BANK_ID,t.FROM_BANK_TYPE,t.FROM_BANK_ACCOUNT,t.FROM_BANK_CARD,t.TRADE_AMOUNT,t.TO_BANK_TYPE,t.TO_BANK_CARD,
+        t.TO_BANK_ACCOUNT,t.TO_BANK_ADDRESS,t.STATUS,t.CREATE_USER,t.CREATE_TIME,t.REMARK,u.LOGIN_NAME, cw.LOGIN_NAME FINANCE_USER_NAME, fk.LOGIN_NAME RISK_USER_NAME,
+        t.FINANCE_TIME,t.RISK_TIME,t.FINANCE_USER, t.RISK_USER, t.POUNDAGE,
+        round( (UNIX_TIMESTAMP(t.risk_time) - UNIX_TIMESTAMP(t.create_time))/60) as riskUserTime,
+        round( (UNIX_TIMESTAMP(t.finance_time) - UNIX_TIMESTAMP(t.risk_time))/60) as financeUserTime
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO USER_WITHDRAWAL_ORDER (
+        	USER_ID,ORDER_NO,FROM_BANK_ID,FROM_BANK_TYPE,FROM_BANK_ACCOUNT,FROM_BANK_CARD,TRADE_AMOUNT,TO_BANK_TYPE,TO_BANK_CARD,
+        	TO_BANK_ACCOUNT,TO_BANK_ADDRESS,STATUS,CREATE_TIME, IP_ADDRESS
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{orderNo,jdbcType=VARCHAR},
+	        #{fromBankId,jdbcType=NUMERIC},
+	        #{fromBankType,jdbcType=VARCHAR},
+	        #{fromBankAccount,jdbcType=VARCHAR},
+	        #{fromBankCard,jdbcType=VARCHAR},
+	        #{tradeAmount,jdbcType=NUMERIC},
+	        #{toBankType,jdbcType=VARCHAR},
+	        #{toBankCard,jdbcType=VARCHAR},
+	        #{toBankAccount,jdbcType=VARCHAR},
+	        #{toBankAddress,jdbcType=VARCHAR},
+	        #{status,jdbcType=VARCHAR},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{ipAddress,jdbcType=VARCHAR}
+        )
+    </insert>
+	
+	<!-- 查询代理的下属会员提款总额 -->
+    <select id="selectAmountByAgent" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(sum(o.trade_amount), 0) FROM user_withdrawal_order o
+		LEFT JOIN pub_user u 
+			ON u.id = o.user_id
+		WHERE o.status = 2
+			AND u.parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+			    </foreach>
+			<if test="beginTime != null">
+	    		AND o.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND o.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+	
+    <update id="update" parameterType="map">
+        UPDATE USER_WITHDRAWAL_ORDER
+        <set>
+        	update_time = #{updateTime}, update_user = #{updateUser},
+        	<if test="financeUser != null">
+                 FINANCE_USER = #{financeUser, jdbcType=NUMERIC},
+            </if>
+            <if test="financeTime != null">
+                 FINANCE_TIME = #{financeTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark, jdbcType=TIMESTAMP},
+            </if>
+            <if test="riskUser != null">
+                 RISK_USER = #{riskUser, jdbcType=NUMERIC},
+            </if>
+            <if test="riskTime != null">
+                 RISK_TIME = #{riskTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status,jdbcType=NUMERIC},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="poundage != null">
+                 POUNDAGE = #{poundage,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankId != null">
+                 FROM_BANK_ID = #{fromBankId,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankType != null">
+                 FROM_BANK_TYPE = #{fromBankType,jdbcType=NUMERIC},
+            </if>
+            <if test="fromBankAccount != null">
+                 FROM_BANK_ACCOUNT = #{fromBankAccount,jdbcType=VARCHAR},
+            </if>
+            <if test="fromBankCard != null">
+                 FROM_BANK_CARD = #{fromBankCard,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="WithdrawalOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_WITHDRAWAL_ORDER t 
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user cw on cw.id = t.finance_user
+        LEFT JOIN pub_user fk on fk.id = t.risk_user
+        where t.ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.ID) FROM USER_WITHDRAWAL_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="WithdrawalOrder">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_WITHDRAWAL_ORDER t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user cw on cw.id = t.finance_user
+        LEFT JOIN pub_user fk on fk.id = t.risk_user
+        <include refid="searchCondition"/>
+        ORDER BY t.id DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	<if test="id != null">
+        		AND t.id = #{id}
+        	</if>
+        	<if test="statusList != null">
+				AND t.STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+			<if test="keywords != null">
+				AND (u.LOGIN_NAME like '%' #{keywords} '%')
+			</if>
+			<if test="loginName != null">
+				AND u.login_name=#{loginName}
+			</if>
+			<if test="parentIds != null">
+				AND u.parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+		    	</foreach>
+		    </if>
+		     <if test="notInParentIds != null">
+				AND (
+					u.parent_id IS NULL OR u.parent_id NOT IN 
+					<foreach collection="notInParentIds" item="_pId" open="(" separator="," close=")">
+						#{_pId}
+		    		</foreach>
+		    	)
+		    </if>
+			<if test="userId != null">
+				AND USER_ID = #{userId, jdbcType=NUMERIC}
+			</if>
+			<if test="beginTime != null">
+                AND t.CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="orderNo != null">
+                AND (t.ORDER_NO like '%' #{orderNo} '%')
+            </if>
+            <if test="financeUser != null">
+            	AND t.FINANCE_USER = #{financeUser}
+            	AND TIMESTAMPDIFF(MINUTE, t.risk_time,t.finance_time) > 5
+            </if>
+            <if test="riskUser != null">
+            	AND t.RISK_USER = #{riskUser}
+            	AND TIMESTAMPDIFF(MINUTE, t.create_time , t.risk_time) > 5
+            </if>
+        </where>
+    </sql>
+    
+    <!-- 查询提款总额 -->
+    <select id="selectSumAmount" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(o.trade_amount), 0) 
+        FROM USER_WITHDRAWAL_ORDER o
+        	LEFT JOIN pub_user u
+        		ON o.user_id = u.id
+        WHERE o.status = 2
+        	<if test="parentId != null">
+				AND u.parent_id = #{parentId}
+		    </if>
+        	<if test="beginTime != null">
+        		AND o.create_time >= #{beginTime}
+        	</if>
+        	<if test="endTime != null">
+        		AND o.create_time <![CDATA[<=]]> #{endTime}
+        	</if>
+    </select>
+    
+    <!-- 统计提款财务审核大于5分钟的记录 -->
+    <resultMap type="com.xjw.entity.po.order.WithdrawalFinance" id="WithdrawalFinance">
+        <result column="FINANCE_USER"  property="financeUser" />
+        <result column="COUNT_FINANCE"  property="countFinance" />
+         <result column="LOGIN_NAME"  property="loginName" />
+    </resultMap>
+    <select id="selectCountWithdrawalFinance" parameterType="map" resultMap="WithdrawalFinance">
+		  SELECT u.login_name, w.finance_user, count(w.finance_user) as COUNT_FINANCE
+			from USER_WITHDRAWAL_ORDER w,pub_user u
+			where w.status='2' and u.id=w.finance_user
+			and TIMESTAMPDIFF(MINUTE, w.risk_time,w.finance_time) > 5
+			<if test="beginTime != null">
+	    		AND w.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND w.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+			GROUP BY w.finance_user ;
+    </select>
+    
+    <!-- 统计提款风控审核大于5分钟的记录 -->
+    <resultMap type="com.xjw.entity.po.order.WithdrawalRisk" id="WithdrawalRisk">
+        <result column="RISK_USER"   property="riskUser" />
+        <result column="COUNT_RISK"  property="countRisk" />
+        <result column="LOGIN_NAME"  property="loginName" />
+    </resultMap>
+    <select id="selectCountWithdrawalRisk" parameterType="map" resultMap="WithdrawalRisk">
+		 SELECT u.login_name, w.risk_user, count(w.risk_user) as COUNT_RISK
+		   from USER_WITHDRAWAL_ORDER w ,pub_user u
+		  where w.status='2' and u.id=w.risk_user
+		    and TIMESTAMPDIFF(MINUTE, w.create_time,w.risk_time) > 5  
+		    <if test="beginTime != null">
+	    		AND w.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND w.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+		  GROUP BY w.risk_user;
+    </select>
+    
+    <!-- 根据当前用户查询提款记录是否有成功过的记录 -->
+    <resultMap type="com.xjw.entity.vo.order.DrawalCount" id="DrawalCount">
+        <result column="USER_ID"   property="userId" />
+        <result column="COUNT"  property="count" />
+    </resultMap>
+    <select id="selectDrawalCount" parameterType="map" resultMap="DrawalCount">
+        select w.user_id, IFNULL(count(*),0) COUNT from USER_WITHDRAWAL_ORDER w , pub_user u
+		where w.USER_ID = u.id
+		  and w.STATUS='2' 
+		  and u.id IN 
+		  <foreach collection="userIds" item="_userId" open="(" separator="," close=")">
+		  	#{_userId}
+		  </foreach>
+		  group by w.user_id
+    </select>
+    
+</mapper>

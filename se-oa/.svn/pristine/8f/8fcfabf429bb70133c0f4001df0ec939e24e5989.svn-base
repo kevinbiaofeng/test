@@ -1,0 +1,88 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.util.ArrayList;
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.entity.po.activity.Activity;
+//import com.xjw.entity.po.activity.AdvertWebsite;
+//import com.xjw.kzenum.activity.ActivityStatusEnum;
+//import com.xjw.service.activity.ActivityService;
+//import com.xjw.service.activity.AdvertWebsiteService;
+//import com.xjw.utility.BizException;
+//import com.xjw.utility.SpringContextHolder;
+//import com.xjw.utility.StringUtil;
+//
+//public class StopActivityTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(StopActivityTask.class.getName());
+//	
+//	@Override
+//    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+////		logger.info("start  ： " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+//        try{
+//        	stopActivity(context);
+//        }catch(BizException e){
+//        	logger.error(e.getMessage(), e);
+//        }
+////      logger.info("stop  ：  " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+//    }
+//    
+//    public void stopActivity(JobExecutionContext context) throws BizException {
+//    	//*********************************************启动中的活动
+//    	Map<String, Object> params = new HashMap<String, Object>();
+//    	params.put("statusList", StringUtil.getListFromStr(ActivityStatusEnum.START.getCode()));
+//    	ActivityService activityService = (ActivityService) SpringContextHolder.getBean(ActivityService.class);
+//    	List <Activity> activityList = activityService.selectAll(params);
+//    	
+//    	if(activityList != null && activityList.size() > 0){
+//    		//添加大于当前时间活动ID
+//    		List<Long> idList = new ArrayList<Long>();
+//        	for (Activity activity : activityList) {
+//        		if(activity.getEndTime().before(new Date())){
+//        			idList.add(activity.getId());
+//        		}
+//    		}
+//        	
+//        	//修改大于当前时间活动状态为暂停
+//        	if(idList != null && idList.size() > 0){
+//        		params.clear();
+//            	params.put("status", ActivityStatusEnum.STOP.getCode());
+//            	params.put("ids", idList);
+//            	activityService.update(params);
+//        	}
+//    	}
+//    	
+//    	//*********************************************启动中的公告
+//    	params.clear();
+//    	params.put("statusList", StringUtil.getListFromStr(ActivityStatusEnum.START.getCode()));
+//    	AdvertWebsiteService advertWebsiteService = (AdvertWebsiteService) SpringContextHolder.getBean(AdvertWebsiteService.class);
+//    	List <AdvertWebsite> advertWebsiteList = advertWebsiteService.selectAll(params);
+//    	
+//    	if(advertWebsiteList != null && advertWebsiteList.size() > 0){
+//    		//添加大于当前时间活动ID
+//    		List<Long> idList = new ArrayList<Long>();
+//        	for (AdvertWebsite advertWebsite : advertWebsiteList) {
+//        		if(advertWebsite.getEndTime().before(new Date())){
+//        			idList.add(advertWebsite.getId());
+//        		}
+//    		}
+//        	
+//        	//修改大于当前时间活动状态为暂停
+//        	if(idList != null && idList.size() > 0){
+//        		params.clear();
+//            	params.put("status", ActivityStatusEnum.STOP.getCode());
+//            	params.put("ids", idList);
+//            	advertWebsiteService.update(params);
+//        	}
+//    	}
+//    }
+//}

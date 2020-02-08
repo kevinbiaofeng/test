@@ -1,0 +1,57 @@
+package com.xjw.service.rake.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.rake.RakeDao;
+import com.xjw.dao.rake.RakeVipDao;
+import com.xjw.entity.po.rake.Rake;
+import com.xjw.service.rake.RakeService;
+import com.xjw.utility.BizException;
+
+@Service
+public class RakeServiceImpl extends BaseServiceImpl<Rake> implements RakeService{
+	
+	@Autowired
+	private RakeDao rakeDao;
+	@Autowired
+	private RakeVipDao rakeVipDao;
+
+	@Override
+	public BaseDaoImpl<Rake> baseDao() {
+		return rakeDao;
+	}
+
+	@Override
+	public Class<Rake> getClazz() {
+		return Rake.class;
+	}
+
+	public Rake queryByRakeType(String rakeType) {
+		if(StringUtils.isNotBlank(rakeType)){
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("rakeType", rakeType);
+			
+			List<Rake> list = super.selectAll(params);
+			if(null != list && list.size() > 0){
+				return list.get(0);
+			}
+		}
+		
+		return null;
+	}
+	
+	public void deleteByRakeType(String rakeType) throws BizException{
+		if(StringUtils.isNotBlank(rakeType)){
+			rakeDao.delete("Rake.deleteByRakeType", rakeType);
+			rakeVipDao.delete("RakeVip.deleteByRakeType", rakeType);
+		}
+	}
+}

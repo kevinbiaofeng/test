@@ -1,0 +1,109 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.math.BigDecimal;
+//import java.util.Calendar;
+//import java.util.GregorianCalendar;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//
+//import org.apache.commons.lang3.time.DateFormatUtils;
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.entity.po.Email;
+//import com.xjw.entity.po.data.SummaryDay;
+//import com.xjw.service.data.SummaryDayService;
+//import com.xjw.service.mail.MailService;
+//import com.xjw.util.FreeMarkerConstant;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class SummaryDayTask extends QuartzJobBean{
+//	private static Logger logger = LoggerFactory.getLogger(SummaryDayTask.class);
+//	
+//	private SummaryDayService summaryDayService;
+//	private MailService mailService;
+//	
+//	public SummaryDayTask(){
+//		summaryDayService = (SummaryDayService) SpringContextHolder.getBean(SummaryDayService.class);
+//		mailService = (MailService) SpringContextHolder.getBean(MailService.class);
+//	}
+//	
+//	@Override
+//	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
+//		Calendar dayTime = Calendar.getInstance();
+//		dayTime.add(Calendar.DATE, -1);
+//
+//		try {
+//			summaryDayService.save(dayTime.getTime());
+//			
+//			Thread.sleep(8000);
+//			
+////			this.sendMail(dayTime);
+//			
+////          初始化数据代码
+////			Calendar startTime = new GregorianCalendar(2016, 9, 27);
+////			Calendar startTime = new GregorianCalendar(2017, 3, 1);
+////			while(startTime.compareTo(dayTime) <= 0){
+////				summaryDayService.save(startTime.getTime());
+////				this.sendMail(startTime);
+////			
+////				startTime.add(Calendar.DATE, 1);
+////			}
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//		}
+//	}
+//	
+//	/** 发送汇总邮件 */
+//	private void sendMail(Calendar dayTime){
+//		String dayString = DateFormatUtils.format(dayTime, "yyyy-MM-dd");
+//		
+//		//该日
+//		Map<String, Object> params = new HashMap<String, Object>();
+//		params.put("dayTime", dayString);
+//		SummaryDay dayData = summaryDayService.selectOne(params);
+//		
+//		Calendar beginTime = new GregorianCalendar(dayTime.get(Calendar.YEAR), dayTime.get(Calendar.MONTH), 1);
+//		
+//		params.clear();
+//		params.put("beginTime", DateFormatUtils.format(beginTime, "yyyy-MM-dd"));
+//		params.put("endTime", dayString);
+//		List<SummaryDay> dayList = summaryDayService.selectAll(params);
+//		
+//		BigDecimal depositAmount = BigDecimal.ZERO;
+//		BigDecimal withdrawalAmount = BigDecimal.ZERO;
+//		BigDecimal totalBetAmount = BigDecimal.ZERO;
+//		BigDecimal totalNetAmount = BigDecimal.ZERO;
+//		BigDecimal promotionAmount = BigDecimal.ZERO;
+//		for(SummaryDay day : dayList){
+//			depositAmount = depositAmount.add(day.getDepositAmount());
+//			withdrawalAmount = withdrawalAmount.add(day.getWithdrawalAmount());
+//			totalBetAmount = totalBetAmount.add(day.getTotalBetAmount());
+//			totalNetAmount = totalNetAmount.add(day.getTotalNetAmount());
+//			promotionAmount =promotionAmount.add(day.getPromotionAmount());
+//		}
+//		
+//		Map<String, Object> monthData = new HashMap<String, Object>();
+//		monthData.put("depositAmount", depositAmount);
+//		monthData.put("withdrawalAmount", withdrawalAmount);
+//		monthData.put("promotionAmount", promotionAmount);
+//		monthData.put("totalBetAmount", totalBetAmount);
+//		monthData.put("totalNetAmount", totalNetAmount);
+//		
+//		Map<String, Object> data = new HashMap<String, Object>();
+//		data.put("dayTime", dayTime.getTime());
+//		data.put("dayData", dayData);
+//		data.put("monthData", monthData);
+//		
+//		Email email = new Email();
+//		email.setTo("zsylar1@gmail.com", "brentastic888@gmail.com");
+//		email.setSubject(dayString + " Statistical Report");
+//		email.setContent(FreeMarkerConstant.SUMMARY_DAY);
+//		mailService.sendMailByFreemarker(email, data);
+//	}
+//}

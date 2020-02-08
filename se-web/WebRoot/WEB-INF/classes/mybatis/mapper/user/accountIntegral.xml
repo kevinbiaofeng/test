@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AccountIntegral">
+    <resultMap id="AccountIntegral" type="AccountIntegral" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="VARCHAR" property="userId" />
+        <result column="TOTAL_MONEY" jdbcType="NUMERIC" property="totalMoney" />
+        <result column="INTEGRAL" jdbcType="NUMERIC" property="integral" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID,USER_ID, TOTAL_MONEY, INTEGRAL, CREATE_TIME, UPDATE_TIME, UPDATE_USER
+    </sql>
+
+    <update id="update" parameterType="AccountIntegral">
+        UPDATE MEMBER_ACCOUNT_INTEGRAL
+        <set>
+            <if test="totalMoney != null">
+                 total_money = #{totalMoney,jdbcType=NUMERIC},
+            </if>
+            <if test="integral != null">
+                 integral = #{integral,jdbcType=NUMERIC},
+            </if>
+            <if test="updateTime != null">
+                 update_time = #{updateTime},
+            </if>
+            <if test="updateUser != null and updateUser != ''">
+                 update_user = #{updateUser},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+    
+    
+    <update id="addIntegral" parameterType="map">
+        UPDATE MEMBER_ACCOUNT_INTEGRAL t SET t.integral = t.integral + #{newIntegral} WHERE USER_ID=#{userId,jdbcType=NUMERIC}
+    </update>
+    <update id="subtractIntegral" parameterType="map">
+        UPDATE MEMBER_ACCOUNT_INTEGRAL t SET t.integral = t.integral - #{subtractIntegral} WHERE USER_ID=#{userId,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="AccountIntegral">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_ACCOUNT_INTEGRAL where ID=#{id, jdbcType=NUMERIC}
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="AccountIntegral">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_ACCOUNT_INTEGRAL
+        <include refid="searchCondition"/>
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	<if test="id != null">
+                AND id = #{id, jdbcType=NUMERIC}
+            </if>
+            <if test="userId != null">
+                AND USER_ID = #{userId, jdbcType=NUMERIC}
+            </if>
+        </where>
+    </sql>
+</mapper>

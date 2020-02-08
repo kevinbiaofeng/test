@@ -1,0 +1,22 @@
+package com.xjw.service.rake;
+
+import java.util.List;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.rake.RakeGameSlot;
+import com.xjw.utility.BizException;
+
+public interface RakeGameSlotService extends BaseServcie<RakeGameSlot> {
+
+	/**
+	 * 查询单条记录
+	 * @param rakeType 返水类别
+	 * @param gameType 游戏类别
+	 */
+	public RakeGameSlot queryOne(String rakeType, String gameType);
+	
+	/**
+	 * 批量保存数据
+	 */
+	public void save(List<RakeGameSlot> slotList) throws BizException;
+}

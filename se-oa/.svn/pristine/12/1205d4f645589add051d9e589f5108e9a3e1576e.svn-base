@@ -1,0 +1,9 @@
+package com.xjw.kzenum.platform;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class NewGameDeviceTypeEnum extends AbstractEnum{
+	public static final EnumBean web = new EnumBean("1001", "电脑端");
+	public static final EnumBean wap = new EnumBean("1002", "手机网页");
+	public static final EnumBean phone = new EnumBean("1003", "手机端");
+}

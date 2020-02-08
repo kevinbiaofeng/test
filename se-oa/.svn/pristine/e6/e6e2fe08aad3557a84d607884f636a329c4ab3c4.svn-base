@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberAmountVo">
+	<resultMap type="com.xjw.entity.vo.user.MemberAmountVo" id="memberAmountVo">
+		<result column="user_id" property="userId" />
+		<result column="login_name" property="loginName" />
+		<result column="register_time" property="registerTime" />
+		<result column="deposit_amount" property="depositAmount" />
+		<result column="withdraw_amount" property="withdrawAmount" />
+		<result column="award_amount" property="awardAmount" />
+		<result column="rake_amount" property="rakeAmount" />
+	</resultMap>
+	
+	<sql id="condition">
+		<where>
+			m.user_id = u.id
+			AND u.type=8
+			<if test="userId != null">
+				AND u.id=#{userId}
+			</if>
+			 <if test="keywords != null">
+				AND u.LOGIN_NAME like concat('%', #{keywords},'%')
+			</if>
+			<if test="loginName != null and loginName != ''">
+				AND u.login_name=#{loginName}
+			</if>
+			<if test="viptype != null and viptype != ''">
+				AND m.vip_type=#{viptype}
+			</if>
+			<if test="viptypes != null and viptypes != '' ">
+				AND m.vip_type in
+				<foreach collection="viptypes" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT 
+        	count(*)
+        FROM pub_user u , member_info m 
+		<include refid="condition" />
+    </select>
+	
+	<select id="selectAll" parameterType="map" resultMap="memberAmountVo">
+		SELECT 
+			u.id AS user_id, 
+			u.login_name, 
+			u.create_time as register_time,
+			(
+				SELECT COALESCE(SUM(trade_amount), 0) 
+				FROM user_deposit_order 
+				WHERE status = 2 AND user_id = u.id
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS deposit_amount, 
+			(
+				SELECT COALESCE(SUM(trade_amount), 0) 
+				FROM user_withdrawal_order 
+				WHERE status = 2 AND user_id = u.id
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS withdraw_amount,
+			(
+				SELECT COALESCE(SUM(money), 0) 
+				FROM member_money_change 
+				WHERE user_id = u.id
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS award_amount,
+			(
+				SELECT COALESCE(SUM(rake_amount), 0) 
+				FROM rake_stat 
+				WHERE user_id = u.id 
+					<if test="beginTime != null and beginTime != ''">
+						AND create_time >= #{beginTime}
+					</if>
+					<if test="endTime != null and endTime != ''">
+						AND create_time <![CDATA[<=]]> #{endTime}
+					</if>
+			) AS rake_amount
+		FROM pub_user u , member_info m 
+ 		<include refid="condition" />
+ 		ORDER BY u.id DESC
+ 		<include refid="base.page" />
+	</select>
+</mapper>

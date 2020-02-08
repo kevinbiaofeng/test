@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Dept">
+	<sql id="searchColumn">
+		ID, NAME, CODE, REMARK, PARENT_ID, CREATE_USER, CREATE_TIME, UPDATE_TIME, UPDATE_USER, STATUS
+	</sql>
+	
+	<resultMap type="Dept" id="dept" extends="base.baseAttr">
+	   <result property="name" column="NAME" ></result>
+	   <result property="code" column="CODE"></result>
+	   <result property="remark" column="REMARK"></result>
+	   <result property="parentId" column="PARENT_ID"></result>
+	</resultMap>
+	
+	<delete id="deleteOne" parameterType="map">
+		DELETE FROM pub_dept
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+		</where>
+	</delete>
+	
+	<update id="delete" parameterType="map">
+		UPDATE pub_dept
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser},status = #{status}
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+	
+	<update id="update" parameterType="map">
+		UPDATE pub_dept
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser}
+			<if test="name != null">
+				,name = #{name}
+			</if>
+			<if test="code != null">
+				,code = #{code}
+			</if>
+			<if test="remark != null">
+				,remark = #{remark}
+			</if>
+			<if test="parentId != null">
+				,parent_id = #{parentId}
+			</if>
+			<if test="status != null">
+				,status = #{status}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO pub_dept
+         (name, code, remark, status, parent_id, create_user, create_time, update_user, update_time) 
+         VALUES 
+         (#{name}, #{code}, #{remark}, #{status}, #{parentId},#{createUser}, #{createTime}, #{updateUser}, #{updateTime})
+    </insert>
+    
+	<select id="selectById" parameterType="long" resultMap="dept">
+		SELECT <include refid="searchColumn" /> FROM pub_dept WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="dept">
+		SELECT <include refid="searchColumn" /> FROM pub_dept
+		<include refid="condition" />
+		ORDER BY id ASC
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(id) FROM pub_dept
+		<include refid="condition" />
+	</select>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="code != null">
+				AND code=#{code}
+			</if>
+			<if test="statusList != null">
+				AND status in
+				<foreach collection="statusList" item="status" index="index" open="(" separator="," close=")">
+				#{status}
+		        </foreach>
+			</if>
+			<if test="ids != null">
+				 id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+</mapper>

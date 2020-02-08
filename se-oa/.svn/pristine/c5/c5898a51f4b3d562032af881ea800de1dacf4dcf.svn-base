@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RakeVip">
+	<resultMap type="RakeVip" id="rakeVip" extends="base.baseAttr">
+       	<result column="rake_type" property="rakeType" />
+       	<result column="vip_type" property="vipType" />
+       	<result column="ratio" property="ratio" />
+       	<result column="threshold_amount" property="thresholdAmount" />
+       	<result column="max_amount" property="maxAmount" />
+	</resultMap>
+	
+	<sql id="base_column">
+		rake_type, vip_type, ratio, threshold_amount, max_amount
+	</sql>
+	<sql id="where_condition">
+		<where>
+			<if test="rakeType != null and rakeType != ''">
+				AND rake_type = #{rakeType}
+			</if>
+			<if test="vipType != null">
+				AND vip_type = #{vipType}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectAll" parameterType="map" resultMap="rakeVip">
+		SELECT <include refid="base_column" /> FROM rake_vip
+		<include refid="where_condition" />
+		ORDER BY vip_type ASC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(id) FROM rake_vip
+		<include refid="where_condition" />
+	</select>
+
+	<insert id="save" parameterType="map">
+        INSERT INTO rake_vip(rake_type, vip_type, ratio, threshold_amount, max_amount) 
+        VALUES (#{rakeType}, #{vipType}, #{ratio}, #{thresholdAmount}, #{maxAmount})
+	</insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE rake_vip
+		<set> 
+			<if test="ratio != null">ratio = #{ratio},</if>
+        	<if test="thresholdAmount != null">threshold_amount = #{thresholdAmount}, </if>
+        	<if test="maxAmount != null">max_amount = #{maxAmount}, </if>
+        </set>
+        WHERE rake_type = #{rakeType} AND vip_type = #{vipType}
+	</update>
+	
+	<delete id="deleteOne" parameterType="map">
+		DELETE FROM rake_vip  WHERE rake_type = #{rakeType} AND vip_type = #{vipType} 
+	</delete>
+	
+	<delete id="deleteByRakeType" parameterType="String">
+		DELETE FROM rake_vip  WHERE rake_type = #{rakeType}
+	</delete>
+</mapper>

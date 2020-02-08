@@ -1,0 +1,28 @@
+package com.xjw.entity.form.file;
+
+import com.xjw.entity.form.BaseForm;
+
+public class VideoForm extends BaseForm {
+	private static final long serialVersionUID = 1752240807127110596L;
+	
+	/** 素材编号 */
+	private String num;
+	/** 类型  {link VideoTypeEnum} */
+	private Integer type;
+
+	public String getNum() {
+		return num;
+	}
+
+	public void setNum(String num) {
+		this.num = num;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+}

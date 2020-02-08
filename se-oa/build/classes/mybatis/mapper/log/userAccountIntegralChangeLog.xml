@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserAccountIntegralChangeLog">
+    <resultMap id="UserAccountIntegralChangeLog" type="UserAccountIntegralChangeLog" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="MONEY" jdbcType="NUMERIC" property="money" />
+        <result column="TOTAL_MONEY" jdbcType="NUMERIC" property="totalMoney" />
+        <result column="RED_PROFIT" jdbcType="NUMERIC" property="redProfit" />
+        <result column="INTEGRAL" jdbcType="NUMERIC" property="integral" />
+        <result column="TABLE_NAME" jdbcType="VARCHAR" property="tableName" />
+        <result column="BUSINESS_TABLE_ID" jdbcType="NUMERIC" property="businessTableId" />
+        <result column="ORDER_NO" jdbcType="NUMERIC" property="orderNo" />
+        <result column="CREATE_USER" jdbcType="NUMERIC" property="createUser" />
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="IP_ADDRESS" jdbcType="VARCHAR" property="ipAddress" />
+        <result column="TYPE" jdbcType="NUMERIC" property="type" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="GAME_TYPE" jdbcType="NUMERIC" property="gameType" />
+        <result column="MULTIPLE" jdbcType="NUMERIC" property="multiple" />
+        <result column="change_type" property="changeType" />
+		<result column="act_id" property="actId" />
+		<result column="PLATFORM_BALANCE" jdbcType="NUMERIC" property="platformBalance" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID, t.USER_ID,t.MONEY,t.TOTAL_MONEY,t.INTEGRAL,t.TABLE_NAME,t.BUSINESS_TABLE_ID, t.ORDER_NO, 
+        t.CREATE_USER,t.CREATE_TIME, t.IP_ADDRESS, t.TYPE, t.REMARK, t.RED_PROFIT, u.LOGIN_NAME USER_NAME,
+        t.GAME_TYPE, t.MULTIPLE, t.change_type, t.act_id, t.PLATFORM_BALANCE
+    </sql>
+
+    <insert id="save" parameterType="UserAccountIntegralChangeLog">
+        INSERT INTO USER_ACCOUNT_INTEGRAL_CHANGE_LOG (
+        USER_ID, MONEY, TOTAL_MONEY, RED_PROFIT, INTEGRAL, TABLE_NAME, BUSINESS_TABLE_ID, ORDER_NO,CREATE_USER,CREATE_TIME,IP_ADDRESS, 
+        REMARK, TYPE, GAME_TYPE, MULTIPLE, CHANGE_TYPE, ACT_ID, PLATFORM_BALANCE
+        ) VALUES (
+        #{userId,jdbcType=NUMERIC},
+        #{money,jdbcType=NUMERIC},
+        #{totalMoney,jdbcType=NUMERIC},
+        #{redProfit,jdbcType=NUMERIC},
+        #{integral,jdbcType=NUMERIC},
+        #{tableName,jdbcType=VARCHAR},
+        #{businessTableId,jdbcType=NUMERIC},
+        #{orderNo,jdbcType=VARCHAR},
+        #{createUser,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP},
+        #{ipAddress,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR},
+        #{type,jdbcType=NUMERIC},
+        #{gameType,jdbcType=NUMERIC},
+        #{multiple,jdbcType=NUMERIC}, 
+        #{changeType},
+        #{actId},
+        #{platformBalance}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="long" resultMap="UserAccountIntegralChangeLog">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_ACCOUNT_INTEGRAL_CHANGE_LOG t
+        LEFT JOIN PUB_USER u on u.id = t.user_id
+        where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.ID) FROM USER_ACCOUNT_INTEGRAL_CHANGE_LOG t 
+        LEFT JOIN PUB_USER u on u.id = t.user_id
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="UserAccountIntegralChangeLog">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM USER_ACCOUNT_INTEGRAL_CHANGE_LOG t
+        LEFT JOIN PUB_USER u ON u.id = t.user_id
+        <include refid="searchCondition"/>
+        ORDER BY ID DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="userId != null">
+                AND t.USER_ID = #{userId,jdbcType=NUMERIC}
+            </if>
+            <if test="money != null">
+                AND t.MONEY = #{money,jdbcType=NUMERIC}
+            </if>
+            <if test="integral != null">
+                AND t.INTEGRAL = #{integral,jdbcType=NUMERIC}
+            </if>
+            <if test="tableName != null">
+                AND t.TABLE_NAME = #{tableName,jdbcType=VARCHAR}
+            </if>
+            <if test="businessTableId != null">
+                AND t.BUSINESS_TABLE_ID = #{businessTableId,jdbcType=NUMERIC}
+            </if>
+            <if test="gameType != null">
+                AND t.GAME_TYPE = #{gameType,jdbcType=NUMERIC}
+            </if>
+            <if test="beginTime != null">
+                AND t.CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="userName != null">
+				AND (u.LOGIN_NAME like '%' #{userName} '%')
+			</if>
+            <if test="type != null">
+                AND t.TYPE = #{type,jdbcType=NUMERIC}
+            </if>
+        </where>
+    </sql>
+</mapper>

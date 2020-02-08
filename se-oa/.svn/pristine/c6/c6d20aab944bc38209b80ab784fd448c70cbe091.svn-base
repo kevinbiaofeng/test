@@ -1,0 +1,111 @@
+package com.xjw.controller.sys;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.xjw.controller.BaseController;
+import com.xjw.entity.Page;
+import com.xjw.entity.form.notice.NoticePromptForm;
+import com.xjw.entity.po.notice.NoticePrompt;
+import com.xjw.kzenum.notice.NoticePromptTypeEnum;
+import com.xjw.kzenum.sys.YesORNoEnum;
+import com.xjw.service.notice.NoticePromptService;
+import com.xjw.utility.BizException;
+
+@Controller
+@RequestMapping("/notice/prompt")
+public class NoticePromptController extends BaseController {
+	private static final Logger logger = LoggerFactory.getLogger(NoticePromptController.class);
+	
+	@Autowired
+	private NoticePromptService noticePromptService;
+	
+	@RequestMapping("/list")
+	public String index(NoticePromptForm form, Model model) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("status", YesORNoEnum.YES.getCode());
+		params.put("name", form.getName());
+		params.put("platformType", form.getPlatformType());
+		
+		
+		try {
+			Page<NoticePrompt> page =  noticePromptService.getPage(params, form.getPageNo(), form.getPageSize());
+			model.addAttribute("page", page);
+		} catch (BizException e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		model.addAttribute("form", form);
+		return "public/notice/prompt/list";
+	}
+	
+	@RequestMapping("new")
+	public String editNew(){
+		return "public/notice/prompt/edit";
+	}
+	
+	@RequestMapping("edit")
+	public String editNew(@RequestParam("id") Long id, Model model){
+		NoticePrompt prompt = noticePromptService.selectById(id);
+		model.addAttribute("prompt", prompt);
+		return "public/notice/prompt/edit";
+	}
+	
+	@RequestMapping("save")
+	public String save(NoticePrompt prompt){
+		prompt.setType(Integer.valueOf(NoticePromptTypeEnum.GAME.getCode()));
+		
+		if(null == prompt.getId()){	//新增
+			try {
+				noticePromptService.save(prompt);
+				this.writerSuccessJSONDataById("新增成功", "/notice/prompt/new", null, "/notice/prompt/list", null);
+			}catch (Exception e) {
+				writerJSONData("failure", "新增失败", null, "/notice/prompt/list");
+				logger.error(e.getMessage(), e);
+				logger.error("---fill---:" + e.fillInStackTrace());
+				logger.error("---msg---:"+ e.getMessage());
+				logger.error("---e---:" + e.toString());
+		    }
+		}else{	//更新
+			try {
+				noticePromptService.update(prompt);
+				this.writerSuccessJSONDataById("编辑成功", null, "/notice/prompt/edit?id=" + prompt.getId(), "/notice/prompt/list", null);
+			}catch (Exception e) {
+				writerJSONData("failure", "编辑失败", null, "/notice/prompt/list");
+				logger.error(e.getMessage(), e);
+				logger.error("---fill---:" + e.fillInStackTrace());
+				logger.error("---msg---:"+ e.getMessage());
+				logger.error("---e---:" + e.toString());
+		    }	
+		}
+		
+		return null;
+	}
+	
+	@RequestMapping("delete")
+	public String delete(@RequestParam("id") Long id){
+		if(null != id){
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("status", YesORNoEnum.NO.getCode());
+			params.put("id", id);
+			try {
+				noticePromptService.update(params);
+			} catch (BizException e) {
+				logger.error(e.getMessage(), e);
+				logger.error("---fill---:" + e.fillInStackTrace());
+				logger.error("---msg---:"+ e.getMessage());
+				logger.error("---e---:" + e.toString());
+			}
+		}
+		
+		return "redirect:/notice/prompt/list" ;
+	}
+}

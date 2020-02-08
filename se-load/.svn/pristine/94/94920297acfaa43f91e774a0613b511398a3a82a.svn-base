@@ -1,0 +1,128 @@
+package com.xjw.service.user.impl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.common.util.Constant;
+import com.xjw.common.util.FreeMarkerConstant;
+import com.xjw.dao.user.MemberDao;
+import com.xjw.entity.po.Email;
+import com.xjw.entity.po.user.Member;
+import com.xjw.entity.po.user.User;
+import com.xjw.entity.vo.user.UserVo;
+import com.xjw.kzenum.sys.YesORNoEnum;
+import com.xjw.kzenum.user.UserTypeAllEnum;
+import com.xjw.service.mail.MailService;
+import com.xjw.service.user.MemberService;
+import com.xjw.service.user.UserService;
+import com.xjw.util.GetAddressByIp;
+import com.xjw.util.PwdRandom;
+import com.xjw.utility.BizException;
+import com.xjw.utility.DateUtil;
+import com.xjw.utility.EncryptUtil;
+import com.xjw.utility.StringUtil;
+
+@Service
+public class MemberServiceImpl extends BaseServiceImpl<Member> implements MemberService {
+	
+	@Resource
+	private MemberDao memberDao;
+	@Resource
+	private UserService userService;
+	@Autowired
+	private MailService mailService;
+	
+	public User createMember(UserVo userVo, String ip) throws BizException{
+		userVo.setRegName(userVo.getRegName().toLowerCase());	//用户账号统一小写
+		
+		User user = new User();
+		user.setType(Integer.valueOf(UserTypeAllEnum.HY.getCode()));
+		user.setLoginName(userVo.getRegName());
+		user.setPwd(EncryptUtil.encode(Constant.DateEncryptManage.PWD_PWD, userVo.getRegPwd()));
+		user.setRegisterIp(ip);
+		try{
+			user.setRegisterIpCityInfo(GetAddressByIp.GetAddressByIp01(ip));
+		}catch(Exception e){
+			user.setRegisterIpCityInfo("");
+		}
+		user.setSessionSid(PwdRandom.getSessionId(user.getLoginName()));
+		user.setSessionSidTime(DateUtil.formatStr(DateUtil.addDays(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"), "yyyy-MM-dd HH:mm:ss", 7), "yyyy-MM-dd HH:mm:ss"));
+		user = userService.save(user);
+
+		Member member = new Member();
+		member.setUserId(user.getId());
+		member.setSex(userVo.getGender());
+		member.setName(EncryptUtil.encode(Constant.DateEncryptManage.NAME_PWD, userVo.getUserName()));
+		member.setPhone(EncryptUtil.encode(Constant.DateEncryptManage.PHONE_PWD, userVo.getPhone()));
+		member.setEmail(EncryptUtil.encode(Constant.DateEncryptManage.EMAIL_PWD, userVo.getEmail()));
+		member.setQq(EncryptUtil.encode(Constant.DateEncryptManage.QQ_PWD, userVo.getQq()));
+		member.setVipType(0);
+		member.setBirthday(DateUtil.formatStr(userVo.getBirthday() + " 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+		String agentCode = userVo.getAgentCode();
+		if(StringUtil.isNotBlank(agentCode) && (agentCode.equals("2288") || agentCode.equals("6688"))){
+			member.setPrivacyFlag(Integer.valueOf(YesORNoEnum.NO.getCode()));
+		}else{
+			member.setPrivacyFlag(Integer.valueOf(YesORNoEnum.YES.getCode()));
+		}
+		this.save(member);
+		return user;
+	}
+	
+	public Member decodeMember(Member member){
+		member.setName(EncryptUtil.decode(Constant.DateEncryptManage.NAME_PWD, member.getName()));
+		member.setPhone(EncryptUtil.decode(Constant.DateEncryptManage.PHONE_PWD, member.getPhone()));
+		member.setEmail(EncryptUtil.decode(Constant.DateEncryptManage.EMAIL_PWD, member.getEmail()));
+		member.setQq(EncryptUtil.decode(Constant.DateEncryptManage.QQ_PWD, member.getQq()));
+		return member;
+	}
+	
+	public Member getMemberByUserId(Long userId){
+		Map<String, Object> condition = new HashMap<String, Object>();
+		condition.put("userId", userId);
+		return this.selectOne(condition);
+	}
+	
+	@Override
+	public Class<Member> getClazz() {
+		return Member.class;
+	}
+
+	@Override
+	public BaseDaoImpl<Member> baseDao() {
+		return memberDao;
+	}
+
+	public void updateMemberPwd(Long userId) throws BizException {
+		String pwd = PwdRandom.getRandomString(8);
+		
+		Member member;
+		try {
+			member = this.getMemberByUserId(userId);
+		} catch (Exception e) {
+			throw new BizException(e);
+		}
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("id", userId);
+		params.put("pwd", EncryptUtil.encode(Constant.DateEncryptManage.PWD_PWD, pwd));
+		userService.update(params);
+		
+		//发送邮件
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("password", pwd);
+				
+		Email email = new Email();
+		email.setTo(EncryptUtil.decode(Constant.DateEncryptManage.EMAIL_PWD, member.getEmail()));
+		email.setSubject("老司機重置登录密码通知");
+		email.setContent(FreeMarkerConstant.PASSWORD_RESET);		
+		mailService.sendMailByFreemarker(email, model);
+	}
+}

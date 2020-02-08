@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserRoleRel">
+	<sql id="searchColumn">
+		t.ID, t.USER_ID, t.ROLE_ID, t.CREATE_USER, t.CREATE_TIME, t.UPDATE_TIME, t.UPDATE_USER, r.NAME
+	</sql>
+	
+	<resultMap type="UserRoleRel" id="userRoleRel" extends="base.baseAttr">
+	   <result property="userId" column="USER_ID" javaType="long"></result>
+	   <result property="roleId" column="ROLE_ID" javaType="long"></result>
+	   <result property="name" column="NAME"></result>
+	</resultMap>
+	
+	<delete id="deleteOne" parameterType="map">
+		DELETE FROM pub_user_role_rel
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="userId != null">
+				AND user_id=#{userId}
+			</if>
+			<if test="roleId != null">
+				AND role_id=#{roleId}
+			</if>
+			<if test="userIds != null">
+				 user_id IN
+				<foreach collection="userIds" item="user_id" index="index" open="(" separator="," close=")">
+				#{user_id}
+		        </foreach>
+			</if>
+		</where>
+	</delete>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO pub_user_role_rel
+         (user_id, role_id, create_user, create_time, update_user, update_time) 
+         VALUES 
+         (#{userId}, #{roleId}, #{createUser}, #{createTime}, #{updateUser}, #{updateTime})
+    </insert>
+    
+    <insert id="saveRecordBatch" parameterType="map">
+         INSERT INTO pub_user_role_rel
+         (user_id, role_id, create_user, create_time, update_user, update_time) 
+         VALUES
+         <foreach collection="list" item="item" index="index" separator="," > 
+	        (#{item.userId}, #{item.roleId}, #{item.createUser}, #{item.createTime}, #{item.updateUser}, #{item.updateTime})
+	     </foreach>
+    </insert>
+	
+	<update id="update" parameterType="map">
+		UPDATE pub_user_role_rel
+		<set>
+			update_time = #{updateTime},update_user = #{updateUser}
+			<if test="roleId != null">
+				,role_id = #{roleId}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				AND id = #{id}
+			</if>
+			<if test="ids != null">
+				AND id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+	<select id="selectById" parameterType="long" resultMap="userRoleRel">
+		SELECT <include refid="searchColumn" /> FROM pub_user_role_rel t, pub_role r WHERE id=#{id} and r.id=t.role_id
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="userRoleRel">
+		SELECT <include refid="searchColumn" /> FROM pub_user_role_rel t, pub_role r
+		<include refid="condition" />
+		ORDER BY t.id ASC
+	</select>
+	
+	<sql id="condition">
+		<where>
+			and r.id=t.role_id
+			<if test="id != null">
+				AND t.id=#{id}
+			</if>
+			<if test="roleId != null">
+				AND t.role_id=#{roleId}
+			</if>
+			<if test="userId != null">
+				AND t.user_id=#{userId}
+			</if>
+			<if test="userIds != null">
+				AND t.user_id IN
+				<foreach collection="userIds" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+			<if test="ids != null">
+				AND t.id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+</mapper>

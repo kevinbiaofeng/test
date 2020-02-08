@@ -1,0 +1,28 @@
+package com.xjw.service.api;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public interface MGGameService {
+	
+	/**
+	 * 新版本MG游戏 获取余额
+	 * @param userId
+	 * @param gameType
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<String, Object> getNewGameBalance(String userId) throws Exception;
+	
+	/**
+	 * 新版本MG游戏 户内转账
+	 * @param userId
+	 * @param gameType
+	 * @return
+	 * @throws Exception
+	 */
+	public Map<String, Object> createNewGameTransferOrder(String userId, String gameType, BigDecimal credit, String type, String fromFunction) throws Exception;
+}

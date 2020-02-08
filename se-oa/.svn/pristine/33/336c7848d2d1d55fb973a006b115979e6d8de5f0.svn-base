@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MessageUser">
+	<resultMap type="MessageUser" id="messageUser" extends="base.baseAttr">
+       	<result column="message_id" property="messageId" />
+       	<result column="receive_user" property="receiveUser" />
+       	<result column="receive_name" property="receiveName" />
+       	<result column="read_status" property="readStatus" />
+       	<result column="read_time" property="readTime" />
+	</resultMap>
+	
+	<sql id="base_column">
+		id, message_id, receive_user, receive_name, read_status, read_time
+	</sql>
+	<sql id="where_condition">
+		<where>
+			<if test="messageId != null and messageId != ''">
+				AND message_id = #{messageId}
+			</if>
+			<if test="receiveName != null and receiveName != ''">
+				AND receive_name = #{receiveName}
+			</if>
+			<if test="readStatus != null">
+				AND read_status = #{readStatus}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectAll" parameterType="map" resultMap="messageUser">
+		SELECT <include refid="base_column" /> FROM message_user
+		<include refid="where_condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(*) FROM message_user
+		<include refid="where_condition" />
+	</select>
+	
+    <insert id="save" parameterType="map">
+        INSERT INTO message_user(message_id, receive_user, receive_name, read_status, read_time) 
+        	VALUES(#{messageId}, #{receiveUser}, #{receiveName}, #{readStatus}, #{readTime})
+    </insert>
+    
+    <delete id="deleteById" parameterType="long">
+    	DELETE FROM message_user WHERE id = #{id} 
+    </delete>
+    
+    <delete id="deleteByMessageId" parameterType="long">
+    	DELETE FROM message_user WHERE message_id = #{messageId}
+    </delete>
+    
+</mapper>

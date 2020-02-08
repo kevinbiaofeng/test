@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Agent">
+	<sql id="searchColumn">
+		u.ID, u.LOGIN_NAME, u.PWD, u.CREATE_TIME, t.NAME, t.EMAIL, t.SEX, t.PHONE, t.BANK_TYPE, t.BANK_CARD, t.BANK_ADDRESS, t.PROMOTION_CODE, t.promotion_url,
+		 t.QQ, t.id agentId, u.STATUS, t.BIRTHDAY, t.remark
+	</sql>
+	
+	<resultMap type="Agent" id="agent" extends="base.baseAttr">
+	   <result column="LOGIN_NAME" property="loginName"/>
+	   <result column="PWD" property="pwd" />
+	   <result column="AGENTID" property="agentId"/>
+	   <result column="NAME" jdbcType="VARCHAR" property="name" />
+	   <result column="QQ" jdbcType="VARCHAR" property="qq" />
+       <result column="EMAIL" jdbcType="VARCHAR" property="email" />
+       <result column="SEX" jdbcType="NUMERIC" property="sex" />
+       <result column="PHONE" jdbcType="VARCHAR" property="phone" />
+       <result column="BIRTHDAY" property="birthday" ></result>
+       <result column="BANK_TYPE" jdbcType="NUMERIC" property="bankType" />
+       <result column="BANK_CARD" jdbcType="VARCHAR" property="bankCard" />
+       <result column="BANK_ADDRESS" jdbcType="VARCHAR" property="bankAddress" />
+       <result column="PROMOTION_CODE" jdbcType="VARCHAR" property="promotionCode" />
+       <result column="promotion_url" jdbcType="VARCHAR" property="promotionUrl" />
+       <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+	</resultMap>
+	
+	<update id="delete" parameterType="map">
+		UPDATE agent_info
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser}
+			<if test="status != null">
+				,status = #{status}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+
+	<update id="update" parameterType="map">
+		UPDATE agent_info
+		<set>
+			<if test="name != null">
+                 NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                 EMAIL = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                 SEX = #{sex,jdbcType=NUMERIC},
+            </if>
+            <if test="phone != null">
+                 PHONE = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="bankType != null">
+                 BANK_TYPE = #{bankType,jdbcType=NUMERIC},
+            </if>
+            <if test="birthday != null">
+                 BIRTHDAY = #{birthday,jdbcType=TIMESTAMP},
+            </if>
+            <if test="bankCard != null">
+                 BANK_CARD = #{bankCard,jdbcType=VARCHAR},
+            </if>
+            <if test="bankAddress != null">
+                 BANK_ADDRESS = #{bankAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="promotionCode != null">
+                 PROMOTION_CODE = #{promotionCode,jdbcType=VARCHAR},
+            </if>
+			<if test="promotionUrl != null">
+                 promotion_url = #{promotionUrl},
+            </if>
+            <if test="qq != null">
+                 QQ = #{qq,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+		</where>
+	</update>
+	
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO AGENT_INFO (
+        NAME, USER_ID, EMAIL,SEX,PHONE,BANK_TYPE,BANK_CARD,BANK_ADDRESS,PROMOTION_CODE, promotion_url, QQ,BIRTHDAY,REMARK
+        ) VALUES (
+        #{name,jdbcType=VARCHAR},
+        #{userId,jdbcType=NUMERIC},
+        #{email,jdbcType=VARCHAR},
+        #{sex,jdbcType=NUMERIC},
+        #{phone,jdbcType=VARCHAR},
+        #{bankType,jdbcType=NUMERIC},
+        #{bankCard,jdbcType=VARCHAR},
+        #{bankAddress,jdbcType=VARCHAR},
+        #{promotionCode,jdbcType=VARCHAR},
+        #{promotionUrl,jdbcType=VARCHAR},
+        #{qq,jdbcType=VARCHAR},
+        #{birthday,jdbcType=TIMESTAMP},
+        #{remark,jdbcType=VARCHAR}
+        )
+    </insert>
+
+	<select id="selectById" parameterType="long" resultMap="agent">
+		SELECT <include refid="searchColumn" /> FROM pub_user u LEFT JOIN agent_info t on u.id = t.user_id WHERE u.id=#{id} and type=2
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="agent">
+		select <include refid="searchColumn" /> FROM pub_user u 
+ 			LEFT JOIN agent_info t ON u.id = t.user_id
+ 			<include refid="condition" />
+ 			ORDER BY u.status ASC, u.create_time DESC
+ 			<include refid="base.page" />
+	</select>
+	
+    <select id="selectAllCount" resultType="long">
+        SELECT count(u.id) FROM pub_user u 
+ 			LEFT JOIN agent_info t ON u.id = t.user_id
+ 			<include refid="condition" />
+ 			<include refid="base.page" />
+    </select>
+    
+	<sql id="condition">
+		<where>
+			AND u.type=2
+			<if test="id != null">
+				AND u.id=#{id, jdbcType=NUMERIC}
+			</if>
+			<if test="keywords != null">
+				AND (u.login_name like '%' #{keywords} '%')
+			</if>
+			<if test="loginName != null">
+				AND (u.login_name like '%' #{loginName} '%' or t.name like '%' #{loginName} '%')
+			</if>
+			<if test="promotionCode != null">
+				AND t.promotion_code=#{promotionCode}
+			</if>
+			<if test="promotionUrl != null">
+                AND t.promotion_url = #{promotionUrl}
+            </if>
+			<if test="userIdList != null">
+				AND u.id in
+				<foreach collection="userIdList" item="s" index="index" open="(" separator="," close=")">
+					#{s}
+		        </foreach>
+			</if>
+			<if test="statusList != null">
+				AND u.STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>		
+		</where>
+	</sql>
+</mapper>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberMoneyChange">
+    <resultMap id="memberMoneyChange" type="MemberMoneyChange" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="MONEY" jdbcType="NUMERIC" property="money" />
+        <result column="INTEGRAL" jdbcType="NUMERIC" property="integral" />
+        <result column="MULTIPLE" jdbcType="NUMERIC" property="multiple" />
+        <result column="DEPOSIT_ORDER_NO" jdbcType="VARCHAR" property="depositOrderNo" />
+		<result column="CHANGE_TYPE" property="changeType" />
+		<result column="ACT_ID" property="actId" />
+		<result column="ACT_TYPE" property="actType" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName" />
+        <result column="PLATFORM_TYPE" jdbcType="NUMERIC" property="platformType" />
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID, t.USER_ID, t.MONEY, t.INTEGRAL, t.MULTIPLE, t.DEPOSIT_ORDER_NO, t.CHANGE_TYPE, t.ACT_ID, t.PLATFORM_TYPE, t.CREATE_TIME, t.START_TIME, t.END_TIME, a.type ACT_TYPE
+    </sql>
+	
+	
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO MEMBER_MONEY_CHANGE (
+        	USER_ID,MONEY,INTEGRAL,MULTIPLE, CHANGE_TYPE, ACT_ID, REMARK,CREATE_USER,CREATE_TIME, PLATFORM_TYPE, DEPOSIT_ORDER_NO
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{money,jdbcType=NUMERIC},
+	        #{integral,jdbcType=NUMERIC},
+	        #{multiple,jdbcType=NUMERIC},
+	        #{changeType},
+	        #{actId},
+	        #{remark,jdbcType=VARCHAR},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{platformType,jdbcType=NUMERIC},
+	        #{depositOrderNo}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="long" resultMap="memberMoneyChange">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_MONEY_CHANGE t 
+        LEFT JOIN sys_activity a on a.id = t.act_id
+        where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.id) FROM MEMBER_MONEY_CHANGE t
+        LEFT JOIN sys_activity a on a.id = t.act_id
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="memberMoneyChange">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_MONEY_CHANGE t
+        LEFT JOIN SYS_ACTIVITY a ON a.id = t.act_id
+        <include refid="searchCondition"/>
+        ORDER BY CREATE_TIME DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="userId != null">
+                AND t.USER_ID = #{userId,jdbcType=NUMERIC}
+            </if>
+            <if test="minMoney != null">
+                AND t.MONEY >= #{minMoney}
+            </if>
+            <if test="money != null">
+                AND t.MONEY = #{money,jdbcType=NUMERIC}
+            </if>
+            <if test="integral != null">
+                AND t.INTEGRAL = #{integral,jdbcType=NUMERIC}
+            </if>
+            <if test="multiple != null">
+                AND t.MULTIPLE = #{multiple,jdbcType=NUMERIC}
+            </if>
+            <if test="depositOrderNo != null">
+                AND t.DEPOSIT_ORDER_NO = #{depositOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="changeType != null">
+                AND t.CHANGE_TYPE = #{changeType}
+            </if>
+            <if test="actIdIsNotNull != null">
+                AND t.ACT_ID is not null
+            </if>
+			<if test="actId != null">
+                AND t.ACT_ID = #{actId}
+            </if>
+            <if test="endTimeIsNull != null">
+                AND t.END_TIME is null
+            </if>
+            <if test="startTimeIsNotNull != null">
+                AND t.START_TIME is not null
+            </if>
+            <if test="endTime != null">
+                AND t.END_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="platformType != null">
+                AND t.PLATFORM_TYPE = #{platformType, jdbcType=NUMERIC}
+            </if>
+            <if test="type != null">
+                AND a.TYPE = #{type, jdbcType=NUMERIC}
+            </if>
+            
+           <if test="beginCreateTime != null">
+                AND t.CREATE_TIME >= #{beginCreateTime}
+            </if>
+            <if test="endCreateTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endCreateTime}
+            </if>
+        </where>
+    </sql>
+
+</mapper>
+

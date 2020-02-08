@@ -1,0 +1,16 @@
+package com.xjw.service.file;
+
+import java.util.Map;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.Page;
+import com.xjw.entity.po.file.Material;
+import com.xjw.utility.BizException;
+
+public interface MaterialService extends BaseServcie<Material>{
+	
+	public Material selectByNum(String num);
+	
+	public Page<Material> getPageByVideo(Map<String, Object> params, Integer pageNo, Integer pageSize) throws BizException;
+
+}

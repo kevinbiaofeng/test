@@ -1,0 +1,81 @@
+package com.xjw.entity.po.file;
+
+import com.xjw.base.entity.BasePo;
+
+/**
+ * 视频
+ */
+public class Video extends BasePo {
+	private static final long serialVersionUID = 1948543892161729652L;
+
+	/** 编号 */
+	private String materialNum;
+	/** 标题 */
+	private String title;
+	/** 路径 */
+	private String path;
+	/** 类型  {link VideoTypeEnum} */
+	private Integer type;
+	/** 关键字 */
+	private String keyword;
+	/** 收藏数量 */
+	private Integer favoriteCount;
+	/** 点击数量 */
+	private Integer clickCount;
+
+	public String getMaterialNum() {
+		return materialNum;
+	}
+
+	public void setMaterialNum(String materialNum) {
+		this.materialNum = materialNum;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
+
+	public Integer getFavoriteCount() {
+		return favoriteCount;
+	}
+
+	public void setFavoriteCount(Integer favoriteCount) {
+		this.favoriteCount = favoriteCount;
+	}
+
+	public Integer getClickCount() {
+		return clickCount;
+	}
+
+	public void setClickCount(Integer clickCount) {
+		this.clickCount = clickCount;
+	}
+}

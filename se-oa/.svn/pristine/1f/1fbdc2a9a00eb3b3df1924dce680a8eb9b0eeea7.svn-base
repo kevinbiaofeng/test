@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Member">
+	<sql id="searchColumn">
+		u.ID, u.LOGIN_NAME, u.PWD, t.BIRTHDAY, u.REGISTER_IP, u.CREATE_TIME, t.NAME, t.EMAIL, t.SEX, t.PHONE, t.QQ, t.id memberId, t.VIP_TYPE, u.STATUS, u.LOGIN_IP
+		,u.LOGIN_TIME, u.LOGIN_IP_CITY_INFO, u.REGISTER_IP_CITY_INFO, u.PARENT_ID, u.USER_NAME, t.privacy_flag
+		<!-- 获取用户余额、积分 -->
+		<if test="getBalance != null">
+		, s.TOTAL_MONEY, s.INTEGRAL
+		</if>
+		<!-- 获取存、提款总和数据   group by d.user_id ,group by w.user_id -->
+		<if test="getOrderAmount != null">
+		,(select sum(d.trade_amount) from user_deposit_order d where d.user_id = u.id and d.status = 2 ) deposit_amount,
+		(select sum(w.trade_amount) from user_withdrawal_order w where w.user_id = u.id and w.status = 2 ) withdrawal_amount
+		</if>
+		<!-- 获取电销记录 -->
+		<if test="getCallList != null">
+			,d.CALLCS_STATUS, d.CALLCS_TYPE
+		</if>
+	</sql>
+	
+	<sql id="memberColumn">
+		u.ID, u.LOGIN_NAME, u.PWD, t.BIRTHDAY, u.REGISTER_IP, u.CREATE_TIME, t.NAME, t.EMAIL, t.SEX, t.PHONE, t.QQ, t.id memberId, t.VIP_TYPE, u.STATUS, u.LOGIN_IP
+		,u.LOGIN_TIME, u.LOGIN_IP_CITY_INFO, u.REGISTER_IP_CITY_INFO, u.PARENT_ID, u.USER_NAME, t.privacy_flag
+	</sql>
+	
+	<resultMap type="Member" id="member" extends="base.baseAttr">
+	   <result column="LOGIN_NAME" property="loginName"/>
+	   <result column="USER_NAME" property="userName"/>
+	   <result column="PWD" property="pwd"></result>
+	   <result column="MEMBERID" property="memberId" ></result>
+	   <result column="NAME" jdbcType="VARCHAR" property="name" />
+	   <result column="QQ" jdbcType="VARCHAR" property="qq" />
+       <result column="EMAIL" jdbcType="VARCHAR" property="email" />
+       <result column="SEX" jdbcType="NUMERIC" property="sex" />
+       <result column="VIP_TYPE" jdbcType="NUMERIC" property="vipType" />
+       <result column="PHONE" jdbcType="VARCHAR" property="phone" />
+       <result column="REGISTER_IP" jdbcType="VARCHAR" property="registerIp" />
+       <result column="LOGIN_IP" jdbcType="VARCHAR" property="loginIp" />
+       <result column="BIRTHDAY" property="birthday" ></result>
+       <result column="LOGIN_TIME" property="loginTime" ></result>
+       <result column="LOGIN_IP_CITY_INFO" property="loginIpCityInfo" ></result>
+       <result column="REGISTER_IP_CITY_INFO" property="registerIpCityInfo" ></result>
+       <result column="PARENT_ID" property="parentId" />
+       <result column="TOTAL_MONEY" property="totalMoney" />
+       <result column="INTEGRAL" property="integral" />
+       <result column="PRIVACY_FLAG" property="privacyFlag" />
+       <result column="DEPOSIT_AMOUNT" property="depositAmount" />
+       <result column="WITHDRAWAL_AMOUNT" property="withdrawalAmount" />
+       <result column="CALLCS_STATUS" property="callcsStatus" />
+       <result column="CALLCS_TYPE" property="callcsType" />
+	</resultMap>
+	
+	<update id="delete" parameterType="map">
+		UPDATE member_info
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser}
+			<if test="status != null">
+				,status = #{status}
+			</if>
+		</set>
+		<where>
+			<if test="id != null">
+				and id=#{id}
+			</if>
+		</where>
+	</update>
+
+	<update id="update" parameterType="map">
+		UPDATE member_info
+		<set>
+			<if test="name != null">
+                 NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null">
+                 EMAIL = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                 SEX = #{sex,jdbcType=NUMERIC},
+            </if>
+            <if test="phone != null">
+                 PHONE = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="qq != null">
+                 QQ = #{qq,jdbcType=VARCHAR},
+            </if>
+            <if test="vipType != null">
+                 VIP_TYPE = #{vipType},
+            </if>
+             <if test="privacyFlag != null and privacyFlag != ''">
+                 privacy_flag = #{privacyFlag},
+            </if>
+		</set>
+		<where>
+			<if test="memberId != null">
+				and id=#{memberId}
+			</if>
+		</where>
+	</update>
+	
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO member_info (
+        NAME, USER_ID, EMAIL, SEX, PHONE, QQ, VIP_TYPE
+        ) VALUES (
+        #{name,jdbcType=VARCHAR},
+        #{userId,jdbcType=NUMERIC},
+        #{email,jdbcType=VARCHAR},
+        #{sex,jdbcType=NUMERIC},
+        #{phone,jdbcType=VARCHAR},
+        #{qq,jdbcType=VARCHAR},
+        #{vipType}
+        )
+    </insert>
+	
+	<select id="selectById" parameterType="long" resultMap="member">
+		SELECT <include refid="searchColumn" /> FROM pub_user u 
+		LEFT JOIN member_info t on u.id = t.user_id
+		<if test="getBalance != null">
+		LEFT JOIN member_account_integral s on u.id = s.user_id
+		</if>
+		<if test="getCallList != null">
+		LEFT JOIN member_callcs_detail d on u.id = d.user_id
+		</if>
+		WHERE u.id=#{id} and u.type=8
+	</select>
+    
+	<select id="selectAll" parameterType="map" resultMap="member">
+		select <include refid="searchColumn" /> FROM pub_user u 
+ 			LEFT JOIN MEMBER_INFO t on u.id = t.user_id
+ 			<if test="getBalance != null">
+			LEFT JOIN MEMBER_ACCOUNT_INTEGRAL s on u.id = s.user_id
+			</if>
+ 			<if test="getCallList != null">
+ 				LEFT JOIN MEMBER_CALLCS_DETAIL d on u.id = d.user_id
+ 			</if>
+ 			<include refid="condition" />
+ 			ORDER BY u.id DESC
+ 			<include refid="base.page" />
+	</select>
+	
+    <select id="selectAllCount" resultType="long">
+        SELECT count(u.id) FROM pub_user u 
+        LEFT JOIN MEMBER_INFO t on u.id = t.user_id
+        <if test="getBalance != null">
+			LEFT JOIN MEMBER_ACCOUNT_INTEGRAL s on u.id = s.user_id
+		</if>
+		<if test="getCallList != null">
+		LEFT JOIN MEMBER_CALLCS_DETAIL d on u.id = d.user_id
+		</if>
+		<include refid="condition" />
+		<include refid="base.page" />
+    </select>
+    
+	
+	<sql id="condition">
+		<where>
+			AND u.type=8
+			<if test="id != null">
+				AND u.id=#{id, jdbcType=NUMERIC}
+			</if>
+			<if test="userId != null">
+				AND t.user_id=#{userId, jdbcType=NUMERIC}
+			</if>
+			<if test="status != null">
+				AND u.status=#{status, jdbcType=NUMERIC}
+			</if>
+			<if test="loginName != null">
+				AND u.login_name=#{loginName, jdbcType=VARCHAR}
+			</if>
+			<if test="keywords != null">
+				AND (
+				u.login_name = #{keywords}
+				OR t.name = #{keywordsName}
+<!-- 				or t.phone like '%' #{keywordsPhone} '%' -->
+<!-- 				or t.email like '%' #{keywordsEmail} '%' -->
+<!-- 				or t.qq like '%' #{keywordsQQ} '%' -->
+<!-- 				or u.register_ip like '%'  #{keywords} '%' -->
+				)
+			</if>
+			<if test="beginTime != null">
+                AND u.CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND u.CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="parentId != null">
+                AND u.PARENT_ID = #{parentId}
+            </if>
+            <if test="parentIdList != null">
+				AND u.PARENT_ID in
+				<foreach collection="parentIdList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+			<if test="getCallList != null ">
+				<if test="callcsType != null">
+                	AND d.CALLCS_TYPE = #{callcsType}
+                </if>
+                <if test="beginCallcsTime != null">
+	                AND d.update_time >= #{beginCallcsTime, jdbcType=TIMESTAMP}
+	            </if>
+	            <if test="endCallcsTime != null">
+	                AND d.update_time <![CDATA[<=]]> #{endCallcsTime, jdbcType=TIMESTAMP}
+	            </if>
+            </if>
+		</where>
+	</sql>
+	
+	<!-- 查询代理的下线用户数量 -->
+    <select id="selectCountByAgent" parameterType="map" resultType="int">
+	    SELECT count(id) FROM pub_user 
+	    WHERE parent_id IN 
+			<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+				#{_pId}
+		    </foreach>
+	    	<if test="beginTime != null">
+	    		AND create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+    
+    <!-- 查询代理用户的信息 -->
+	<select id="selectAgentById" parameterType="long" resultMap="member">
+		SELECT <include refid="memberColumn" /> 
+		FROM pub_user u 
+		LEFT JOIN member_info t 
+			ON u.id = t.user_id
+		WHERE u.id=#{userId} 
+			AND u.type=2
+	</select>
+</mapper>

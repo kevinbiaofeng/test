@@ -1,0 +1,73 @@
+package com.xjw.entity.po.rake;
+
+import com.xjw.base.entity.BasePo;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+import com.xjw.kzenum.sys.YesORNoEnum;
+
+/**
+ * 返水配置-老虎机游戏
+ */
+public class RakeGameSlot extends BasePo {
+	private static final long serialVersionUID = 2680269420790918810L;
+
+	/** 返水类型 {@link RakeTypeEnum} */
+	private String rakeType;
+	/** 游戏类别 参考文档 */
+	private String gameType;
+	/** 游戏英文名 */
+	private String enName;
+	/** 游戏中文名 */
+	private String zhName;
+	/** 游戏繁体名 */
+	private String trName;
+	/** 是否返水  {@link YesORNoEnum}} */
+	private Integer status;
+
+	public String getRakeType() {
+		return rakeType;
+	}
+
+	public void setRakeType(String rakeType) {
+		this.rakeType = rakeType;
+	}
+
+	public String getGameType() {
+		return gameType;
+	}
+
+	public void setGameType(String gameType) {
+		this.gameType = gameType;
+	}
+
+	public String getEnName() {
+		return enName;
+	}
+
+	public void setEnName(String enName) {
+		this.enName = enName;
+	}
+
+	public String getZhName() {
+		return zhName;
+	}
+
+	public void setZhName(String zhName) {
+		this.zhName = zhName;
+	}
+
+	public String getTrName() {
+		return trName;
+	}
+
+	public void setTrName(String trName) {
+		this.trName = trName;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+}

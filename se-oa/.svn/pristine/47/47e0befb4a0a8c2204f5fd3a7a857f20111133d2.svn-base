@@ -1,0 +1,37 @@
+package com.xjw.entity.po.rake;
+
+import com.xjw.base.entity.BasePo;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+
+/**
+ * 返水配置
+ */
+public class Rake extends BasePo {
+	private static final long serialVersionUID = -1156784055236305008L;
+
+	/** 返水类型 {@link RakeTypeEnum} */
+	private String rakeType;
+	/** 返水名称 */
+	private String rakeName;
+	/** 备注 */
+	private String remark;
+	
+	public String getRakeType() {
+		return rakeType;
+	}
+	public void setRakeType(String rakeType) {
+		this.rakeType = rakeType;
+	}
+	public String getRakeName() {
+		return rakeName;
+	}
+	public void setRakeName(String rakeName) {
+		this.rakeName = rakeName;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+}

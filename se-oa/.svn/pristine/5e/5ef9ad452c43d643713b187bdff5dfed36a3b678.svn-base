@@ -1,0 +1,47 @@
+package com.xjw.service.rake.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.rake.RakeVipDao;
+import com.xjw.entity.po.rake.RakeVip;
+import com.xjw.service.rake.RakeVipService;
+import com.xjw.utility.BizException;
+
+@Service
+public class RakeVipServiceImpl extends BaseServiceImpl<RakeVip> implements RakeVipService {
+
+	@Autowired
+	private RakeVipDao rakeVipDao;
+	
+	public RakeVip selectOne(String rakeType, Integer vipType) {
+		if(StringUtils.isBlank(rakeType) || null == vipType){
+			return null;
+		}
+		
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("rakeType", rakeType);
+		params.put("vipType", vipType);
+		return super.selectOne(params);
+	}
+	
+	public void deleteByRakeType(String rakeType) throws BizException {
+		rakeVipDao.delete("RakeVip.deleteByRakeType", rakeType);
+	}
+	
+	@Override
+	public BaseDaoImpl<RakeVip> baseDao() {
+		return rakeVipDao;
+	}
+
+	@Override
+	public Class<RakeVip> getClazz() {
+		return RakeVip.class;
+	}
+}

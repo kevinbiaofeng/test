@@ -1,0 +1,14 @@
+package com.xjw.kzenum.platform.ag;
+
+import com.xjw.kzenum.AbstractEnum;
+/**
+ * 结算状态 4.7
+ */
+public class FlagEnum extends AbstractEnum {
+	 public static final EnumBean YJS = new EnumBean("1", "已结算");
+	 public static final EnumBean WJS = new EnumBean("0", "未结算");
+	 public static final EnumBean CZSWED = new EnumBean("-1", "重置试玩额度");
+	 public static final EnumBean ZDBCG = new EnumBean("-2", "注单被篡改");
+	 public static final EnumBean QXZDJZD = new EnumBean("-8", "取消指定局注单");
+	 public static final EnumBean QXZD = new EnumBean("-9", "取消注单");
+}

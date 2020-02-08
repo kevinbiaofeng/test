@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VipConfig">
+	<resultMap type="VipConfig" id="vipConfig" extends="base.baseAttr">
+	   <result property="level" column="level"/>
+	   <result property="monthDepositAmount" column="month_deposit_amount"/>
+	   <result property="weekBetAmount" column="week_bet_amount"/>
+	   <result property="monthChipAmount" column="month_chip_amount"/>
+	</resultMap>
+
+	<sql id="searchColumn">
+		`id`, `level`, `month_deposit_amount`, `week_bet_amount`, `month_chip_amount`
+	</sql>
+	
+	<sql id="where_condition">
+		1=1
+		<if test="level != null">
+			AND `level` = #{level}
+		</if>
+	</sql>
+	
+	<select id="selectAll" parameterType="map" resultMap="vipConfig">
+		SELECT <include refid="searchColumn" /> 
+		FROM sys_vip_config
+		WHERE <include refid="where_condition" />
+		ORDER BY `level` ASC
+	</select>
+</mapper>

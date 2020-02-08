@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="OfficialMember">
+	<resultMap type="OfficialMember" id="officialMember" extends="base.baseAttr">
+		<result column="user_id" property="userId" />
+		<result column="login_name" property="loginName" />
+		<result column="deposit_Amout" property="depositAmout" />
+		<result column="deposit_count" property="depositCount" />
+		<result column="withdrawal_Amout" property="withdrawalAmout" />
+		<result column="withdrawal_count" property="withdrawalCount" />
+		<result column="hlmoney" property="hlmoney" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+	 <sql id="whereCondition">
+    	WHERE
+    		<!-- u.type = 8  AND u.status = 1  -->
+  			u.parent_id is null AND u.type != '2'
+  			and u.id in (
+			select  t.USER_ID from USER_DEPOSIT_ORDER t 
+			where 
+				t.TRADE_AMOUNT > 0
+				<if test="beginTime != null">
+		    		AND t.CREATE_TIME >= #{beginTime}
+		    	</if>
+				<if test="endTime != null">
+					AND t.CREATE_TIME <![CDATA[<=]]> #{endTime}
+				</if>
+				group by t.user_id 
+			  )
+          	<if test="loginName != null and loginName != ''">
+				AND login_name = #{loginName}
+          	</if>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER u
+        <include refid="whereCondition"/>
+    </select>
+    
+    <!-- 查询官网会员存款金额、存款笔数、提款金额、提款笔数、红利金额、注册时间 -->
+    <select id="selectAll" parameterType="map" resultMap="officialMember">
+    	select u.id, u.login_name, u.create_time,
+			( SELECT IFNULL(sum(o.trade_amount), 0) FROM user_deposit_order o  
+				WHERE u.id = o.user_id 
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND  o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) deposit_Amout ,
+			( SELECT count(o.trade_amount) FROM user_deposit_order o  
+				WHERE u.id = o.user_id  
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) deposit_count ,
+			(SELECT IFNULL(sum(o.trade_amount), 0) FROM user_withdrawal_order o 
+				where o.user_id=u.id
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) withdrawal_Amout,
+			(SELECT count(o.trade_amount) FROM user_withdrawal_order o 
+				where o.user_id=u.id 
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND o.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND o.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) withdrawal_count,
+			(select IFNULL(SUM(M.MONEY),0) FROM MEMBER_MONEY_CHANGE M 
+				where m.user_id = u.id
+				<if test="beginTime != null and beginTime != ''">
+               	 	AND m.CREATE_TIME >= #{beginTime}
+            	</if>
+            	<if test="endTime != null and endTime != ''">
+               	 	AND m.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            	</if>
+			) hlmoney
+		from pub_user u 
+		<include refid="whereCondition"/>
+		ORDER BY id DESC 
+       <include refid="base.page" />
+    </select>
+	
+	<!-- 查询官网会员的会员数量 -->
+    <select id="selectCountByOfficialMember" parameterType="map" resultType="int">
+	    SELECT count(id) FROM pub_user u
+	    WHERE u.parent_id is null and u.type != '2'
+	    	<if test="beginTime != null">
+	    		AND create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+	
+	<sql id="sum_where_condition">
+    	1 = 1
+		AND u.parent_id is null  and u.type != '2'
+    	<if test="beginLocalTime != null and beginLocalTime != ''">
+			AND d.local_time >= #{beginLocalTime}
+		</if>
+		<if test="endLocalTime != null and endLocalTime != ''">
+			AND d.local_time <![CDATA[<=]]> #{endLocalTime}
+		</if>
+    </sql>
+	
+	<!-- 查询AG国际的投注总额 -->
+    <select id="selectSumBetAmountByAggj" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u ON d.user_id = u.id
+		WHERE d.platform_type='AGIN'
+			AND <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询AG急速的投注总额 -->
+    <select id="selectSumBetAmountByAgjs" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM ag_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE d.platform_type='AG'
+			AND <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询PT的投注总额 -->
+    <select id="selectSumBetAmountByPt" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM pt_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询MG的投注总额 -->
+    <select id="selectSumBetAmountByMg" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM mg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询XIN的投注总额 -->
+    <select id="selectSumBetAmountByXin" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM xin_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询Fish的投注总额 -->
+    <select id="selectSumBetAmountByFish" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.cost), 0) 
+    	FROM fish_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+     <!-- 查询sb的投注总额 -->
+    <select id="selectSumBetAmountBySb" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM sb_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询qp的投注总额 -->
+    <select id="selectSumBetAmountByQp" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM qp_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询ttg的投注总额 -->
+    <select id="selectSumBetAmountByTtg" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM ttg_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+    
+    <!-- 查询endo的投注总额 -->
+    <select id="selectSumBetAmountByEndo" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(SUM(d.valid_bet_amount), 0) 
+    	FROM endo_play_game_data d 
+    	LEFT JOIN pub_user u
+			ON d.user_id = u.id
+		WHERE <include refid="sum_where_condition"/>
+    </select>
+	 
+	<!-- 查询官网的会员存款总额 -->
+    <select id="selectDepositAmountByOfficialMember" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(sum(o.trade_amount), 0) FROM user_deposit_order o
+		LEFT JOIN pub_user u  ON u.id = o.user_id
+		WHERE o.status = 2
+			AND u.parent_id is null and u.type != '2'
+			<if test="beginTime != null">
+	    		AND o.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND o.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+	
+	<!-- 查询代理的下属会员提款总额 -->
+    <select id="selectWithdrawalAmountByOfficialMember" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT IFNULL(sum(o.trade_amount), 0) FROM user_withdrawal_order o
+		LEFT JOIN pub_user u  ON u.id = o.user_id
+		WHERE o.status = 2
+			AND u.parent_id is null and u.type != '2'
+			<if test="beginTime != null">
+	    		AND o.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND o.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+    
+    <!-- 查询官网会员存款总额 -->
+    <select id="selectMMCAmountByOfficialMember" parameterType="map" resultType="java.math.BigDecimal">
+    	select IFNULL(SUM(M.MONEY),0) FROM MEMBER_MONEY_CHANGE M
+		LEFT JOIN pub_user u ON u.id = m.user_id
+		WHERE 
+			u.parent_id is null and u.type != '2'
+			<if test="beginTime != null">
+	    		AND m.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND m.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+    
+    <!-- 查询官网会员有存款的人员，也叫活跃会员 -->
+     <select id="selectAllCountByOfficialUser" parameterType="map" resultType="long">
+        select count(*) from PUB_USER u
+         where u.parent_id is null and u.type != '2'
+           and u.id in (
+			select  t.USER_ID from USER_DEPOSIT_ORDER t 
+			where 
+				t.TRADE_AMOUNT > 0
+				<if test="beginTime != null">
+		    		AND t.CREATE_TIME >= #{beginTime}
+		    	</if>
+				<if test="endTime != null">
+					AND t.CREATE_TIME <![CDATA[<=]]> #{endTime}
+				</if>
+				group by t.user_id 
+			  )
+    </select>
+	
+</mapper>

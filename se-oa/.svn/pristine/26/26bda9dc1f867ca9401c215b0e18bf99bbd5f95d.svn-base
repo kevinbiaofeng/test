@@ -1,0 +1,62 @@
+package com.xjw.entity.po.rake;
+
+import java.math.BigDecimal;
+
+import com.xjw.base.entity.BasePo;
+import com.xjw.kzenum.rake.RakeTypeEnum;
+import com.xjw.kzenum.user.MemberVIPTypeEnum;
+
+public class RakeVip extends BasePo {
+	private static final long serialVersionUID = 7201740683833685951L;
+	
+	/** 返水类型 {@link RakeTypeEnum} */
+	private String rakeType;
+	/** VIP等级 {@link MemberVIPTypeEnum} */
+	private Integer vipType;
+	/** 返水比 */
+	private BigDecimal ratio;
+	/** 返水门槛金额 */
+	private BigDecimal thresholdAmount;
+	/** 返水最高金额 */
+	private BigDecimal maxAmount;
+
+	public String getRakeType() {
+		return rakeType;
+	}
+
+	public void setRakeType(String rakeType) {
+		this.rakeType = rakeType;
+	}
+
+	public Integer getVipType() {
+		return vipType;
+	}
+
+	public void setVipType(Integer vipType) {
+		this.vipType = vipType;
+	}
+
+	public BigDecimal getRatio() {
+		return ratio;
+	}
+
+	public void setRatio(BigDecimal ratio) {
+		this.ratio = ratio;
+	}
+
+	public BigDecimal getThresholdAmount() {
+		return thresholdAmount;
+	}
+
+	public void setThresholdAmount(BigDecimal thresholdAmount) {
+		this.thresholdAmount = thresholdAmount;
+	}
+
+	public BigDecimal getMaxAmount() {
+		return maxAmount;
+	}
+
+	public void setMaxAmount(BigDecimal maxAmount) {
+		this.maxAmount = maxAmount;
+	}
+}

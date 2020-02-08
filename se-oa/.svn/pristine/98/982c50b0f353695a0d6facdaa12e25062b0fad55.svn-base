@@ -1,0 +1,12 @@
+package com.xjw.service.rake;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.rake.RakeVip;
+import com.xjw.utility.BizException;
+
+public interface RakeVipService extends BaseServcie<RakeVip>{
+	
+	public RakeVip selectOne(String rakeType, Integer vipType);
+	
+	public void deleteByRakeType(String rakeType) throws BizException;
+}

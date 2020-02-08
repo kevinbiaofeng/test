@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="NoticePrompt">
+	<sql id="searchColumn">
+		ID, NAME, TYPE, CONTENT, AMOUNT, PLATFORM_TYPE, WIN_TIME, STATUS, CREATE_TIME
+	</sql>
+	
+	<resultMap type="NoticePrompt" id="noticePrompt" extends="base.baseAttr">
+	   <result property="name" column="NAME" ></result>
+	   <result property="type" column="TYPE"></result>
+	   <result property="content" column="CONTENT"></result>
+	   <result property="amount" column="AMOUNT"></result>
+	   <result property="winTime" column="WIN_TIME"></result>
+	   <result property="platformType" column="PLATFORM_TYPE"></result>
+	   <result property="status" column="STATUS"></result>
+	   <result property="createTime" column="CREATE_TIME"></result>
+	</resultMap>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND ID = #{id}
+			</if>
+			<if test="name != null and name != ''">
+				AND NAME = #{name}
+			</if>
+			<if test="platformType != null">
+				AND PLATFORM_TYPE = #{platformType}
+			</if>
+			<if test="status != null">
+				AND STATUS = #{status}
+			</if>
+			<if test="beginTime != null">
+                AND CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+		</where>
+	</sql>
+	
+    <select id="selectById" parameterType="long" resultMap="noticePrompt">
+		SELECT <include refid="searchColumn" /> FROM PUB_NOTICE_PROMPT WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="noticePrompt">
+		SELECT <include refid="searchColumn" /> FROM PUB_NOTICE_PROMPT
+		<include refid="condition" />
+		ORDER BY WIN_TIME DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+        SELECT count(id) FROM PUB_NOTICE_PROMPT
+		<include refid="condition" />
+    </select>
+    
+    <update id="update" parameterType="map">
+    	 UPDATE PUB_NOTICE_PROMPT
+    	 <set>
+    	 	<if test="null != name and content != ''">
+    	 		NAME = #{name},
+    	 	</if>
+    	 	<if test="null != content and content != ''">
+				CONTENT = #{content},
+			</if>
+    	 	<if test="null != amount">
+    	 		AMOUNT = #{amount},
+    	 	</if>
+    	 	<if test="null != winTime">
+    	 		WIN_TIME = #{winTime},
+    	 	</if>
+    	 	<if test="null != platformType">
+    	 		PLATFORM_TYPE = #{platformType},
+    	 	</if>
+    	 	<if test="null != status">
+    	 		STATUS = #{status},
+    	 	</if>
+    	 </set>
+    	 WHERE ID = #{id}
+    </update>
+    
+	<insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO PUB_NOTICE_PROMPT(NAME, TYPE, CONTENT, AMOUNT, PLATFORM_TYPE, WIN_TIME, STATUS, CREATE_USER, CREATE_TIME) 
+         VALUES (#{name}, #{type}, #{content}, #{amount}, #{platformType}, #{winTime}, #{status}, #{createUser}, #{createTime})
+    </insert>
+	
+	
+</mapper>

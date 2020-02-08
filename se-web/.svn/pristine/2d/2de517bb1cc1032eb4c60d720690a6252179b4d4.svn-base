@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="renderer" content="webkit" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE;chrome=1" />
+		<title>首页游戏列表</title>
+    	<meta name="keywords" content="
+老司機,
+老司機官网" />
+		<meta name="description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		<meta property="og:title" content="
+老司機官网-在线老虎机娱乐场游戏|
+老司機" />
+		<meta property="og:description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		
+		<link href="../plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    	<link href="../css/common.css" rel="stylesheet" />
+    	<script src="../plugins/jquery/1.11.1/jquery.min.js"></script>
+    	<script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    	<!--[if lte IE 9]>
+		<script src="${statics}/js/respond.min.js"></script>
+		<script src="${statics}/js/html5shiv.min.js"></script>
+		<![endif]-->
+		
+		<style>
+			canvas {position: absolute; left:0; top:0; opacity: 0.6; width:100%; height:100%;}
+		
+			.g1-panel{background: #000000; border-bottom: #ff204f solid 3px; text-align: center; position: relative;}
+			.g1-tabs{border: 0px;}
+			.g1-tabs li{margin: 0 90px;}
+			.g1-tabs a{opacity: 0.5; background: bottom center!important; -webkit-transition: all 0ms ease-in-out!important; -moz-transition: all 0ms ease-in-out!important; -o-transition: all 0ms ease-in-out!important; transition: all 0ms ease-in-out!important;}
+			.g1-tabs a:hover, .g1-tabs a:focus {border-color: transparent!important; opacity: 1.0;}
+			
+			.g1-tabs > li.active > a,
+  			.g1-tabs > li.active > a:hover,
+  			.g1-tabs > li.active > a:focus {
+    			border-color: transparent!important;
+  				/*background: url(http://600edf.com:8880/richman/home/images/pink-arrow.png) no-repeat bottom center!important; */
+  				opacity: 1.0;
+  			}
+			
+			.g1-tabs .g1-bg{display: block; width:160px; height:225px; background:url(../images/index/games/games-menu_icon.png) no-repeat;}
+			.g1-tabs .g1-bg-slot{background-position: 0px 0px;}
+			.g1-tabs .g1-bg-sport{background-position: -176px -6px;}
+			.g1-tabs .g1-bg-live{background-position: -349px -3px;}
+			.g1-tabs .g1-name{position: absolute; bottom:10px; left:35px; font-size: 30px; color: #fffefc;}
+		
+			.game-panel{width: 100%; height: 488px; background: #f2f2f2 none repeat scroll 0 0;}
+			.slot-tabs{width: 100%; height: 58px; background: #6322b6; margin-bottom: 40px;}
+			.slot-tabs ul{margin: 0px 120px;}
+			.slot-tabs li{margin-top:17px; float: left; font-size: 18px; width: 33%; text-align: center;}
+			.slot-tabs a{color: #fff; display: block;}
+			.slot-tabs li.active,.slot-tabs a:hover{text-shadow:0 0 0.3em #fe5600, -0 -0 0.3em #fe5600; text-decoration: none; color: #e0d505;}
+			
+			.slot-box{width:150px; height:150px; margin-bottom: 15px; position: relative; display: block; overflow: hidden!important; border-radius: 20px; box-shadow:0 2px 4px #000}
+			.slot-box-lg{height:315px; width:100%; box-shadow:0 0px 0px #FFFFFF}
+			.slot-box .slot-name{position: absolute; bottom: 0px; left: 0px; text-align: center; width: 100%; font-size: 11px; font-weight: 600; z-index: 6; background: rgba(0,0,0,0.7); padding: 15px; color: #fff;}
+			
+			.slot-box .slot-img{height:100%;}
+			.slot-box .slot-img img{display:block; margin: 0px auto; max-width: 100%; height: 100%;}
+			
+			.slot-box .btn{width:80%;margin-top:12px;  color: #FFFFFF; border-radius: 20px;}
+			.slot-box .btn-play{background-color: #78069D;}
+			.slot-box .btn-free{background-color: #301A58;}
+			
+			.slot-effect .slot-overlay {text-align:center; width:100%; height:100%; position:absolute; top:0; left:0; opacity:0; background-color:rgba(0,0,0,0.5); -webkit-transition:all .4s ease-in-out; transition:all .4s ease-in-out;}
+			.slot-effect img {position:relative; -webkit-transition:all .4s linear; transition:all .4s linear;}
+			.slot-effect .btn:hover {box-shadow:0 0 5px #fff;}
+			.slot-effect:hover img {-ms-transform:scale(1.1); -webkit-transform:scale(1.1); transform:scale(1.1);}
+			.slot-effect:hover .slot-overlay {opacity:1; filter:alpha(opacity=100);}
+			.slot-effect:hover .btn {opacity:1; filter:alpha(opacity=100); -ms-transform:translatey(0); -webkit-transform:translatey(0); transform:translatey(0);}
+			.slot-effect:hover .btn {-webkit-transition-delay:.2s; transition-delay:.2s;}
+			
+			.sport-box{height:500px; background: url('../images/index/games/sport/sport_bg.jpg') no-repeat scroll center top; position: relative;}
+    		.sport-box a{position: absolute; width:200px; line-height:50px; top:150px; left:50%; margin-left:-90px; background-color:#50C15B; color:#FAFAFA; border-radius:20px; box-shadow: 0 0 5px 5px #D0D0AA; font: bold 25px arial; letter-spacing: 10px;}
+    		.sport-box a:hover{background-color: #BBBB39; color: #FAFAFA;}
+    		
+    		.live-box{height:653px; background: url('../images/index/games/live/live_bg.jpg') no-repeat scroll center top;}
+    		.live-box .live-btn-group{padding-top: 20px; text-indent:-9999em;}
+    		.live-box .live-btn-group .live-btn{float: left; margin-left:60px; width: 220px; height: 80px; background:url(../images/index/games/live/live_btn.png) no-repeat; }
+    		.live-box .live-btn-group .live-btn-aggj{background-position: 0 0px;}
+    		.live-box .live-btn-group .live-btn-agjs{background-position: -222px 0px;}
+    		.live-box .live-btn-group .live-btn-ptzr{background-position: -444px 0px;}
+    		.live-box .live-btn-group .live-btn-agzr{background-position: -666px 0px;}
+    		.live-box .live-poster{display:block; text-align: center;}
+		</style>
+	</head>
+	<body>
+    	<div class="g1-panel">
+    		<canvas id="canvas-bottom"></canvas>
+			<canvas id="canvas-top"></canvas>
+			<script src="../js/canvas-particle.js"></script>
+    		<div class="container">
+    			<div class="row">
+    				<div class="col-md-12">
+    					<img src="../images/index/games/game_word.png"/>
+    					
+    					<div style="margin:20px; display:block;">
+    						<ul class="nav nav-tabs g1-tabs" role="tablist">
+    							<li class="active" role="presentation">
+    								<a href="#slotPanel" aria-controls="slotPanel" role="tab" data-toggle="tab">
+    									<i class="g1-bg g1-bg-slot"></i>
+	    								<span class="g1-name">电子游戏</span>
+    								</a>
+    							</li>
+    							<li role="presentation">
+    								<a href="#sportPanel" aria-controls="sportPanel" role="tab" data-toggle="tab">
+    									<i class="g1-bg g1-bg-sport"></i>
+	    								<span class="g1-name">体育游戏</span>
+    								</a>
+    							</li>
+    							<li role="presentation">
+    								<a href="#livePanel" aria-controls="livePanel" role="tab" data-toggle="tab">
+    									<i class="g1-bg g1-bg-live"></i>
+	    								<span class="g1-name">真人游戏</span>
+    								</a>
+    							</li>
+    						</ul>
+    					</div>
+    				</div>
+    			</div>
+    		</div>
+    	</div>
+    	
+    	<div class="tab-content">
+	    	<!-- 电子游戏 -->
+	    	<div id="slotPanel" class="tab-pane active game-panel" role="tabpanel">
+				<div class="slot-tabs">
+	   				<ul>
+		    			<li class="active">
+		    				<a class="slot-tab" href="javascript:;">XIN平台</a>
+		    			</li>
+		    			<li>
+		    				<a class="slot-tab" href="javascript:;">PT平台</a>
+		    			</li>
+		    			<li>
+		    				<a class="slot-tab" href="javascript:;">MG平台</a>
+		    			</li>
+		    		</ul>
+	   			</div>
+	    		<div class="container">
+	    			<div class="row">
+		    			<div class="col-md-4">
+		    				<div class="slot-box slot-box-lg">
+		    					<div class="slot-img">
+		    						<img src="../images/index/games/slot/999.png" alt="星海博彩"/>
+		    					</div>
+		    				</div>
+		    			</div>
+		    			<div class="col-md-8">
+		    				<div class="row">
+		    					<div class="col-md-3">
+		    						<div class="slot-box slot-effect">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    							
+		    							<div class="slot-overlay">
+	           								<a href="javascript:;" class="btn btn-play">立即开始</a>
+	           								<a href="javascript:;" class="btn btn-free">免费试玩</a>
+	        							</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>		
+		    				</div>
+		    				<div class="row">
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>
+		    					<div class="col-md-3">
+		    						<div class="slot-box">
+		    							<div class="slot-img">
+		    								<img src="../images/index/games/slot/172px_icons.jpg" alt="星海博彩"/>
+		    							</div>
+		    							<div class="slot-name">游戏名称</div>
+		    						</div>
+		    					</div>		
+		    				</div>
+		    			</div>
+	    			</div>
+	    		</div>
+	    	</div>
+	    	
+	    	<!-- 体育 -->
+	    	<div id="sportPanel" class="tab-pane game-panel" role="tabpanel">
+	    		<div class="sport-box">
+	    			<a href="javascript:;" class="btn bulge">进入游戏</a>
+	    		</div>
+	    	</div>
+	    	
+	    	<!-- 真人 -->
+	    	<div id="livePanel" class="tab-pane game-panel" role="tabpanel">
+	    		<div class="live-box">
+	    			<div class="container">
+	    				<div class="live-btn-group">
+	    					<a href="javascript:;" class="live-btn live-btn-aggj bulge">AG国际</a>
+	    					<a href="javascript:;" class="live-btn live-btn-agjs bulge">AG急速</a>
+	    					<a href="javascript:;" class="live-btn live-btn-ptzr bulge">PT真人</a>
+	    					<a href="javascript:;" class="live-btn live-btn-agzr bulge">AG真人</a>
+						</div>
+		    			<div class="live-poster">
+		    				<img src="../images/index/games/live/live_person.png"/>
+		    			</div>
+	    			</div>
+	    		</div>
+	    	</div>
+	    </div>
+	</body>
+</html>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Rake">
+	<resultMap type="Rake" id="rake" extends="base.baseAttr">
+       	<id column="rake_type" property="rakeType" />
+       	<result column="rake_name" property="rakeName" />
+       	<result column="remark" property="remark" />
+	</resultMap>
+	
+	<sql id="base_column">
+		rake_type, rake_name, remark, create_user, create_time, update_user, update_time
+	</sql>
+	<sql id="where_condition">
+		<where>
+			<if test="rakeType != null and rakeType != ''">
+				AND rake_type = #{rakeType}
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectAll" parameterType="map" resultMap="rake">
+		SELECT <include refid="base_column" /> FROM rake
+		<include refid="where_condition" />
+		ORDER BY CREATE_TIME DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(*) FROM rake
+		<include refid="where_condition" />
+	</select>
+	
+	<update id="update" parameterType="map">
+		UPDATE rake
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser},
+			<if test="remark != null">
+				 remark = #{remark},
+			</if>
+		</set>
+		WHERE rake_type = #{rakeType}
+	</update>
+	
+    <insert id="save" parameterType="rake">
+        INSERT INTO rake(rake_type, rake_name, remark, create_user, create_time) 
+        	VALUES(#{rakeType}, #{rakeName}, #{remark}, #{createUser}, #{createTime})
+    </insert>
+    
+    <delete id="deleteByRakeType" parameterType="String">
+    	DELETE FROM rake where rake_type = #{rakeType}
+    </delete>
+    
+</mapper>

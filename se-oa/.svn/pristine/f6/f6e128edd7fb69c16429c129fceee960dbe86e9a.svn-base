@@ -1,0 +1,11 @@
+package com.xjw.dao.rake;
+
+import org.springframework.stereotype.Repository;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.entity.po.rake.Rake;
+
+@Repository
+public class RakeDao extends BaseDaoImpl<Rake>{
+
+}

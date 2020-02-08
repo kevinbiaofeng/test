@@ -1,0 +1,24 @@
+package com.xjw.kzenum.platform;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class SBGameTypeEnum extends AbstractEnum {
+	public static final EnumBean SOCCER = new EnumBean("1", "Soccer");
+//	public static final EnumBean BASKETBALL = new EnumBean("2", "Basketball");
+//	public static final EnumBean BASKETBALL = new EnumBean("3", "Football");
+//	public static final EnumBean BASKETBALL = new EnumBean("4", "Ice Hockey");
+//	public static final EnumBean BASKETBALL = new EnumBean("5", "Tennis");
+//	public static final EnumBean BASKETBALL = new EnumBean("6", "Volleyball");
+//	public static final EnumBean BASKETBALL = new EnumBean("7", "Billiards");
+//	public static final EnumBean BASKETBALL = new EnumBean("8", "Baseball");
+//	public static final EnumBean BASKETBALL = new EnumBean("9", "Badminton");
+//	public static final EnumBean BASKETBALL = new EnumBean("10", "Golf");
+//	public static final EnumBean BASKETBALL = new EnumBean("11", "Motorsports");
+//	public static final EnumBean BASKETBALL = new EnumBean("12", "Swimming");
+//	public static final EnumBean BASKETBALL = new EnumBean("13", "Politics");
+//	public static final EnumBean BASKETBALL = new EnumBean("14", "Water Polo");
+//	public static final EnumBean BASKETBALL = new EnumBean("15", "Diving");
+//	public static final EnumBean BASKETBALL = new EnumBean("16", "Boxing");
+//	public static final EnumBean BASKETBALL = new EnumBean("17", "Archery");
+//	public static final EnumBean BASKETBALL = new EnumBean("18", "Water Polo");
+}

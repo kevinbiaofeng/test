@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdvertWebsite">
+    <resultMap id="AdvertWebsite" type="AdvertWebsite" extends="base.baseAttr">
+        <result column="NAME" jdbcType="VARCHAR" property="name" />
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+        <result column="CONTEXT" jdbcType="VARCHAR" property="context" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID,NAME,START_TIME,END_TIME,CONTEXT,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME,STATUS
+    </sql>
+
+    <insert id="save" parameterType="AdvertWebsite">
+        INSERT INTO SYS_WEBSITE_NOTICE(
+        NAME,START_TIME,END_TIME,CONTEXT,CREATE_USER,CREATE_TIME,STATUS
+        ) VALUES (
+        #{name,jdbcType=VARCHAR},
+        #{startTime,jdbcType=TIMESTAMP},
+        #{endTime,jdbcType=TIMESTAMP},
+        #{context,jdbcType=VARCHAR},
+        #{createUser,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP},
+        #{status,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <update id="delete" parameterType="map">
+        UPDATE SYS_WEBSITE_NOTICE SET STATUS=#{status,jdbcType=VARCHAR},UPDATE_USER=#{updateUser,jdbcType=NUMERIC},UPDATE_TIME=#{updateTime,jdbcType=TIMESTAMP} WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <update id="update" parameterType="AdvertWebsite">
+        UPDATE SYS_WEBSITE_NOTICE
+        <set>
+            <if test="name != null">
+                 NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="startTime != null">
+                 START_TIME = #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                 END_TIME = #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="context != null">
+                 CONTEXT = #{context,jdbcType=VARCHAR},
+            </if>
+            <if test="updateUser != null">
+                 UPDATE_USER = #{updateUser,jdbcType=NUMERIC},
+            </if>
+            <if test="updateTime != null">
+                 UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status,jdbcType=NUMERIC},
+            </if>
+        </set>
+        <where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="ids != null">
+				 id in
+				<foreach collection="ids" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="AdvertWebsite">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM SYS_WEBSITE_NOTICE where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(ID) FROM SYS_WEBSITE_NOTICE
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="AdvertWebsite">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM SYS_WEBSITE_NOTICE
+        <include refid="searchCondition"/>
+        ORDER BY STATUS ASC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="name != null">
+                AND NAME = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="startTime != null">
+                AND CREATE_TIME >= #{startTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND END_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="context != null">
+                AND CONTEXT = #{context,jdbcType=VARCHAR}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status,jdbcType=NUMERIC}
+            </if>
+            <if test="statusList != null">
+				AND STATUS in
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+        </where>
+    </sql>
+</mapper>

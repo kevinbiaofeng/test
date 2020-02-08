@@ -1,0 +1,306 @@
+package com.xjw.controller.media;
+
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.spreada.utils.chinese.ZHConverter;
+import com.xjw.cache.VideoClickCache;
+import com.xjw.common.result.ModelResult;
+import com.xjw.controller.BaseController;
+import com.xjw.entity.Page;
+import com.xjw.entity.po.log.UserPlayLog;
+import com.xjw.entity.po.media.Favorite;
+import com.xjw.entity.po.media.Video;
+import com.xjw.entity.po.user.User;
+import com.xjw.kzenum.AbstractEnum.EnumBean;
+import com.xjw.kzenum.media.VideoTypeEnum;
+import com.xjw.kzenum.sys.YesORNoEnum;
+import com.xjw.service.log.UserPlayLogService;
+import com.xjw.service.media.FavoriteService;
+import com.xjw.service.media.VideoService;
+import com.xjw.service.user.UserAccountIntegralService;
+import com.xjw.util.SessionManager;
+import com.xjw.utility.DESEncrypt;
+import com.xjw.utility.MD5Util;
+
+@Controller
+@RequestMapping("/media/")
+public class MediaController extends BaseController {
+	private static Logger logger = LoggerFactory.getLogger(MediaController.class);
+
+	@Value("${play.video.url}")
+	private String remoteUrl;
+	@Value("${video.image.url}")
+	private String videoImageUrl;
+	@Value("${DES.KEY}")
+	private String desKey;
+	@Value("${MD5.KEY}")
+	private String md5Key;
+	@Autowired
+	private VideoService videoService;
+	@Autowired
+	private FavoriteService favoriteService;
+	@Autowired
+	private VideoClickCache clickCache;
+	@Autowired
+	private UserAccountIntegralService userAccountIntegralService;
+	@Autowired
+	private UserPlayLogService videoPlayLogService;
+	
+	
+	/**
+	 * 根据导航跳转到列表页
+	 */
+	@RequestMapping(value = "/list/{typeName}/{orderBy}/{pageNo}/", method = RequestMethod.GET)
+	public String list(@PathVariable String typeName, 
+				@PathVariable String orderBy,
+				@PathVariable Integer pageNo,
+				String searchName,
+				@RequestParam(defaultValue = "16") Integer pageSize,
+				Model model) {
+		ZHConverter.convert(typeName, ZHConverter.TRADITIONAL);
+		List<EnumBean> listEnum = VideoTypeEnum.getEnumBeans(VideoTypeEnum.class);
+		String type = null;
+		for (EnumBean enumBean : listEnum) {
+			if(enumBean.getName().equals(typeName)){
+				type = enumBean.getCode();
+				break;
+			}
+		}
+		
+		Map<String, Object> params = new HashMap<>();
+		//判断是否按照视频类型搜索
+		if(StringUtils.isNotEmpty(type)){
+			params.put("type", type);
+		}else{
+			params.put("type", type);
+		}
+		
+		if(StringUtils.isNotEmpty(typeName) && typeName.equals("VIP區")){
+			params.put("vipFlag", 1);
+		}
+		//按照热度等排序功能
+		if(StringUtils.isNotEmpty(orderBy)){
+			params.put(orderBy, orderBy);
+		}
+		
+		if(StringUtils.isNotEmpty(searchName)){
+			params.put("title", searchName);
+			typeName = searchName;
+		}
+		
+		try {
+			Page<Video> page = videoService.getPage(params, pageNo, pageSize);
+			model.addAttribute("page", page);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		
+		return "/xjw/media/list";
+	}
+	
+	
+	/**
+	 * 跳转到播放页面
+	 * @param code 素材编号
+	 */
+	@RequestMapping(value = "/{code}/play")
+	public String play(@PathVariable String code, HttpServletRequest request, Model model) {
+		String scheme = request.getScheme();
+		String serverName = request.getServerName();
+		int port = request.getServerPort();
+		String bpath = request.getContextPath();
+		String basePath = scheme + "://" + serverName + ":" + port + bpath;
+		Video video = videoService.selectByCode(code);
+		model.addAttribute("video", video);
+		model.addAttribute("ctx", basePath);
+		Map<String, Object> params = new HashMap<>();
+		try {
+		if(null != video) {
+			//增加视频点击总数
+			clickCache.increment(code);
+			
+			User user = SessionManager.getUserSession(request);
+			if(null != user) {
+				params.put("userId", user.getId());
+				/** 观看VIP电影需要扣除积分 1积分可以看当天观看当前电影 **/
+				params.put("today", "1");
+				params.put("videoCode", code);
+				UserPlayLog videoPlayLog = videoPlayLogService.selectOne(params);
+				String IntegralCode = null;
+				//VIP视频需要扣除积分
+				if(video.getVipFlag() == 1){
+					if(videoPlayLog != null){
+						//观看记录存在 设置状态码可观看
+						IntegralCode = "100";
+					}else{
+						//扣除积分  状态码 303 表示积分不足
+							IntegralCode = userAccountIntegralService.subtractIntegral(user.getId(), 1);
+						if(IntegralCode.equals("100")){
+							//添加观看记录
+							videoPlayLog = new UserPlayLog();
+							videoPlayLog.setUserId(user.getId());
+							videoPlayLog.setVideoCode(code);
+							videoPlayLogService.save(videoPlayLog);
+						}
+					}
+				}else{
+					IntegralCode = "100";
+				}
+				model.addAttribute("IntegralCode", IntegralCode);
+				//查是否收藏
+				params.put("videoCode", code);
+				Favorite fav = favoriteService.selectOne(params);
+				model.addAttribute("favorite", fav);
+				
+				
+			}
+			
+			StringBuffer videoUrl = new StringBuffer();
+			String path = video.getPath();
+			videoUrl.append(remoteUrl).append("media/load/").append(URLEncoder.encode(URLEncoder.encode(new DESEncrypt(desKey).encrypt(path), "UTF-8"), "UTF-8")).append("/").append(MD5Util.md5Encode(path + md5Key)).append("/");
+			model.addAttribute("videoImageUrl", videoImageUrl);
+			model.addAttribute("videoUrl", videoUrl);
+		}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*热门*/
+		params.clear();
+		params.put("hotVideo", "1");
+		params.put("begin", "1");
+		params.put("pageSize", "6");
+		params.put("type", video.getType());
+		List<Video> hotList = videoService.selectAll(params);
+		model.addAttribute("list", hotList);
+		
+		return "/play";
+	}
+//	/**
+//	 * 跳转到播放页面
+//	 * @param code 素材编号
+//	 */
+//	@RequestMapping(value = "/play/{code}/", method = RequestMethod.GET)
+//	public String play(@PathVariable String code, HttpServletRequest request, Model model) throws UnsupportedEncodingException, Exception {
+//		Video video = videoService.selectByCode(code);
+//		model.addAttribute("video", video);
+//		Map<String, Object> params = new HashMap<>();
+//		if(null != video) {
+//			//增加视频点击总数
+//			clickCache.increment(code);
+//			
+//			User user = SessionManager.getUserSession(request);
+//			if(null != user) {
+//				params.put("userId", user.getId());
+//				/** 观看VIP电影需要扣除积分 1积分可以看当天观看当前电影 **/
+//				params.put("today", "1");
+//				params.put("videoCode", code);
+//				UserPlayLog videoPlayLog = videoPlayLogService.selectOne(params);
+//				String IntegralCode = null;
+//				//VIP视频需要扣除积分
+//				if(video.getVipFlag() == 1){
+//					if(videoPlayLog != null){
+//						//观看记录存在 设置状态码可观看
+//						IntegralCode = "100";
+//					}else{
+//						//扣除积分  状态码 303 表示积分不足
+//						IntegralCode = userAccountIntegralService.subtractIntegral(user.getId(), 1);
+//						if(IntegralCode.equals("100")){
+//							//添加观看记录
+//							videoPlayLog = new UserPlayLog();
+//							videoPlayLog.setUserId(user.getId());
+//							videoPlayLog.setVideoCode(code);
+//							videoPlayLogService.save(videoPlayLog);
+//						}
+//					}
+//				}else{
+//					IntegralCode = "100";
+//				}
+//				model.addAttribute("IntegralCode", IntegralCode);
+//				//查是否收藏
+//				params.put("videoCode", code);
+//				Favorite fav = favoriteService.selectOne(params);
+//				model.addAttribute("favorite", fav);
+//				
+//				
+//			}
+//			
+//			StringBuffer videoUrl = new StringBuffer();
+//			String path = video.getPath();
+//			videoUrl.append(remoteUrl).append("media/load/").append(URLEncoder.encode(URLEncoder.encode(new DESEncrypt(desKey).encrypt(path), "UTF-8"), "UTF-8")).append("/").append(MD5Util.md5Encode(path + md5Key)).append("/");
+//			
+//			model.addAttribute("videoUrl", videoUrl);
+//		}
+//		
+//		/*热门*/
+//		params.clear();
+//		params.put("hotVideo", "1");
+//		params.put("begin", "1");
+//		params.put("pageSize", "6");
+//		params.put("type", video.getType());
+//		List<Video> hotList = videoService.selectAll(params);
+//		model.addAttribute("list", hotList);
+//		
+//		return "/xjw/media/play";
+//	}
+	
+	@RequestMapping(value = "/favorite", method = RequestMethod.GET)
+	@ResponseBody
+	public ModelResult<String> favorite(@RequestParam String code, @RequestParam Integer flag, HttpServletRequest request) throws Exception {
+		User user = SessionManager.getUserSession(request);
+		
+		Map<String, Object> params = new HashMap<>();
+		params.put("userId", user.getId());
+		params.put("videoCode", code);
+		int count = (int)favoriteService.selectAllCount(params);
+		
+		if(Integer.valueOf(YesORNoEnum.YES.getCode()) == flag) {
+			if(count == 0){
+				Favorite f = new Favorite();
+				f.setUserId(user.getId());
+				f.setVideoCode(code);
+				favoriteService.save(f);
+				
+				videoService.updateFavoriteCount(code, 1);
+			}
+			return new ModelResult<>().withSuccess();
+		} else {
+			if(count > 0) {
+				params = new HashMap<>();
+				params.put("userId", user.getId());
+				params.put("videoCode", code);
+				favoriteService.deleteOne(params);
+				
+				videoService.updateFavoriteCount(code, -1);
+			}
+			
+			return new ModelResult<>().withSuccess();
+		}
+	}
+	
+	public static void main(String[] args) {
+		String str1="繁體轉簡體"; 
+		String simpleStr=ZHConverter.convert(str1, ZHConverter.SIMPLIFIED); 
+		System.out.println(simpleStr); 
+		String traditionStr=ZHConverter.convert(str1, ZHConverter.TRADITIONAL); 
+		System.out.println(traditionStr);
+	}
+}

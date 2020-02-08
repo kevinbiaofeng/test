@@ -1,0 +1,15 @@
+package com.xjw.service.user;
+
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.user.AccountIntegral;
+
+@Service
+public interface UserAccountIntegralService extends BaseServcie<AccountIntegral>{
+	/**
+	 * 根据用户ID查询账户余额
+	 * @return
+	 */
+	public AccountIntegral selectByUserId(Long userId);
+}

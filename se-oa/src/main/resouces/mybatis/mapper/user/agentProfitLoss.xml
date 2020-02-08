@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AgentProfitLoss">
+	<resultMap id="AgentProfitLoss" type="AgentProfitLoss" extends="base.baseAttr">
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="LOGIN_NAME" jdbcType="VARCHAR" property="loginName" />
+    </resultMap>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER u
+        <where>
+			AND u.type=8
+			<if test="loginName != null">
+				AND (
+					u.login_name like '%' #{loginName} '%'
+				)
+			</if>
+		</where>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="AgentProfitLoss">
+       SELECT u.id, u.user_name, u.login_name, g1.login_name aggj_name, g2.login_name agjs_name, g3.login_name pt_name,
+		(select SUM(d.net_amount) from ag_play_game_data d
+		<where>
+			d.player_name = g1.login_name and d.platform_type='AGIN'
+			<if test="beginTime != null">
+                AND d.BET_TIME >= #{beginTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND d.BET_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+		</where>
+		) aggj_net_amount,
+		(select SUM(d.net_amount) from ag_play_game_data d
+		<where>
+			d.player_name = g2.login_name and d.platform_type='AG'
+			<if test="beginTime != null">
+                AND d.BET_TIME >= #{beginTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND d.BET_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+		</where>
+		) agjs_net_amount,
+		(select SUM(d.bet_amount) from ag_play_game_data d
+		<where>
+			d.player_name = g1.login_name and d.platform_type='AGIN'
+			<if test="beginTime != null">
+                AND d.BET_TIME >= #{beginTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND d.BET_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+		</where>
+		) aggj_bet_amount,
+		(select SUM(d.bet_amount) from ag_play_game_data d
+		<where>
+			 d.player_name = g2.login_name and d.platform_type='AG'
+			<if test="beginTime != null">
+                AND d.BET_TIME >= #{beginTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND d.BET_TIME <![CDATA[<=]]> #{endTime,jdbcType=TIMESTAMP}
+            </if>
+		</where>
+		) agjs_bet_amount
+		 FROM PUB_USER u
+		LEFT JOIN pub_user_game_account g1 ON g1.user_id = u.id AND g1.game_type = 1 
+		LEFT JOIN pub_user_game_account g2 ON g2.user_id = u.id AND g2.game_type = 2
+		LEFT JOIN pub_user_game_account g3 ON g3.user_id = u.id AND g3.game_type = 3
+		<where>
+			AND u.type=8
+			<if test="loginName != null">
+				AND (u.login_name LIKE '%' #{loginName} '%')
+			</if>
+			<if test="userIdList != null">
+				AND u.id in
+				<foreach collection="userIdList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+		ORDER BY u.login_name
+    </select>
+</mapper>

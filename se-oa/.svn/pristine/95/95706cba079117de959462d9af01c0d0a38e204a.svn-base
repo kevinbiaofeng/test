@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+	http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd" >
+
+	<!-- 定时调度工厂，lazy-init='false' 容器启动就会执行调度程序 -->
+	<bean id="startHandlerQuertz" lazy-init="false" autowire="no"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="stopActivityTask" />
+				<ref bean="initSequenceTask" />
+				<ref bean="yestdayAmountTask"/>
+				<ref bean="summaryDayTask"/>
+				<ref bean="proxySummaryDayTask"/>
+				<ref bean="rakeStatBySumTask"/>
+				<ref bean="rakeStatBySendTask"/>
+				<ref bean="stopMoneyChangeTask"/>
+				
+				<ref bean="agDayHistoryTask"/>
+				<ref bean="endoDayHistoryTask"/> 
+				<ref bean="fishDayHistoryTask"/> 
+				<ref bean="mgDayHistoryTask"/> 
+				<ref bean="newMgDayHistoryTask"/>
+			 	<ref bean="ptDayHistoryTask"/>
+				<ref bean="qpDayHistoryTask"/>
+				<ref bean="sbDayHistoryTask"/>
+				<ref bean="ttgDayHistoryTask"/>
+				<ref bean="xinDayHistoryTask"/> 
+				
+				<ref bean="depositRejectTask"/>
+				<ref bean="platformWalletTaskTask"/> 
+			</list>
+		</property>
+	</bean>
+
+	<!--  每15分钟执行一次的task，修改正在运行中的活动、首页公告为暂停     -->
+	<bean id="stopActivityTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="stopActivity" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.StopActivityTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 */15 * * * ?</value></property>
+	</bean>
+	
+	<!--  每10分钟执行一次的task，查询资金调整中的活动状态是否完成     -->
+	<bean id="stopMoneyChangeTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="stopMoneyChange" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.StopMoneyChangeTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 */10 * * * ?</value></property>
+	</bean>
+	
+	<!-- 每天凌晨12点  重置订单编号从1开始 -->
+	<bean id="initSequenceTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="initSequence" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.InitSequenceTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 0 0 * * ?</value></property>
+	</bean>
+	
+	<!-- 每天凌晨1点  生成昨天的派彩金额 -->
+	<bean id="yestdayAmountTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.YestdayAmountTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 0 1 * * ?</value></property> 
+		<!-- <property name="cronExpression"><value>0 */1 * * * ?</value></property> -->
+	</bean>
+	
+	<!-- 每天生成总的统计数据，并发送邮件 -->
+	<bean id="summaryDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.SummaryDayTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 25 2 * * ?</value></property>  
+		<!-- <property name="cronExpression"><value>0 */1 * * * ?</value></property>-->
+	</bean>
+	
+	<!-- 每天生成代理的各项统计数据 -->
+	<bean id="proxySummaryDayTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.ProxySummaryDayTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 35 2 * * ?</value></property> 
+		<!-- <property name="cronExpression"><value>0 */3 * * * ?</value></property> -->
+	</bean>
+	
+	<!-- 每天早上5点，进行返水统计 -->
+	<bean id="rakeStatBySumTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.RakeStatBySumTask</value></property>
+			</bean>
+		</property>
+		 <property name="cronExpression"><value>0 0 5 * * ?</value></property>
+		<!-- <property name="cronExpression"><value>0 */1 * * * ?</value></property>   -->
+	</bean>
+	
+	<!-- 每天上午11点，进行返水发放 -->
+	<bean id="rakeStatBySendTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.RakeStatBySendTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 0 11 * * ?</value></property>
+		<!-- <property name="cronExpression"><value>0 */1 * * * ?</value></property> -->
+	</bean>
+	
+	
+	<!-- 每天凌晨12点  生成每日Ag游戏统计表数据 -->
+	<bean id="agDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="AgDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.AgDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 5 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="endoDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="endoDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.EndoDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 10 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="fishDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="fishDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.FishDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 15 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="mgDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="mgDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.MgDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 20 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="newMgDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="newMgDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.NewMgDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 25 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="ptDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="ptDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.PtDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 30 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="qpDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="qpDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.QpDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 35 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="sbDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="sbDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.SbDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 40 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="ttgDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="ttgDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.TtgDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 45 1 * * ?</value></property>
+	</bean>
+	
+	<bean id="xinDayHistoryTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="xinDayHistory" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.XinDayHistoryTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 50 1 * * ?</value></property>
+	</bean>
+	
+	<!-- 存款拒绝定时任务 每五个小时查询一次  -->
+	<bean id="depositRejectTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean id="depositReject" class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.DepositRejectTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 */50 * * * ?</value></property>
+	</bean>
+	
+	<!-- 查询代理下属的会员各个平台的余额  每月1号执行一次 -->
+	<bean id="platformWalletTaskTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<bean class="org.springframework.scheduling.quartz.JobDetailBean">
+				<property name="jobClass"><value>com.xjw.service.scheduler.PlatformWalletTask</value></property>
+			</bean>
+		</property>
+		<property name="cronExpression"><value>0 50 1 1 * ?</value></property>
+		<!-- <property name="cronExpression"><value>0 0 * * * ?</value></property> -->
+	</bean>
+</beans>

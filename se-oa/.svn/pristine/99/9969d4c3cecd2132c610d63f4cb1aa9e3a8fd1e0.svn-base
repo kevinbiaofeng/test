@@ -1,0 +1,51 @@
+package com.xjw.task;
+//package com.xjw.service.scheduler;
+//
+//import java.util.Calendar;
+//import java.util.Date;
+//import java.util.GregorianCalendar;
+//
+//import org.apache.commons.lang3.time.DateFormatUtils;
+//
+//
+//import org.quartz.JobExecutionContext;
+//import org.quartz.JobExecutionException;
+//import org.springframework.scheduling.quartz.QuartzJobBean;
+//
+//import com.xjw.service.history.NewMgDayHistoryService;
+//import com.xjw.utility.DateUtil;
+//import com.xjw.utility.DateUtil.IntevalType;
+//import com.xjw.utility.SpringContextHolder;
+//
+//public class NewMgDayHistoryTask extends QuartzJobBean {
+//	private static Logger logger = LoggerFactory.getLogger(NewMgDayHistoryTask.class.getName());
+//
+//	@Override
+//	protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+//		try {
+//			init(context);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//		}
+//	}
+//
+//	public void init(JobExecutionContext context) throws Exception {
+//		NewMgDayHistoryService newMgDayHistoryService =(NewMgDayHistoryService)SpringContextHolder.getBean(NewMgDayHistoryService.class);
+//		String strDate = DateUtil.subDays(new Date(), "yyyy-MM-dd");//统计前一天的数据
+//		newMgDayHistoryService.saveBatch(strDate);
+//	}
+//
+//	private void initAll(){
+//		Calendar nowTime = Calendar.getInstance();
+//		Calendar startTime = new GregorianCalendar(2016, 10, 1); // 2016-11-01
+//		Calendar endTime = new GregorianCalendar(nowTime.get(Calendar.YEAR), nowTime.get(Calendar.MONTH), nowTime.get(Calendar.DATE)-1);	 
+//		
+//		long day = DateUtil.getInterval(startTime.getTime(), endTime.getTime(), IntevalType.DAY);
+//		NewMgDayHistoryService newMgDayHistoryService =(NewMgDayHistoryService)SpringContextHolder.getBean(NewMgDayHistoryService.class);
+//		for(int i=0; i <= day; i++){
+//			Calendar statDate = new GregorianCalendar(startTime.get(Calendar.YEAR), startTime.get(Calendar.MONTH), startTime.get(Calendar.DATE) + i);
+//			String statString = DateFormatUtils.format(statDate, "yyyy-MM-dd");
+//			newMgDayHistoryService.saveBatch(statString);
+//		}
+//	}
+//}

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberCallcsDetail">
+    <resultMap id="MemberCallcsDetail" type="MemberCallcsDetail" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="CALLCS_STATUS" jdbcType="NUMERIC" property="callcsStatus" />
+        <result column="CALLCS_TYPE" jdbcType="NUMERIC" property="callcsType" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID,USER_ID,CALLCS_STATUS, CALLCS_TYPE,REMARK,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME
+    </sql>
+
+    <insert id="save" parameterType="MemberCallcsDetail">
+        INSERT INTO MEMBER_CALLCS_DETAIL(
+        	USER_ID,CALLCS_STATUS, CALLCS_TYPE,REMARK,CREATE_USER,CREATE_TIME, UPDATE_USER, UPDATE_TIME
+        ) VALUES (
+        	#{userId,jdbcType=NUMERIC},
+        	#{callcsStatus,jdbcType=NUMERIC},
+        	#{callcsType,jdbcType=NUMERIC},
+        	#{remark,jdbcType=VARCHAR},
+        	#{createUser,jdbcType=NUMERIC},
+        	#{createTime,jdbcType=TIMESTAMP},
+        	#{createUser,jdbcType=NUMERIC},
+        	#{createTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <update id="delete" parameterType="map">
+        UPDATE MEMBER_CALLCS_DETAIL 
+        SET STATUS=#{status,jdbcType=VARCHAR},UPDATE_USER=#{updateUser,jdbcType=NUMERIC},UPDATE_TIME=#{updateTime,jdbcType=TIMESTAMP} 
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <update id="update" parameterType="MemberCallcsDetail">
+        UPDATE MEMBER_CALLCS_DETAIL
+        <set>
+        	 <if test="callcsStatus != null">
+                 CALLCS_STATUS = #{callcsStatus,jdbcType=NUMERIC},
+            </if>
+            <if test="callcsType != null">
+                 CALLCS_TYPE = #{callcsType,jdbcType=NUMERIC},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="updateUser != null">
+                 UPDATE_USER = #{updateUser,jdbcType=NUMERIC},
+            </if>
+            <if test="updateTime != null">
+                 UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="MemberCallcsDetail">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_CALLCS_DETAIL where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(ID) FROM MEMBER_CALLCS_DETAIL
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="MemberCallcsDetail">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_CALLCS_DETAIL
+        <include refid="searchCondition"/>
+        ORDER BY UPDATE_TIME DESC, ID DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="userId != null">
+                AND USER_ID = #{userId}
+            </if>
+             <if test="callcsStatus != null">
+                AND CALLCS_Status = #{callcsStatus}
+            </if>
+            <if test="callcsType != null">
+                AND CALLCS_TYPE = #{callcsType}
+            </if>
+            <if test="createUser != null">
+                AND CREATE_USER = #{createUser,jdbcType=NUMERIC}
+            </if>
+            <if test="createTime != null">
+                AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updateUser != null">
+                AND UPDATE_USER = #{updateUser,jdbcType=NUMERIC}
+            </if>
+            <if test="updateTime != null">
+                AND UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="remark != null">
+				AND (remark like '%' #{remark} '%')
+			</if>
+        </where>
+    </sql>
+</mapper>

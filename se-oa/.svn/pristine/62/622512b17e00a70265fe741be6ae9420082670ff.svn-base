@@ -1,0 +1,18 @@
+package com.xjw.service.history;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.history.NewMgDayHistory;
+
+@Service
+public interface NewMgDayHistoryService extends BaseServcie<NewMgDayHistory>{
+
+	public List<NewMgDayHistory> selectOneDayData(Map<String, Object> params);
+	
+	public void saveBatch(String statDate);
+	
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberCheck">
+	<sql id="searchColumn">
+		user_id, email_flag, email_time, phone_flag, phone_time, id_card_flag, id_card_time, bank_card_flag, bank_card_time
+	</sql>
+	
+	<resultMap type="MemberCheck" id="memberCheck" extends="base.baseAttr">
+	   <result column="user_id" property="userId" />
+	   <result column="email_flag"  property="emailFlag" />
+	   <result column="email_time"  property="emailTime" />
+       <result column="phone_flag" property="phoneFlag" />
+       <result column="phone_time"  property="phoneTime" />
+       <result column="id_card_flag" property="idCardFlag" />
+       <result column="id_card_time"  property="idCardTime" />
+       <result column="bank_card_flag" property="bankCardFlag" />
+       <result column="bank_card_time"  property="bankcardTime" />
+	</resultMap>
+	
+	<select id="queryByUserId" parameterType="long" resultMap="memberCheck">
+		SELECT <include refid="searchColumn" /> FROM member_info_check WHERE user_id = #{userId}
+	</select>
+	
+	<update id="update">
+		UPDATE member_info_check
+		<set>
+			update_time = #{updateTime},
+			<if test="emailFlag != null and emailFlag != ''">
+				email_flag = #{emailFlag},
+				email_time = #{emailTime},
+			</if>
+			<if test="phoneFlag != null and phoneFlag != ''">
+				phone_flag = #{phoneFlag},
+				phone_time = #{phoneTime},
+			</if>
+			<if test="idCardFlag != null and idCardFlag != ''">
+				id_card_flag = #{idCardFlag},
+				id_card_time = #{idCardTime},
+			</if>
+			<if test="bankCardFlag != null and bankCardFlag != ''">
+				bank_card_flag = #{bankCardFlag},
+				bank_card_time = #{bankcardTime},
+			</if>
+		</set>
+		WHERE user_id = #{userId}
+	</update>
+	
+    <insert id="save" parameterType="map">
+        INSERT INTO member_info_check (
+        	user_id, email_flag, phone_flag, id_card_flag, bank_card_flag
+        ) VALUES (
+	       #{userId}, 
+	       COALESCE(#{emailFlag}, 2), 
+	       COALESCE(#{phoneFlag}, 2), 
+	       COALESCE(#{idCardFlag}, 2), 
+	       COALESCE(#{bankCardFlag}, 2)
+        )
+    </insert>
+</mapper>

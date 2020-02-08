@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MemberMoneyChange">
+    <resultMap id="memberMoneyChange" type="MemberMoneyChange" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="MONEY" jdbcType="NUMERIC" property="money" />
+        <result column="INTEGRAL" jdbcType="NUMERIC" property="integral" />
+        <result column="MULTIPLE" jdbcType="NUMERIC" property="multiple" />
+        <result column="DEPOSIT_ORDER_NO" jdbcType="VARCHAR" property="depositOrderNo" />
+        <result column="WITHDRAWAL_ORDER_NO" jdbcType="VARCHAR" property="withdrawalOrderNo" />
+		<result column="CHANGE_TYPE" property="changeType" />
+		<result column="ACT_ID" property="actId" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="userName" />
+        <result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName" />
+        <result column="PLATFORM_TYPE" jdbcType="NUMERIC" property="platformType" />
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+        <result column="ACT_TYPE" jdbcType="NUMERIC" property="actType" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID, t.USER_ID, t.MONEY, t.INTEGRAL, t.MULTIPLE, t.DEPOSIT_ORDER_NO, t.change_type, t.act_id,
+        t.REMARK, t.CREATE_USER, t.CREATE_TIME, u.login_name user_name, 
+        u1.login_name CREATE_USER_NAME, t.PLATFORM_TYPE, t.START_TIME, t.END_TIME, a.type ACT_TYPE, t.WITHDRAWAL_ORDER_NO
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO MEMBER_MONEY_CHANGE (
+        	USER_ID,MONEY,INTEGRAL,MULTIPLE,DEPOSIT_ORDER_NO, CHANGE_TYPE, ACT_ID, REMARK,CREATE_USER,CREATE_TIME, PLATFORM_TYPE, WITHDRAWAL_ORDER_NO
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{money,jdbcType=NUMERIC},
+	        #{integral,jdbcType=NUMERIC},
+	        #{multiple,jdbcType=NUMERIC},
+	        #{depositOrderNo,jdbcType=VARCHAR},
+	        #{changeType},
+	        #{actId},
+	        #{remark,jdbcType=VARCHAR},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{platformType,jdbcType=NUMERIC},
+	        #{withdrawalOrderNo,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <update id="update" parameterType="memberMoneyChange">
+        UPDATE MEMBER_MONEY_CHANGE
+        <set>
+            <if test="userId != null">
+                 USER_ID = #{userId,jdbcType=NUMERIC},
+            </if>
+            <if test="money != null">
+                 MONEY = #{money,jdbcType=NUMERIC},
+            </if>
+            <if test="integral != null">
+                 INTEGRAL = #{integral,jdbcType=NUMERIC},
+            </if>
+            <if test="multiple != null">
+                 MULTIPLE = #{multiple,jdbcType=NUMERIC},
+            </if>
+            <if test="depositOrderNo != null">
+                 DEPOSIT_ORDER_NO = #{depositOrderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="depositOrderNo != null">
+                 WITHDRAWAL_ORDER_NO = #{withdrawalOrderNo,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                 REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="updateUser != null">
+                 UPDATE_USER = #{updateUser, jdbcType=NUMERIC},
+            </if>
+            <if test="updateTime != null">
+                 UPDATE_TIME = #{updateTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                 END_TIME = #{endTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="startTime != null">
+                 START_TIME = #{startTime, jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="memberMoneyChange">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_MONEY_CHANGE t 
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user u1 on u1.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+        where t.ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.id) FROM MEMBER_MONEY_CHANGE t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user u1 on u1.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="memberMoneyChange">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_MONEY_CHANGE t
+        LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user u1 on u1.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+        <include refid="searchCondition"/>
+        ORDER BY t.CREATE_TIME DESC
+        <include refid="base.page" />
+    </select>
+    
+    
+    <select id="selectSumAmount" parameterType="map" resultType="java.math.BigDecimal">
+    	select IFNULL(SUM(MONEY),0) FROM MEMBER_MONEY_CHANGE
+		<where> 
+			<if test="beginTime != null">
+	    		AND create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND create_time <![CDATA[<=]]> #{endTime}
+			</if>
+		</where>
+    </select>
+    
+    
+    <select id="selectByJoinAct" parameterType="map" resultMap="memberMoneyChange">
+    	SELECT mmc.id, mmc.user_id, mmc.money, mmc.integral, mmc.multiple, mmc.deposit_order_no, 
+    		mmc.change_type, mmc.act_id, mmc.remark, mmc.start_time, mmc.end_time 
+    	FROM sys_activity sa, member_money_change mmc 
+		WHERE sa.id = mmc.act_id 
+			AND sa.rake_status = 1 
+			AND sa.type = ${actType} 
+			AND mmc.platform_type = #{platformType}
+			AND mmc.user_id = #{userId}
+  			AND DATE(mmc.start_time) <![CDATA[<=]]> #{joinDate}
+  			AND (DATE(mmc.end_time) >= #{joinDate} OR mmc.end_time is null)
+  		ORDER BY mmc.start_time asc
+    </select>
+    
+	<select id="selectSumIntegralByJoinAct" parameterType="map" resultType="java.math.BigDecimal">
+    	SELECT SUM(mmc.integral) 
+    	FROM sys_activity sa, member_money_change mmc 
+		WHERE sa.id = mmc.act_id 
+			AND sa.type = ${actType}
+			AND mmc.platform_type = #{platformType}
+			AND mmc.user_id = #{userId}
+  			AND DATE(mmc.start_time) <![CDATA[<=]]> #{joinDate}
+  			AND (DATE(mmc.end_time) >= #{joinDate} OR mmc.end_time is null)
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="userId != null">
+                AND t.USER_ID = #{userId,jdbcType=NUMERIC}
+            </if>
+            <if test="money != null">
+                AND t.MONEY = #{money,jdbcType=NUMERIC}
+            </if>
+            <if test="integral != null">
+                AND t.INTEGRAL = #{integral,jdbcType=NUMERIC}
+            </if>
+            <if test="multiple != null">
+                AND t.MULTIPLE = #{multiple,jdbcType=NUMERIC}
+            </if>
+            <if test="depositOrderNo != null">
+                AND t.DEPOSIT_ORDER_NO = #{depositOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="depositOrderNo != null">
+                AND t.WITHDRAWAL_ORDER_NO = #{withdrawalOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="changeType != null">
+                AND t.change_type = #{changeType}
+            </if>
+			<if test="actId != null">
+                AND t.act_id = #{actId}
+            </if>
+			<if test="loginName != null">
+				AND (u.login_name LIKE '%' #{loginName,jdbcType=VARCHAR} '%')
+			</if>
+            <if test="startTime != null">
+                AND t.start_time >= #{startTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND t.end_time <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="platformType != null">
+                AND t.platform_type = #{platformType, jdbcType=NUMERIC}
+            </if>
+            <if test="actIdIsNotNull != null">
+                AND t.ACT_ID IS NOT null
+            </if>
+            <if test="startTimeIsNotNull != null">
+                AND t.start_time IS NOT null
+            </if>
+            <if test="endTimeIsNull != null">
+                AND t.END_TIME is null
+            </if>
+            <if test="actType != null">
+                AND a.type = #{actType}
+            </if>
+        </where>
+    </sql>
+
+	<!-- 查询代理的下属会员存款总额 -->
+    <select id="selectAmountByAgent" parameterType="map" resultType="java.math.BigDecimal">
+    	select IFNULL(SUM(M.MONEY),0) FROM MEMBER_MONEY_CHANGE M
+		LEFT JOIN pub_user u ON u.id = m.user_id
+		WHERE 
+			u.parent_id IN 
+			<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+				#{_pId}
+			</foreach>
+			<if test="beginTime != null">
+	    		AND m.create_time >= #{beginTime}
+	    	</if>
+			<if test="endTime != null">
+				AND m.create_time <![CDATA[<=]]> #{endTime}
+			</if>
+    </select>
+    
+    <resultMap type="com.xjw.entity.po.user.FundAdjustActivityCount" id="FundAdjustActivityCount">
+    	<result column="ACT_ID" property="actId" />
+    	<result column="NAME" property="name" />
+    	<result column="MONEY" jdbcType="NUMERIC" property="money" />
+    </resultMap>
+    <!-- 查询资金调整活动总金额 -->
+    <select id="selectHDAmount" parameterType="map" resultMap="FundAdjustActivityCount">
+    	SELECT a.id ACT_ID, a.NAME, sum(t.money) MONEY
+		FROM MEMBER_MONEY_CHANGE t
+		LEFT JOIN sys_activity a on a.id = t.act_id
+		where t.act_id is not null and t.change_type='1'
+		<if test="beginTime != null">
+    		AND t.create_time >= #{beginTime}
+    	</if>
+		<if test="endTime != null">
+			AND t.create_time <![CDATA[<=]]> #{endTime}
+		</if>
+		GROUP BY t.act_id
+    </select>
+    
+    <!-- 查询资金调整返水总金额 -->
+    <select id="selectFSAmount" parameterType="map" resultType="java.math.BigDecimal">
+    	select sum(t.money) from MEMBER_MONEY_CHANGE t 
+		where t.change_type='2'
+		<if test="beginTime != null">
+    		AND t.create_time >= #{beginTime}
+    	</if>
+		<if test="endTime != null">
+			AND t.create_time <![CDATA[<=]]> #{endTime}
+		</if>
+    </select>
+    
+    <!-- 查询资金调整特殊奖金总金额 -->
+    <select id="selectTSJJAmount" parameterType="map" resultType="java.math.BigDecimal">
+    	select sum(t.money) from MEMBER_MONEY_CHANGE t 
+		where t.change_type='3'
+		<if test="beginTime != null">
+    		AND t.create_time >= #{beginTime}
+    	</if>
+		<if test="endTime != null">
+			AND t.create_time <![CDATA[<=]]> #{endTime}
+		</if>
+    </select>
+    
+    <!-- 查询资金调整其它总金额 -->
+    <select id="selectQTAmount" parameterType="map" resultType="java.math.BigDecimal">
+    	select sum(t.money) from MEMBER_MONEY_CHANGE t 
+		where t.change_type='4'
+		<if test="beginTime != null">
+    		AND t.create_time >= #{beginTime}
+    	</if>
+		<if test="endTime != null">
+			AND t.create_time <![CDATA[<=]]> #{endTime}
+		</if>
+    </select>
+
+</mapper>

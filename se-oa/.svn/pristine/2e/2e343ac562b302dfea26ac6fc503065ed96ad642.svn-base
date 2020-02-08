@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Cathectic">
+	<resultMap id="Cathectic" type="Cathectic" extends="base.baseAttr">
+        <result column="login_name" 		property="loginName" />
+        <result column="new_pt_bet_amount" 	property="newPtBetAmount" />
+        <result column="new_mg_bet_amount" 	property="newMgBetAmount" />
+    </resultMap>
+    
+     <sql id="search_condition">
+    	<where>
+			AND type=8 and status = 1
+			<if test="loginName != null">
+				AND login_name = #{loginName}
+			</if>
+			<if test="parentIds != null ">
+				AND parent_id IN 
+				<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+					#{_pId}
+			    </foreach>
+			</if>
+		</where>
+    </sql>
+    
+    <sql id="sum_where_condition">
+    	1 = 1
+    	AND u.type=8 
+		AND u.parent_id IN 
+			<foreach collection="parentIds" item="_pId" open="(" separator="," close=")">
+				#{_pId}
+		    </foreach>
+    	<if test="beginLocalTime != null and beginLocalTime != ''">
+			AND d.local_time >= #{beginLocalTime}
+		</if>
+		<if test="endLocalTime != null and endLocalTime != ''">
+			AND d.local_time <![CDATA[<=]]> #{endLocalTime}
+		</if>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(id) FROM PUB_USER
+        <include refid="search_condition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="Cathectic">
+		SELECT u.id, u.login_name,
+			(
+				SELECT IFNULL(SUM(d.bet_amount), 0) 
+				FROM new_pt_game_data d
+				WHERE d.user_id = u.id
+		           	<if test="beginLocalTime != null and beginLocalTime != ''">
+						AND d.local_time >= #{beginLocalTime}
+					</if>
+					<if test="endLocalTime != null and endLocalTime != ''">
+						AND d.local_time <![CDATA[<=]]> #{endLocalTime}
+					</if>
+			) new_pt_bet_amount,
+			(
+				SELECT IFNULL(SUM(d.bet_amount), 0) 
+				FROM new_mg_game_data d
+				WHERE d.user_id = u.id and d.slot_type = 'WAGER'
+					<if test="beginLocalTime != null and beginLocalTime != ''">
+						AND d.local_time >= #{beginLocalTime}
+					</if>
+					<if test="endLocalTime != null and endLocalTime != ''">
+						AND d.local_time <![CDATA[<=]]> #{endLocalTime}
+					</if>
+			) new_mg_bet_amount
+		 FROM (
+		 	SELECT id, login_name 
+		 	FROM pub_user
+		 	<include refid="search_condition"/>
+		 	ORDER BY id DESC
+        	<include refid="base.page" /> 
+		 ) u
+    </select>
+    
+    
+    
+     <!-- 11个游戏单独查询  -->
+    <resultMap type="com.xjw.entity.po.cathectic.AgGame" id="AgGameVO">
+        <result column="user_id" 			property="userId" />
+        <result column="player_name" 		property="playerName" />
+        <result column="platform_type" 		property="platformType" />
+        <result column="ag_bet_amount" 		property="agBetAmount"/>
+        <result column="ag_net_amount" 		property="agNetAmount"/>
+    </resultMap>
+    
+    
+	<resultMap type="com.xjw.entity.po.cathectic.NewPtGame" id="NewPtGameVO">
+        <result column="user_id" 			property="userId" />
+        <result column="player_name" 		property="playerName" />
+        <result column="new_pt_bet_amount" 	property="newPtBetAmount"/>
+    	<result column="new_pt_net_amount" 	property="newPtNetAmount"/>
+    </resultMap>
+    <select id="selectSumAmountByNewPt" parameterType="map" resultMap="NewPtGameVO">
+    	SELECT 
+    	      user_id, player_name, 
+    		  IFNULL(SUM(bet_amount), 0) As new_pt_bet_amount , 
+    	      IFNULL(SUM(net_amount), 0) AS new_pt_net_amount
+		 FROM new_pt_game_data 
+		WHERE local_time >= #{beginLocalTime} 
+			  AND <![CDATA[local_time <= #{endLocalTime}]]>
+			  <if test="minBetAmount != null">
+		    	AND bet_amount >= ${minBetAmount}
+		  	  </if>
+		  	  <if test="userId != null">
+		  	  	AND user_id = ${userId}
+		  	  </if>
+	  	      GROUP BY user_id
+    </select>
+    
+    
+    <resultMap type="com.xjw.entity.po.cathectic.NewMgGame" id="NewMgGameVO">
+        <result column="user_id" 			property="userId" />
+        <result column="player_name" 		property="playerName" />
+       	<result column="new_mg_bet_amount" 	property="newMgBetAmount"/>
+        <result column="new_mg_net_amount" 	property="newMgNetAmount"/>
+    </resultMap>
+    <select id="selectSumAmountByNewMg" parameterType="map" resultMap="NewMgGameVO">
+    	SELECT 
+    	      user_id, player_name, 
+    		  IFNULL(SUM(bet_amount), 0) As new_mg_bet_amount , 
+    	      IFNULL(SUM(net_amount), 0) AS new_mg_net_amount
+		 FROM new_mg_game_data 
+		WHERE local_time >= #{beginLocalTime} 
+			  AND <![CDATA[local_time <= #{endLocalTime}]]>
+			  <if test="minBetAmount != null">
+		    	AND bet_amount >= ${minBetAmount}
+		  	  </if>
+		  	  <if test="userId != null">
+		  	  	AND user_id = ${userId}
+		  	  </if>
+	  	      GROUP BY user_id
+    </select>
+    
+</mapper>

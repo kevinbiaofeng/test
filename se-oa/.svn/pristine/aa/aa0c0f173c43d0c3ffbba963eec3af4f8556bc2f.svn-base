@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PlatformTransfer">
+    <resultMap id="PlatformTransfer" type="PlatformTransfer" extends="base.baseAttr">
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="LOGIN_NAME" jdbcType="NUMERIC" property="loginName" />
+        <result column="MONEY" jdbcType="NUMERIC" property="money" />
+        <result column="PLATFORM_TYPE" jdbcType="VARCHAR" property="platformType" />
+        <result column="TRANSFER_TYPE" jdbcType="NUMERIC" property="transferType" />
+        <result column="CREATE_USER" jdbcType="NUMERIC" property="createUser" />
+        <result column="CREATE_USER_NAME" jdbcType="VARCHAR" property="createUserName" />
+        <result column="CREATE_TIME" jdbcType="NUMERIC" property="createTime" />
+        <result column="STATUS" jdbcType="VARCHAR" property="status" />
+        <result column="BILLNO" jdbcType="VARCHAR" property="billno" />
+        <result column="CONTENT" jdbcType="VARCHAR" property="content" />
+        <result column="FROM_FUNCTION" jdbcType="NUMERIC" property="fromFunction" />
+        <result column="MAIN_BALANCE" jdbcType="NUMERIC" property="mainBalance" />
+        <result column="PLATFORM_BALANCE" jdbcType="NUMERIC" property="platformBalance" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        t.ID, u.LOGIN_NAME, t.MONEY,t.PLATFORM_TYPE,t.TRANSFER_TYPE,t.CREATE_USER,(SELECT u.login_name FROM pub_user u WHERE t.CREATE_USER = u.id) CREATE_USER_NAME,t.CREATE_TIME,t.UPDATE_USER,t.UPDATE_TIME,t.STATUS, t.FROM_FUNCTION, t.MAIN_BALANCE, t.PLATFORM_BALANCE
+    </sql>
+
+    <insert id="save" parameterType="PlatformTransfer" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO MEMBER_PLATFORM_TRANSFER(
+        	USER_ID,MONEY,PLATFORM_TYPE,TRANSFER_TYPE,CREATE_USER,CREATE_TIME,STATUS, BILLNO, CONTENT, FROM_FUNCTION, MAIN_BALANCE, PLATFORM_BALANCE
+        ) VALUES (
+	        #{userId,jdbcType=NUMERIC},
+	        #{money,jdbcType=NUMERIC},
+	        #{platformType,jdbcType=NUMERIC},
+	        #{transferType,jdbcType=NUMERIC},
+	        #{createUser,jdbcType=NUMERIC},
+	        #{createTime,jdbcType=TIMESTAMP},
+	        #{status,jdbcType=NUMERIC},
+	        #{billno,jdbcType=VARCHAR},
+	        #{content,jdbcType=VARCHAR},
+	        #{fromFunction,jdbcType=NUMERIC},
+	        #{mainBalance,jdbcType=NUMERIC},
+	        #{platformBalance,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="long" resultMap="PlatformTransfer">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_PLATFORM_TRANSFER t LEFT JOIN PUB_USER u on u.id = t.user_id where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(t.ID) FROM MEMBER_PLATFORM_TRANSFER t, PUB_USER u
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="PlatformTransfer">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM MEMBER_PLATFORM_TRANSFER t, PUB_USER u
+        <include refid="searchCondition"/>
+        ORDER BY t.ID DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+        	u.id = t.user_id
+        	<if test="loginName != null">
+                AND (u.LOGIN_NAME like '%' #{loginName} '%')
+            </if>
+ 
+            <if test="beginTime != null">
+                AND t.CREATE_TIME >= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND t.CREATE_TIME <![CDATA[<=]]> #{endTime}
+            </if>
+            <if test="transferType != null">
+                AND t.TRANSFER_TYPE = #{transferType,jdbcType=NUMERIC}
+            </if>
+            <if test="platformType != null">
+                AND t.PLATFORM_TYPE = #{platformType,jdbcType=NUMERIC}
+            </if>
+            <if test="statusList != null">
+				AND t.STATUS in
+					<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+					    #{s}
+			        </foreach>
+			</if>
+			<if test="fromFunctionList != null">
+				AND t.FROM_FUNCTION in
+					<foreach collection="fromFunctionList" item="s" index="index" open="(" separator="," close=")">
+					    #{s}
+			        </foreach>
+			</if>
+			<if test="fromFunction != null">
+                AND t.FROM_FUNCTION = #{fromFunction,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </sql>
+</mapper>

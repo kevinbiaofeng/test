@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="NewMgGameData">
+    <resultMap id="NewMgGameData" type="NewMgGameData" extends="base.baseAttr">
+		<result column="bill_no" 		property="billNo"/>
+       	<result column="player_name" 	property="playerName"/>
+       	<result column="slot_type" 		property="slotType"/>
+       	<result column="game_type" 		property="gameType"/>
+       	<result column="before_credit" 	property="beforeCredit"/>
+       	<result column="bet_amount" 	property="betAmount"/>
+       	<result column="net_amount" 	property="netAmount"/>
+       	<result column="device_type" 	property="deviceType"/>
+       	<result column="bet_time" 		property="betTime"/>
+       	<result column="local_time" 	property="localTime"/>
+       	<result column="login_ip" 		property="loginIp"/>
+       	<result column="user_id" 		property="userId"/>
+    </resultMap>
+    
+  	<resultMap type="com.xjw.entity.vo.rake.PlayerStatVo" id="PlayerStatVo">
+		<result column="user_id" property="userId" />
+		<result column="player_name" property="playerName" />
+		<result column="bet_amount" property="betAmount" />
+	</resultMap>
+	
+	<resultMap type="com.xjw.entity.vo.data.SummaryBetVo" id="SummaryBetVo">
+		<result column="bet_amount" property="betAmount" />
+		<result column="net_amount" property="netAmount" />
+	</resultMap>
+        
+    <sql id="baseColumnList">
+    	d.bill_no, d.player_name, d.slot_type, 
+		(
+		 select case 
+		  when d.device_type = '1001' then (select g.zh_name from game_slot_info g where g.code= d.game_type )
+		  when d.device_type = '1002' then (select g.zh_name from game_slot_info g where g.wap_code= d.game_type )
+		  else null end
+		) game_type,
+
+    	d.before_credit, d.bet_amount,d.net_amount, d.device_type,
+    	d.bet_time, d.local_time, d.login_ip, d.user_id
+    </sql>
+    <sql id="searchCondition">
+       <where>
+       	<if test="userId != null">
+               AND d.USER_ID = #{userId}
+           </if>
+           <!-- 注单流水号 -->
+           <if test="billNo != null">
+               AND d.BILL_NO = #{billNo}
+           </if>
+           <!-- 游戏账户名称 -->
+           <if test="playerName != null">
+               AND d.PLAYER_NAME = #{playerName}
+           </if> 
+           <!-- 游戏类型 -->
+           <if test="slotType != null">
+               AND d.SLOT_TYPE = #{slotType}
+           </if>
+           <if test="localBeginTime != null">
+               AND d.local_time >= #{localBeginTime}
+           </if>
+           <if test="localEndTime != null">
+               AND d.local_time <![CDATA[<=]]> #{localEndTime}
+           </if>
+           <if test="beginTime != null">
+               AND d.bet_time >= #{beginTime}
+           </if>
+           <if test="endTime != null">
+               AND d.bet_time <![CDATA[<=]]> #{endTime}
+           </if>
+       </where>
+    </sql>
+    
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT COUNT(d.bill_no) FROM new_mg_game_data d
+        <include refid="searchCondition"/>
+    </select>
+    
+    <select id="selectAll" parameterType="map" resultMap="NewMgGameData">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM new_mg_game_data d
+        <include refid="searchCondition"/>
+        ORDER BY d.local_time DESC
+        <include refid="base.page" />
+    </select>
+  	
+  	<select id="selectSumAll" parameterType="map" resultMap="PlayerStatVo">
+		SELECT USER_ID, SUM(bet_amount) AS bet_amount
+		FROM new_mg_game_data 
+		WHERE 
+			slot_type = #{slotType}
+			AND local_time >= #{beginTime} 
+			AND <![CDATA[ local_time <= #{endTime}]]>
+			AND user_id = #{userId}
+	  	GROUP BY user_id
+    </select>
+  	
+  	<!-- 统计总额以及输赢 -->
+    <select id="selectSumByDate" parameterType="map" resultMap="SummaryBetVo">	  	
+	  	SELECT IFNULL(SUM(bet_amount), 0) AS bet_amount, IFNULL(SUM(net_amount), 0) AS net_amount
+		FROM new_mg_game_data 
+		WHERE local_time >= #{beginTime} 
+			AND <![CDATA[local_time <= #{endTime}]]>
+    </select>
+</mapper>

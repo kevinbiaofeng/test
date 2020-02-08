@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RakeGameSlot">
+	<resultMap type="RakeGameSlot" id="rakeGameSlot" extends="base.baseAttr">
+       	<result column="rake_type" property="rakeType" />
+       	<result column="game_type" property="gameType" />
+       	<result column="en_name" property="enName" />
+       	<result column="zh_name" property="zhName" />
+       	<result column="tr_name" property="trName" />
+	</resultMap>
+	
+	<sql id="base_column">
+		id, rake_type, game_type, en_name, zh_name, tr_name, status, create_user, create_time, update_user, update_time
+	</sql>
+	
+	<sql id="where_condition">
+		<where>
+			<if test="rakeType != null and rakeType != ''">
+				AND rake_type = #{rakeType}
+			</if>
+			<if test="gameType != null and gameType != ''">
+				AND game_type = #{gameType}
+			</if>
+			<if test="status != null">
+				AND status = #{status}
+			</if>
+			<if test="likeName != null and likeName != ''">
+				AND (
+					en_name LIKE CONCAT('%', #{likeName}, '%') 
+					OR zh_name LIKE CONCAT('%', #{likeName}, '%') 
+					OR tr_name LIKE CONCAT('%', #{likeName}, '%')
+				)
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectById" parameterType="long" resultMap="rakeGameSlot">
+		SELECT <include refid="base_column" /> FROM rake_game_slot
+		WHERE id = #{id}
+	</select>
+
+	<select id="selectAll" parameterType="map" resultMap="rakeGameSlot">
+		SELECT <include refid="base_column" /> FROM rake_game_slot
+		<include refid="where_condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(id) FROM rake_game_slot
+		<include refid="where_condition" />
+	</select>
+
+	<insert id="save" parameterType="map">
+        INSERT INTO rake_game_slot(rake_type, game_type, en_name, zh_name, tr_name, status, create_user, create_time) 
+        VALUES (#{rakeType}, #{gameType}, #{enName}, #{zhName}, #{trName}, #{status}, #{createUser}, #{createTime})
+	</insert>
+	
+	 <insert id="saveRecordBatch" parameterType="map">
+        INSERT INTO rake_game_slot(rake_type, game_type, en_name, zh_name, tr_name, status, create_user, create_time)
+		VALUES
+         <foreach collection="list" item="item" index="index" separator="," > 
+	        (#{item.rakeType}, #{item.gameType}, #{item.enName}, #{item.zhName}, #{item.trName}, #{item.status}, #{item.createUser}, #{item.createTime})
+	     </foreach>
+    </insert>
+    
+    <delete id="deleteOne" parameterType="map">
+		DELETE FROM rake_game_slot WHERE id = #{id}
+	</delete>
+	
+	<update id="update" parameterType="map">
+		UPDATE rake_game_slot
+		<set> 
+			update_user = #{updateUser},
+			update_time = #{updateTIme}, 
+			<if test="rakeType != null and rakeType != ''">rake_type = #{rakeType},</if>
+			<if test="gameType != null and gameType != ''">game_type = #{gameType},</if>
+			<if test="enName != null and enName != ''">en_name = #{enName},</if>
+			<if test="zhName != null and zhName != ''">zh_name = #{zhName},</if>
+			<if test="trName != null and trName != ''">tr_name = #{trName},</if>
+			<if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+	</update>
+	
+</mapper>

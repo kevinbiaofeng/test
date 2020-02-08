@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="FinalResourcesValues">
+	<sql id="searchColumn">
+		ID, NAME, CODE, VAL, FINAL_RESOURCES_INDEX_ID, SORT
+	</sql>
+	
+	<resultMap type="FinalResourcesValues" id="finalResourcesValues" extends="base.baseAttr">
+	   <result property="name" column="NAME" ></result>
+	   <result property="code" column="CODE"></result>
+	   <result property="val" column="VAL"></result>
+	   <result property="sort" column="SORT"></result>
+	   <result property="finalResourcesIndexId" column="FINAL_RESOURCES_INDEX_ID"></result>
+	</resultMap>
+	
+	<select id="selectById" parameterType="long" resultMap="finalResourcesValues">
+		SELECT <include refid="searchColumn" /> FROM pub_final_resources_values WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="finalResourcesValues">
+		SELECT <include refid="searchColumn" /> FROM pub_final_resources_values
+		<include refid="condition" />
+		ORDER BY sort ASC
+	</select>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+			<if test="code != null">
+				AND code=#{code}
+			</if>
+			<if test="val != null">
+				AND val=#{val}
+			</if>
+			<if test="finalResourcesIndexId != null">
+				AND final_resources_index_id=#{finalResourcesIndexId}
+			</if>
+			<if test="notVals != null">
+				AND val not IN
+				<foreach collection="notVals" item="val" index="index" open="(" separator="," close=")">
+				#{val}
+		        </foreach>
+			</if>
+			
+		</where>
+	</sql>
+</mapper>

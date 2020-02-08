@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserBankInfo">
+    <resultMap id="UserBankInfo" type="UserBankInfo" extends="base.baseAttr">
+        <result column="BANK_TYPE" jdbcType="NUMERIC" property="bankType" />
+        <result column="ACCOUNT_NAME" jdbcType="VARCHAR" property="accountName" />
+        <result column="BANK_CARD_NO" jdbcType="VARCHAR" property="bankCardNo" />
+        <result column="BANK_ADDRESS" jdbcType="VARCHAR" property="bankAddress" />
+        <result column="USER_ID" jdbcType="NUMERIC" property="userId" />
+        <result column="IS_DEFAULT" jdbcType="NUMERIC" property="isDefault" />
+        <result column="TYPE" jdbcType="NUMERIC" property="type" />
+    </resultMap>
+
+    <sql id="baseColumnList">
+        ID,BANK_TYPE,ACCOUNT_NAME,BANK_CARD_NO,BANK_ADDRESS,USER_ID,IS_DEFAULT,TYPE,STATUS
+    </sql>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO SYS_USER_BANK_INFO (
+        BANK_TYPE,ACCOUNT_NAME,BANK_CARD_NO,BANK_ADDRESS,IS_DEFAULT,TYPE,STATUS, CREATE_USER, CREATE_TIME,USER_ID
+        ) VALUES (
+        #{bankType,jdbcType=NUMERIC},
+        #{accountName,jdbcType=VARCHAR},
+        #{bankCardNo,jdbcType=VARCHAR},
+        #{bankAddress,jdbcType=VARCHAR},
+        #{isDefault,jdbcType=NUMERIC},
+        #{type,jdbcType=NUMERIC},
+        #{status,jdbcType=NUMERIC},
+        #{createUser,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP},
+        #{userId,jdbcType=NUMERIC}
+        )
+    </insert>
+    
+    <update id="update" parameterType="UserBankInfo">
+        UPDATE SYS_USER_BANK_INFO
+        <set>
+            <if test="isDefault != null">
+                 IS_DEFAULT = #{isDefault,jdbcType=NUMERIC},
+            </if>
+            <if test="accountName != null">
+                 account_name = #{accountName,jdbcType=VARCHAR},
+            </if>
+            <if test="bankType != null">
+                 bank_type = #{bankType,jdbcType=NUMERIC},
+            </if>
+            <if test="bankCardNo != null">
+                 bank_card_no = #{bankCardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="bankAddress != null">
+                 bank_address = #{bankAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                 STATUS = #{status,jdbcType=NUMERIC},
+            </if>
+        </set>
+        <where>
+            <if test="id != null">
+               AND ID=#{id,jdbcType=NUMERIC}
+            </if>
+            <if test="type != null">
+                AND TYPE = #{type,jdbcType=NUMERIC}
+            </if>
+            <if test="searchBankType != null">
+                AND BANK_TYPE = #{searchBankType,jdbcType=NUMERIC}
+            </if>
+            <if test="searchStauts != null">
+                AND STATUS = #{searchStauts,jdbcType=NUMERIC}
+            </if>
+        </where>
+    </update>
+
+    <update id="deleteOne" parameterType="map">
+        UPDATE SYS_USER_BANK_INFO SET STATUS=#{status,jdbcType=NUMERIC}, UPDATE_USER=#{updateUser,jdbcType=NUMERIC},UPDATE_TIME=#{updateTime,jdbcType=TIMESTAMP} WHERE ID=#{id,jdbcType=NUMERIC}
+    </update>
+
+    <select id="selectById" parameterType="long" resultMap="UserBankInfo">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM SYS_USER_BANK_INFO where ID=#{id,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectAllCount" parameterType="map" resultType="long">
+        SELECT count(ID) FROM SYS_USER_BANK_INFO
+        <include refid="searchCondition"/>
+    </select>
+    <select id="selectAll" parameterType="map" resultMap="UserBankInfo">
+        SELECT
+        <include refid="baseColumnList"/>
+        FROM SYS_USER_BANK_INFO
+        <include refid="searchCondition"/>
+        ORDER BY STATUS ASC, CREATE_TIME DESC, UPDATE_TIME DESC
+        <include refid="base.page" />
+    </select>
+
+    <sql id="searchCondition">
+        <where>
+            <if test="searchBankType != null">
+                AND BANK_TYPE = #{searchBankType,jdbcType=NUMERIC}
+            </if>
+            <if test="bankType != null">
+                AND BANK_TYPE = #{bankType,jdbcType=NUMERIC}
+            </if>
+            <if test="accountName != null">
+                AND ACCOUNT_NAME = #{accountName,jdbcType=VARCHAR}
+            </if>
+            <if test="bankCardNo != null">
+                AND BANK_CARD_NO = #{bankCardNo,jdbcType=VARCHAR}
+            </if>
+            <if test="bankAddress != null">
+                AND BANK_ADDRESS = #{bankAddress,jdbcType=VARCHAR}
+            </if>
+            <if test="userId != null">
+                AND USER_ID = #{userId,jdbcType=NUMERIC}
+            </if>
+            <if test="isDefault != null">
+                AND IS_DEFAULT = #{isDefault,jdbcType=NUMERIC}
+            </if>
+            <if test="type != null">
+                AND TYPE = #{type,jdbcType=NUMERIC}
+            </if>
+            <if test="status != null">
+                AND STATUS = #{status,jdbcType=NUMERIC}
+            </if>
+            <if test="searchStauts != null">
+                AND STATUS = #{searchStauts,jdbcType=NUMERIC}
+            </if>
+            <if test="statusList != null">
+				AND STATUS IN
+				<foreach collection="statusList" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+        </where>
+    </sql>
+</mapper>

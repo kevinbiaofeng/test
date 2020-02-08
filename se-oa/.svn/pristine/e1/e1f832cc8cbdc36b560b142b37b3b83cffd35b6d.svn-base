@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ProxySummaryDay">
+    <resultMap id="ProxySummaryDay" type="ProxySummaryDay" extends="base.baseAttr">
+     	<result column="user_id" 			property="userCount"/>
+     	<result column="login_name" 		property="loginName"/>
+        <result column="user_count" 		property="userCount"/>
+        <result column="deposit_amount" 	property="depositAmount"/>
+        <result column="withdraw_amount" 	property="withdrawAmount"/>
+		<result column="day_time"			property="dayTime"/>
+    </resultMap>
+
+    <sql id="baseColumnList">
+        id, user_id, login_name, user_count, deposit_amount, withdraw_amount, day_time, create_time
+    </sql>
+
+	<sql id="whereCondition">
+		<where>
+			<if test="userId != null">
+				AND user_id = #{userId}
+			</if>
+			<if test="userIds != null ">
+				AND user_id IN 
+				<foreach collection="userIds" item="_uId" open="(" separator="," close=")">
+					#{_uId}
+			    </foreach>
+			</if>
+			<if test="beginTime != null">
+                AND day_time >= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND day_time <![CDATA[<=]]> #{endTime}
+            </if>
+		</where>
+	</sql>
+
+	<select id="selectAllCount" resultType="long">
+		SELECT count(*) FROM data_proxy_summary_day
+		<include refid="whereCondition" />
+	</select>
+
+	<select id="selectAll" parameterType="map" resultMap="ProxySummaryDay">
+		SELECT <include refid="baseColumnList" /> FROM data_proxy_summary_day
+		<include refid="whereCondition" />
+		ORDER BY day_time DESC
+		<include refid="base.page" />
+	</select>
+	
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO data_proxy_summary_day(user_id, login_name, user_count, deposit_amount, withdraw_amount, day_time, create_time) 
+        VALUES (#{userId}, #{loginName}, #{userCount}, #{depositAmount}, #{withdrawAmount}, #{dayTime}, #{createTime})
+    </insert>
+   
+</mapper>

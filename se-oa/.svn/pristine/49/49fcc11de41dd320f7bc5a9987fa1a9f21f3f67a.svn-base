@@ -1,0 +1,68 @@
+package com.xjw.service.history.impl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.xjw.base.dao.impl.BaseDaoImpl;
+import com.xjw.base.service.impl.BaseServiceImpl;
+import com.xjw.dao.history.NewMgDayHistoryDao;
+import com.xjw.entity.po.history.NewMgDayHistory;
+import com.xjw.service.history.NewMgDayHistoryService;
+import com.xjw.utility.BizException;
+import com.xjw.utility.DateUtil;
+
+@Service
+public class NewMgDayHistoryServiceImpl extends BaseServiceImpl<NewMgDayHistory> implements NewMgDayHistoryService {
+	@Resource
+	private NewMgDayHistoryDao newMgDayHistoryDao;
+	
+	@Override
+	public BaseDaoImpl<NewMgDayHistory> baseDao() {
+		return newMgDayHistoryDao;
+	}
+	
+	@Override
+	public Class<NewMgDayHistory> getClazz() {
+		return NewMgDayHistory.class;
+	}
+
+	public List<NewMgDayHistory> selectOneDayData(Map<String, Object> params) {
+		return newMgDayHistoryDao.selectOneDayData(params);
+	}
+
+	public void saveBatch(String strDate){
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("beginTime", strDate);
+		param.put("endTime", strDate);
+		Long count = this.selectAllCount(param);
+
+		if(0L == count.longValue()){
+			String beginTime = strDate + " 00:00:00";
+			String endTime = strDate + " 23:59:59"; 
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("beginLocalTime", beginTime);
+			params.put("endLocalTime", endTime);
+			List<NewMgDayHistory> newMgDayHistList = this.selectOneDayData(params);
+			
+			if(null != newMgDayHistList && newMgDayHistList.size() != 0){
+				Date day = DateUtil.formatStr(strDate, "yyyy-MM-dd");
+				for (NewMgDayHistory newMgDayHistory : newMgDayHistList) {
+					newMgDayHistory.setStatDate(day);
+					newMgDayHistory.setCreateTime(day);
+				}
+				try {
+					this.saveRecordBatch(newMgDayHistList);
+				} catch (BizException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="Areas">
+	<sql id="searchColumn">
+		ID, NAME, AREA_CODE, PARENT_CODE
+	</sql>
+	
+	<resultMap type="Areas" id="areas">
+	   <result property="id" column="ID" ></result>
+	   <result property="areaCode" column="AREA_CODE" ></result>
+	   <result property="name" column="NAME"></result>
+	   <result property="parentCode" column="PARENT_CODE"></result>
+	</resultMap>
+	
+	<select id="selectById" parameterType="long" resultMap="areas">
+		SELECT <include refid="searchColumn" /> FROM areas WHERE id=#{areaCode}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="areas">
+		SELECT <include refid="searchColumn" /> FROM areas
+		<include refid="condition" />
+		ORDER BY id ASC
+	</select>
+	
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND ID=#{id}
+			</if>
+			<if test="areaCode != null">
+				AND AREA_CODE=#{areaCode}
+			</if>
+			<if test="parentCode != null">
+				AND PARENT_CODE=#{parentCode}
+			</if>
+		</where>
+	</sql>
+</mapper>

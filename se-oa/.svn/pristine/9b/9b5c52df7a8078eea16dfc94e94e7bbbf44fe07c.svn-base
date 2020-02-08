@@ -1,0 +1,8 @@
+package com.xjw.kzenum.platform;
+
+import com.xjw.kzenum.AbstractEnum;
+
+public class GameCategoryEnum extends AbstractEnum {
+	public static final EnumBean LIVE = new EnumBean("1", "真人视讯");
+	public static final EnumBean SOLT = new EnumBean("2", "电子游戏");
+}

@@ -1,0 +1,19 @@
+package com.xjw.entity.form.media;
+
+import java.util.List;
+
+import com.xjw.entity.form.BaseForm;
+
+public class MediaListForm extends BaseForm {
+	private static final long serialVersionUID = 1L;
+	private List<MediaForm> mediaList;
+
+	public List<MediaForm> getMediaList() {
+		return mediaList;
+	}
+
+	public void setMediaList(List<MediaForm> mediaList) {
+		this.mediaList = mediaList;
+	}
+
+}

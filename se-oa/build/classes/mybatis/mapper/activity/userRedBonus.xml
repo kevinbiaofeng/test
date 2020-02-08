@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserRedBonus">
+	<resultMap type="UserRedBonus" id="UserRedBonus" extends="base.baseAttr">
+       	<result column="user_id" property="userId" />
+       	<result column="user_name" property="userName" />
+       	<result column="money" property="money" />
+       	<result column="is_open" property="isOpen" />
+       	<result column="open_time" property="openTime" />
+       	<result column="create_user_name" property="createUserName" />
+       	<result column="act_id" property="actId" />
+       	<result column="act_name" property="actName" />
+	</resultMap>
+	
+	<sql id="base_column">
+		t.id, t.user_id, u.login_name user_name, t.money, t.is_open, t.open_time, t.create_time, t.create_user, uu.login_name create_user_name, t.act_id, a.name actName
+	</sql>
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND t.id=#{id}
+			</if>
+			<if test="status != null">
+				AND t.status = #{status}
+			</if>
+			<if test="ids != null">
+				 t.id IN
+				<foreach collection="ids" item="s" index="index" open="(" separator="," close=")">
+				#{s}
+		        </foreach>
+			</if>
+		</where>
+	</sql>
+
+	<select id="selectById" parameterType="long" resultMap="UserRedBonus">
+		SELECT <include refid="base_column" /> FROM USER_RED_BONUS
+		LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user uu on uu.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+		 WHERE id = #{id}
+	</select>
+
+	<select id="selectAll" parameterType="map" resultMap="UserRedBonus">
+		SELECT <include refid="base_column" /> FROM USER_RED_BONUS t
+		LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user uu on uu.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+		<include refid="condition" />
+		ORDER BY id DESC
+		<include refid="base.page" />
+	</select>
+	
+	<select id="selectAllCount" resultType="long">
+		SELECT count(t.id) FROM USER_RED_BONUS t
+		LEFT JOIN pub_user u on u.id = t.user_id
+        LEFT JOIN pub_user uu on uu.id = t.create_user
+        LEFT JOIN sys_activity a on a.id = t.act_id
+		<include refid="condition" />
+	</select>
+	
+    <insert id="save" parameterType="UserRedBonus">
+        INSERT INTO USER_RED_BONUS(user_id, money, is_open, create_time, create_user, act_id, status) 
+        	VALUES(#{userId}, #{money}, #{isOpen}, #{createTime}, #{createUser}, #{actId}, #{status})
+    </insert>
+    
+    <update id="deleteOne" parameterType="map">
+		UPDATE USER_RED_BONUS
+		<set>
+			update_time = #{updateTime}, update_user = #{updateUser} ,status = #{status}
+		</set>
+		<where>
+			<if test="id != null">
+				AND id=#{id}
+			</if>
+		</where>
+	</update>
+    
+</mapper>

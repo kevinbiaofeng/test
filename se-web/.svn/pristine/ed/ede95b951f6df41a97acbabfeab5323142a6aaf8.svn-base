@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="renderer" content="webkit" />
+		<meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE;chrome=1" />
+		<title>
+老司機官网-在线娱乐场游戏|
+老司機</title>
+    	<meta name="keywords" content="
+老司機,
+老司機官网" />
+		<meta name="description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		<meta property="og:title" content="
+老司機官网-在线老虎机娱乐场游戏|
+老司機" />
+		<meta property="og:description" content="
+老司機官网（www.hat888.com）是国际顶级娱乐平台之一,平台的宗旨是为用户提供最好的服务、全方位的视觉体验、精彩刺激的娱乐游戏,
+老司機不求第一,但只求给您更好的娱乐体验,欢迎光临
+老司機官网。" />
+		
+		<link href="../plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    	<link href="../css/common.css" rel="stylesheet" />
+    	<link href="../css/main.css" rel="stylesheet" />
+    	<!--[if lte IE 9]>
+		<script src="${statics}/js/respond.min.js"></script>
+		<script src="${statics}/js/html5shiv.min.js"></script>
+		<![endif]-->
+		<style>
+			.login-content{background: linear-gradient(to bottom, #bb2083 30%,#371989 80%); width:500px; height:500px; font-family:"MicrosoftJhengHei",华文细黑,STHeiti; border-radius:5px;}
+			.login-header{margin: 0px 0px 15px 0px; height: 50px;}
+			.login-header .hr{border-bottom: 1px solid #ceccd5; width: 144px; float: left; padding-top: 30px; }
+			.login-header .title{float: left; margin:5px 60px; font-size:28px; color:#ffffff;}
+			.login-header .title .zh{font-size: 28px;height: 35px;}
+			.login-header .title .en{font-size: 12px;}
+			.login-main{}
+			.login-main .login-panel{width:430px; height:237px; margin:0 auto; background: url("../images/header/longin_bg.png") no-repeat; position: relative;}
+			.login-panel li {margin-top: 20px; border-radius:5px; width: 330px; height: 55px; padding-left: 5px;background-color: #ebebeb;}
+			.login-panel li:hover {background-color: #2ba342;}
+			.login-panel li input{border-radius: 5px; border-bottom-left-radius: 0px; border-top-left-radius: 0px; height: 55px; background-color: #ebebeb; border: medium none; color: #353535;
+			    float: left; text-align: center; font-size: 16px; margin: 0; width: 100%;
+			}
+			.login-circle{background: url("../images/header/longin_btn.png") no-repeat; height: 87px; width: 87px; margin:-43px auto; position: relative;}
+			.login-circle .font-place {position: relative; padding-top:50px;padding-left:20px;}
+			.login-circle .font-place a {color: #2ba342; position: relative; margin:-43px auto; padding-top:44px;}
+			.login-btn{width:430px; margin:0 auto;}
+			.login-btn a{line-height:55px; display: block; color:#ffffff; text-align: center;}
+			.login-btn .btn-forget{font-size:22px;color:#ffffff;}
+			.login-btn .btn-forget:hover{color:#f67560;}
+			.login-btn .btn-reg{font-size:30px; border-radius: 10px; border: 1px solid #ceccd5; margin: 5px 0;}
+			.login-btn .btn-reg:hover{color:#f3f527;}
+		</style>
+	</head>
+	<body>
+
+		<div class="login-content">
+			<div class="login-header">
+				<div class="hr" style="margin-left: 15px;"></div>
+				<div class="title">
+					<div class="zh">登录</div>
+					<div class="en">user login</div>
+				</div>
+				<div class="hr"></div>
+			</div>
+			
+			<div class="login-main">
+				<form class="login-form">
+					<div class="login-panel">
+						<div style="padding: 10px 55px;">
+							<ul>
+								<li>
+									<input type="text" placeholder="用户名"/>
+								</li>
+								<li>
+									<input type="text" placeholder="用户名"/>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</form>
+				
+				<div class="login-circle">
+					<div class="font-place">
+						<a href="javascript:void(0)">立即登入</a>
+					</div>
+				</div>
+
+				<div style="height: 45px;display: block;width: 100%;"></div>
+				
+				<div class="login-btn">
+					<a class="btn-forget" href="javascript:;">忘记密码?</a>
+					<a class="btn-reg" href="javascript:;">立即注册</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

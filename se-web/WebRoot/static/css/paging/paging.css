@@ -1,0 +1,34 @@
+
+.paging{width: 100%;}
+
+.paging ul{
+	list-style: none;
+    text-align: center;
+}
+
+.paging ul li{
+	display: inline-block;
+    position: relative;
+    border: 1px solid #ebebeb;
+	line-height: 40px;
+	box-sizing: border-box;
+	cursor: pointer;
+	width: 60px;
+	height: 40px;
+	margin-left: 10px;
+}
+
+.paging ul .set-btn{
+  	background:#fff;
+}
+
+.paging ul .set-page{
+	border: 1px solid #ebebeb;
+	background-color: #60BDE8;
+  	color:#fff
+}
+
+.paging ul .text{
+	border: 0px;
+	cursor: auto;
+}

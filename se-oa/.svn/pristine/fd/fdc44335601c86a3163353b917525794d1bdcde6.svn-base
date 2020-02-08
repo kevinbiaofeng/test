@@ -1,0 +1,10 @@
+package com.xjw.service.file;
+
+import com.xjw.base.service.BaseServcie;
+import com.xjw.entity.po.file.Video;
+
+public interface VideoService extends BaseServcie<Video> {
+	
+	public Video selectByMaterialNum(String materialNum);
+
+}

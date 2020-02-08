@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserLoginLog">
+	<sql id="searchColumn">
+		ID, USER_ID, LOGIN_NAME, CREATE_TIME, IP_ADDRESS, NETWORK_TYPE, IP_CITY_INFO
+	</sql>
+	
+	<resultMap type="UserLoginLog" id="userLoginLog" extends="base.baseAttr">
+	   <result property="userId" column="USER_ID" ></result>
+	   <result property="loginName" column="LOGIN_NAME"></result>
+	   <result property="ipAddress" column="IP_ADDRESS"></result>
+	   <result property="networkType" column="NETWORK_TYPE" ></result>
+	   <result property="ipCityInfo" column="IP_CITY_INFO" ></result>
+	</resultMap>
+
+    <insert id="save" parameterType="map" keyProperty="id" useGeneratedKeys="true">
+         INSERT INTO user_login_log
+         (user_id, login_name, ip_address, create_time, network_type, ip_city_info) 
+         VALUES 
+         (#{userId}, #{loginName}, #{ipAddress}, #{createTime}, #{networkType}, #{ipCityInfo})
+    </insert>
+    
+	<select id="selectById" parameterType="long" resultMap="userLoginLog">
+		SELECT <include refid="searchColumn" /> FROM user_login_log WHERE id=#{id}
+	</select>
+	
+	<select id="selectAll" parameterType="map" resultMap="userLoginLog">
+		SELECT <include refid="searchColumn" /> FROM user_login_log
+		<include refid="condition" />
+		ORDER BY id desc
+		<include refid="base.page" />
+	</select>
+	<select id="selectAllCount" resultType="long">
+        SELECT count(id) FROM user_login_log
+		<include refid="condition" />
+		<include refid="base.page" />
+    </select>
+    
+    <select id="selectGroupByData" parameterType="map" resultMap="userLoginLog">
+		SELECT USER_ID, LOGIN_NAME, IP_ADDRESS FROM user_login_log 
+		<include refid="condition" />
+		GROUP BY user_id, login_name, ip_address
+		
+	</select>
+    
+	<sql id="condition">
+		<where>
+			<if test="id != null">
+				AND id = #{id}
+			</if>
+			<if test="networkType != null">
+				AND NETWORK_TYPE = #{networkType}
+			</if>
+			<if test="beginTime != null">
+                AND CREATE_TIME >= #{beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND CREATE_TIME <![CDATA[<=]]> #{endTime, jdbcType=TIMESTAMP}
+            </if>
+			<if test="ids != null">
+				 id IN
+				<foreach collection="ids" item="id" index="index" open="(" separator="," close=")">
+				#{id}
+		        </foreach>
+			</if>
+			<if test="userId != null">
+				AND USER_ID=#{userId}
+			</if>
+			<if test="ipAddress != null">
+				AND IP_ADDRESS=#{ipAddress}
+			</if>
+			<if test="searchIp != null">
+				and (
+				IP_ADDRESS like '%' #{searchIp} '%'
+				)
+			</if>
+			<if test="keywords != null">
+				and (
+				LOGIN_NAME like '%' #{keywords} '%'
+				)
+			</if>
+		</where>
+	</sql>
+</mapper>
